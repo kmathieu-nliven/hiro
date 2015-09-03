@@ -1,0 +1,3 @@
+include 'ccd'
+
+rootProject.name = 'com.cds.hiro'
