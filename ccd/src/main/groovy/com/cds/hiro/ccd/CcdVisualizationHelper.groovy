@@ -1,5 +1,6 @@
 package com.cds.hiro.ccd
 
+import com.cds.hiro.ccd.model.Code
 import groovy.json.JsonBuilder
 import groovy.util.logging.Log4j
 import groovy.xml.Namespace
@@ -459,17 +460,17 @@ class CcdVisualizationHelper {
         float totalInches = value.toFloat()
         int feet = totalInches / 12
         float inches = totalInches % 12
-        String inchString = (inches == (int) inches) ? (int) inches : sprintf('%.2f', inches)  
+        String inchString = (inches == (int) inches) ? (int) inches : sprintf('%.2f', inches)
         return [feet, 'ft', inchString, 'in']
       }
     } catch (Exception e) {
       // catch whatever parse error may occur
       log.error "Unable to parse height: ${value} ${unit} - ${e}"
-    } 
+    }
     // default just a pass through (which GSP will escape)
     return [value, unit]
   }
-  
+
   String getPayerAsJson(payer) {
     def policyIdOriginal = payer?.getAt(ns.act)?.getAt(ns.id)?.@extension
     def performer = payer?.getAt(ns.act)?.getAt(ns.entryRelationship)?.getAt(ns.act)?.getAt(ns.performer)
@@ -523,13 +524,15 @@ class CcdVisualizationHelper {
 
   String getSummaryPurposeAsJson(purpose) {
     def source = purpose?.getAt(ns.text)?.@source
+    def code = purpose?.getAt(ns.act)?.getAt(ns.entryRelationship)?.getAt(ns.act)?.getAt(ns.code)?.getAt(0)
     new JsonBuilder([
         reason: getText(purpose, purpose?.getAt(ns.act)?.getAt(ns.entryRelationship)?.getAt(ns.act)),
         date: parseDate(purpose?.getAt(ns.act)?.getAt(ns.effectiveTime)?.text()),
         source: [
             name: source ? source.get(0) : null,
             id: purpose?.getAt(ns.text)?.getAt(ns.ccd)?.text()
-        ]
+        ],
+        code: getCodeDetails(code)
     ])
   }
 
@@ -552,6 +555,14 @@ class CcdVisualizationHelper {
             id: entry?.getAt(ns.text)?.getAt(ns.ccd)?.text()
         ]
     ]).toString()
+  }
+
+
+  Map getCodeDetails(def codeElement) {
+    return [
+        code: codeElement?.@code, codeSystem: codeElement?.@codeSystem,
+        codeSystemName: codeElement?.@codeSystemName, displayName: codeElement?.@displayName
+    ]
   }
 
   Date getVisitDate(def visitDateObj) {

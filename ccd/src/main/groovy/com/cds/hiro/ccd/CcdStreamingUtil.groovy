@@ -49,8 +49,8 @@ class CcdStreamingUtil {
 
   private synchronized void onNewEntrySynchronized(aggregated, sourceData) {
     def vHelper = new CcdVisualizationHelper()
-    def helpers = ['10160-0': [data: {vHelper.getMedicationAsJson(it.entry, it.section)},
-        section: 'medications'],
+    def helpers = [
+        '10160-0': [data: {vHelper.getMedicationAsJson(it.entry, it.section)}, section: 'medications'],
         '30954-2': [data: {vHelper.getObservationAsJson(it.observation)}, section: 'labResults'],
         '8716-3': [data: {vHelper.getObservationAsJson(it.observation)}, section: 'vitalSigns'],
         '48764-5': [data: {vHelper.getSummaryPurposeAsJson(it.entry)}, section: 'summaryPurpose'],
