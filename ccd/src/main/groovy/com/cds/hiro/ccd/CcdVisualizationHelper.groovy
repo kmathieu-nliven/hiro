@@ -517,7 +517,8 @@ class CcdVisualizationHelper {
     def observation2 = observation?.getAt(ns.entryRelationship)?.find {er -> er.@typeCode == 'MFST'}?.getAt(ns.observation)
     def alerts = new JsonBuilder([
         actParticipant: getText(section, playingEntity),
-        actObservation: normalizeObservationText(getText(section, observation2, 'Unknown'))
+        actObservation: normalizeObservationText(getText(section, observation2, 'Unknown')),
+        code: getCodeDetails(playingEntity?.getAt(ns.code)?.getAt(0)) //TODO: Do we need code for reactions of the allgery too?
     ]).toString()
     return alerts
   }
@@ -553,7 +554,8 @@ class CcdVisualizationHelper {
         source: [
             name: source ? source.get(0) : null,
             id: entry?.getAt(ns.text)?.getAt(ns.ccd)?.text()
-        ]
+        ],
+        code: getCodeDetails(entry?.getAt(ns.encounter)?.getAt(ns.code)?.getAt(0))
     ]).toString()
   }
 
@@ -579,13 +581,15 @@ class CcdVisualizationHelper {
   String getProblemAsJson(problem, section) {
     def observation = problem?.getAt(ns.act)?.getAt(ns.entryRelationship)?.getAt(ns.observation)
     def ccdSource = problem.getAt(ns.text).find {it.@id == 'CcdSource'}
+    def code = observation?.getAt(ns.value)?.getAt(0)
     new JsonBuilder([
         name: getText(section, observation),
         started: parseDate(observation?.getAt(ns.effectiveTime)?.getAt(ns.low)?.@value?.getAt(0)),
         source: [
             name: ccdSource?.@source,
             id: ccdSource?.getAt(ns.ccd)?.text(),
-        ]
+        ],
+        code: getCodeDetails(code)
     ]).toString()
   }
 
@@ -599,15 +603,18 @@ class CcdVisualizationHelper {
   String getFamilyHistoryAsJson(family) {
     def observation = family?.getAt(ns.observation)
     def relatedSubject = observation?.getAt(ns.subject)?.getAt(ns.relatedSubject)
+    def code = relatedSubject?.getAt(ns.code)?.get(0)
     new JsonBuilder([
-        name: relatedSubject?.getAt(ns.code)?.@displayName?.getAt(0) + ": " + observation?.getAt(ns.value)?.text()
+        name: relatedSubject?.getAt(ns.code)?.@displayName?.getAt(0) + ": " + observation?.getAt(ns.value)?.text(),
+        code: getCodeDetails(code)
     ]).toString()
   }
 
   String getSocialHistoryAsJson(social, section) {
     new JsonBuilder([
         name: getText(section, social?.getAt(ns.observation)),
-        status: social?.getAt(ns.observation)?.getAt(ns.value)?.getAt(0)?.text()
+        status: social?.getAt(ns.observation)?.getAt(ns.value)?.getAt(0)?.text(),
+        code: getCodeDetails(social?.getAt(ns.observation)?.getAt(ns.code)?.get(0))
     ]).toString()
   }
 
@@ -665,7 +672,8 @@ class CcdVisualizationHelper {
             prefix: (prescriber) ? prescriber?.getAt(ns.name)?.prefix?.text() : "",
             given: prescriber?.getAt(ns.name)?.getAt(ns.given)?.text() ?: "",
             family: prescriber?.getAt(ns.name)?.getAt(ns.family)?.text() ?: ""
-        ]
+        ],
+        code: getCodeDetails(material?.getAt(ns.code)?.getAt(0))
     ]).toString()
     return medicationsJson
   }
@@ -687,7 +695,8 @@ class CcdVisualizationHelper {
         source: [
             name: ccdSource?.@source?.getAt(0),
             id: ccdSource?.getAt(ns.ccd)?.text(),
-        ]
+        ],
+        code: getCodeDetails(observation?.getAt(ns.code)?.getAt(0))
     ]).toString()
     return observations
   }
