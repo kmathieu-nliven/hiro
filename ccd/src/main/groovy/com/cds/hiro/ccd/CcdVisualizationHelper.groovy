@@ -754,6 +754,7 @@ class CcdVisualizationHelper {
                 name: ccdSource?.@source?.getAt(0),
                 id: ccdSource?.getAt(ns.ccd)?.text(),
             ],
+            code: getCodeDetails(element?.getAt(ns.code)?.getAt(0))
         ]
       case 'encounter':
         return [
@@ -765,6 +766,7 @@ class CcdVisualizationHelper {
                 name: ccdSource?.@source?.getAt(0),
                 id: ccdSource?.getAt(ns.ccd)?.text(),
             ],
+            code: getCodeDetails(element?.getAt(ns.code)?.getAt(0))
         ]
       case 'procedure':
         return [
@@ -776,6 +778,19 @@ class CcdVisualizationHelper {
                 name: ccdSource?.@source?.getAt(0),
                 id: ccdSource?.getAt(ns.ccd)?.text(),
             ],
+            code: getCodeDetails(element?.getAt(ns.code)?.getAt(0))
+        ]
+      case 'observation':
+        return [
+            type: 'observation',
+            status: element[ns.statusCode].@code?.getAt(0),
+            text: getText(section, element),
+            effectiveDate: printEffectiveDate(element[ns.effectiveTime]),
+            source: [
+                name: ccdSource?.@source?.getAt(0),
+                id: ccdSource?.getAt(ns.ccd)?.text(),
+            ],
+            code: getCodeDetails(element?.getAt(ns.code)?.getAt(0))
         ]
       case 'substanceAdmin':
         return [
@@ -790,17 +805,6 @@ class CcdVisualizationHelper {
         return [
             type: 'supply',
             text: 'supply not supported',
-            source: [
-                name: ccdSource?.@source?.getAt(0),
-                id: ccdSource?.getAt(ns.ccd)?.text(),
-            ],
-        ]
-      case 'observation':
-        return [
-            type: 'observation',
-            status: element[ns.statusCode].@code?.getAt(0),
-            text: getText(section, element),
-            effectiveDate: printEffectiveDate(element[ns.effectiveTime]),
             source: [
                 name: ccdSource?.@source?.getAt(0),
                 id: ccdSource?.getAt(ns.ccd)?.text(),
