@@ -90,6 +90,9 @@ class CcdVisualizationHelper {
 
 
   private def printEffectiveDate(Node effectiveDate) {
+    if (!effectiveDate)
+      return null
+
     if (effectiveDate.@value) {
       parseDate effectiveDate?.@value
     } else if (effectiveDate?.getAt(ns.center)?.@value?.getAt(0)) {
@@ -837,7 +840,7 @@ class CcdVisualizationHelper {
             type: 'encounter',
             status: element[ns.entryRelationship][ns.statusCode].@code?.getAt(0),
             text: getText(section, element[ns.entryRelationship]),
-            effectiveDate: printEffectiveDate(element[ns.effectiveTime]),
+            effectiveDate: printEffectiveDate(element?.getAt(ns.effectiveTime)?.getAt(0)),
             source: [
                 name: ccdSource?.@source?.getAt(0),
                 id: ccdSource?.getAt(ns.ccd)?.text(),
@@ -849,7 +852,7 @@ class CcdVisualizationHelper {
             type: 'procedure',
             status: element[ns.statusCode].@code?.getAt(0),
             text: getText(section, element),
-            effectiveDate: printEffectiveDate(element[ns.effectiveTime]),
+            effectiveDate: printEffectiveDate(element?.getAt(ns.effectiveTime)?.getAt(0)),
             source: [
                 name: ccdSource?.@source?.getAt(0),
                 id: ccdSource?.getAt(ns.ccd)?.text(),
@@ -861,7 +864,7 @@ class CcdVisualizationHelper {
             type: 'observation',
             status: element[ns.statusCode].@code?.getAt(0),
             text: getText(section, element),
-            effectiveDate: printEffectiveDate(element[ns.effectiveTime]),
+            effectiveDate: printEffectiveDate(element?.getAt(ns.effectiveTime)?.getAt(0)),
             source: [
                 name: ccdSource?.@source?.getAt(0),
                 id: ccdSource?.getAt(ns.ccd)?.text(),
