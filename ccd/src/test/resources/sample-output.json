@@ -1,0 +1,1028 @@
+[
+  {
+    "data": {
+      "code": {
+        "code": "99241",
+        "codeSystem": "2.16.840.1.113883.6.12",
+        "codeSystemName": "CPT",
+        "displayName": "Office consultation - 15 minutes"
+      },
+      "performer": {
+        "date": {
+          "start": "2011-08-07T07:00:00+0000",
+          "stop": "2011-12-09T08:00:00+0000"
+        },
+        "name": "Peter Chen"
+      },
+      "reason": "N/A",
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "type": "Diagnostic Report Other",
+      "visitDate": "2011-08-07T07:00:00+0000"
+    },
+    "section": "visitSummary"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "183995001",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": null,
+        "displayName": "Chest pain"
+      },
+      "date": null,
+      "reason": "Chest pain",
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      }
+    },
+    "section": "summaryPurpose"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "415.0",
+        "codeSystem": "2.16.840.1.113883.6.103",
+        "codeSystemName": "ICD-9CM",
+        "displayName": "Cor Pulmonale"
+      },
+      "name": "Cor Pulmonale",
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "started": "2011-08-05T07:00:00+0000"
+    },
+    "section": "problems"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "724.5",
+        "codeSystem": "2.16.840.1.113883.6.103",
+        "codeSystemName": "ICD-9CM",
+        "displayName": "BACK pain"
+      },
+      "name": "Back pain",
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "started": "1993-04-23T07:00:00+0000"
+    },
+    "section": "problems"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "496.",
+        "codeSystem": "2.16.840.1.113883.6.103",
+        "codeSystemName": "ICD-9CM",
+        "displayName": "CHRONIC AIRWAY OBSTRUCTION (COPD)"
+      },
+      "name": "Chronic Airway Obstruction (COPD)",
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "started": null
+    },
+    "section": "problems"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "17945006",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": null,
+        "displayName": "Biological grandmother"
+      },
+      "name": "Biological grandmother: survived into her 90s"
+    },
+    "section": "history.family"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "62296006",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": null,
+        "displayName": "Biological grandfather"
+      },
+      "name": "Biological grandfather: survived into his 90s"
+    },
+    "section": "history.family"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "9947008",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": null,
+        "displayName": "Biological father"
+      },
+      "name": "Biological father: celiac disease"
+    },
+    "section": "history.family"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "65656005",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": null,
+        "displayName": "Biological mother"
+      },
+      "name": "Biological mother: multiple sclerosis"
+    },
+    "section": "history.family"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "125679009",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": null,
+        "displayName": "Biological relative"
+      },
+      "name": "Biological relative: no colorectal cancer, prostate cancer, diabetes, hypertension"
+    },
+    "section": "history.family"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "229819007",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": "SNOMED CT",
+        "displayName": "Tobacco use"
+      },
+      "name": "Tobacco use",
+      "status": "never"
+    },
+    "section": "history.social"
+  },
+  {
+    "data": {
+      "code": {
+        "code": null,
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": "SNOMED CT",
+        "displayName": null
+      },
+      "name": "Passive smoke exposure",
+      "status": "no"
+    },
+    "section": "history.social"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "160573003",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": "SNOMED CT",
+        "displayName": "Alcohol use"
+      },
+      "name": "Alcohol use",
+      "status": "no"
+    },
+    "section": "history.social"
+  },
+  {
+    "data": {
+      "code": {
+        "code": null,
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": "SNOMED CT",
+        "displayName": null
+      },
+      "name": "Caffeine use (drinks/day)",
+      "status": "<1"
+    },
+    "section": "history.social"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "228449008",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": "SNOMED CT",
+        "displayName": "Exercise frequency (hours/week)"
+      },
+      "name": "Exercise frequency (hours/week)",
+      "status": "10-20"
+    },
+    "section": "history.social"
+  },
+  {
+    "data": {
+      "author": {
+        "family": "",
+        "given": "",
+        "organization": ""
+      },
+      "code": {
+        "code": null,
+        "codeSystem": "2.16.840.1.113883.6.88",
+        "codeSystemName": "RxNorm",
+        "displayName": "Ibuprofen Tab 600Mg"
+      },
+      "effectiveDate": {
+        "high": "2011-12-09T08:00:00+0000",
+        "low": "2010-05-30T07:00:00+0000"
+      },
+      "frequency": "1 po tid prn pain",
+      "material": "Ibuprofen Tab 600Mg",
+      "prescriber": {
+        "family": "",
+        "given": "",
+        "prefix": ""
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "status": "active"
+    },
+    "section": "medications"
+  },
+  {
+    "data": {
+      "author": {
+        "family": "",
+        "given": "",
+        "organization": ""
+      },
+      "code": {
+        "code": "10191",
+        "codeSystem": "2.16.840.1.113883.6.88",
+        "codeSystemName": "RxNorm",
+        "displayName": "Hydrochlorothiazide Tabs 50 Mg"
+      },
+      "effectiveDate": {
+        "high": "2011-12-10T08:00:00+0000",
+        "low": "2011-08-09T07:00:00+0000"
+      },
+      "frequency": "1 po qd prn ankle swelling",
+      "material": "Hydrochlorothiazide Tabs 50 Mg",
+      "prescriber": {
+        "family": "",
+        "given": "",
+        "prefix": ""
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "status": "active"
+    },
+    "section": "medications"
+  },
+  {
+    "data": {
+      "author": {
+        "family": "",
+        "given": "",
+        "organization": ""
+      },
+      "code": {
+        "code": "10191",
+        "codeSystem": "2.16.840.1.113883.6.88",
+        "codeSystemName": "RxNorm",
+        "displayName": "Hydrochlorothiazide Tabs 250 Mg"
+      },
+      "effectiveDate": {
+        "high": "2011-12-10T08:00:00+0000",
+        "low": "2011-08-05T07:00:00+0000"
+      },
+      "frequency": "1 po qd prn ankle swelling",
+      "material": "Hydrochlorothiazide Tabs 250 Mg",
+      "prescriber": {
+        "family": "",
+        "given": "",
+        "prefix": ""
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "status": "inactive"
+    },
+    "section": "medications"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "27113002",
+        "codeSystem": "2.16.840.1.113883.6.97",
+        "codeSystemName": null,
+        "displayName": "Height"
+      },
+      "date": "2011-12-09T08:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "in",
+        "value": "72"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "Height"
+    },
+    "section": "vitalSigns"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "27113001",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": null,
+        "displayName": "Weight"
+      },
+      "date": "2011-12-09T08:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "[lb_av]",
+        "value": "172.4"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "Weight"
+    },
+    "section": "vitalSigns"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "60621009",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": null,
+        "displayName": "Body mass index"
+      },
+      "date": "2011-12-09T08:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": null,
+        "value": ""
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "Body mass index"
+    },
+    "section": "vitalSigns"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "271649006",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": null,
+        "displayName": "Systolic BP"
+      },
+      "date": "2011-12-09T08:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "mm[Hg]",
+        "value": "116"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "Systolic BP"
+    },
+    "section": "vitalSigns"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "271650006",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": null,
+        "displayName": "Diastolic BP"
+      },
+      "date": "2011-12-09T08:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "mm[Hg]",
+        "value": "72"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "Diastolic BP"
+    },
+    "section": "vitalSigns"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "364075005",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": null,
+        "displayName": "Heart rate"
+      },
+      "date": "2011-12-09T08:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "1",
+        "value": "53"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "Heart rate"
+    },
+    "section": "vitalSigns"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "364095004",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": null,
+        "displayName": "Pulse rhythm"
+      },
+      "date": "2011-12-09T08:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": null,
+        "value": "regular"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "Pulse rhythm"
+    },
+    "section": "vitalSigns"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "86290005",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": null,
+        "displayName": "Respiratory rate"
+      },
+      "date": "2011-12-09T08:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "1",
+        "value": "14"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "Respiratory rate"
+    },
+    "section": "vitalSigns"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "LOI-2339-0",
+        "codeSystem": "2.16.840.1.113883.6.1",
+        "codeSystemName": "LOINC",
+        "displayName": "BG RANDOM"
+      },
+      "date": "2011-12-09T07:00:00+0000",
+      "result": {
+        "level": "low",
+        "unit": "mg/dL",
+        "value": "143"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "BG RANDOM"
+    },
+    "section": "labResults"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "LOI-3094-0",
+        "codeSystem": "2.16.840.1.113883.6.1",
+        "codeSystemName": "LOINC",
+        "displayName": "BUN"
+      },
+      "date": "2011-12-09T07:00:00+0000",
+      "result": {
+        "level": "low",
+        "unit": "mg/dL",
+        "value": "24"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "BUN"
+    },
+    "section": "labResults"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "LOI-2000-8",
+        "codeSystem": "2.16.840.1.113883.6.1",
+        "codeSystemName": "LOINC",
+        "displayName": "CALCIUM"
+      },
+      "date": "2011-12-09T07:00:00+0000",
+      "result": {
+        "level": "high",
+        "unit": "mg/dL",
+        "value": "9.9"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "CALCIUM"
+    },
+    "section": "labResults"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "LOI-2093-3",
+        "codeSystem": "2.16.840.1.113883.6.1",
+        "codeSystemName": "LOINC",
+        "displayName": "CHOLESTEROL"
+      },
+      "date": "2011-12-09T07:00:00+0000",
+      "result": {
+        "level": "high",
+        "unit": "mg/dL",
+        "value": "238"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "CHOLESTEROL"
+    },
+    "section": "labResults"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "LOI-2160-0",
+        "codeSystem": "2.16.840.1.113883.6.1",
+        "codeSystemName": "LOINC",
+        "displayName": "CREATININE"
+      },
+      "date": "2011-12-09T07:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "mg/dL",
+        "value": "1.2"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "CREATININE"
+    },
+    "section": "labResults"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "LOI-2601-3",
+        "codeSystem": "2.16.840.1.113883.6.1",
+        "codeSystemName": "LOINC",
+        "displayName": "MAGNESIUM"
+      },
+      "date": "2011-12-09T07:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "mg/dL",
+        "value": "1.8"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "MAGNESIUM"
+    },
+    "section": "labResults"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "LOI-2777-1",
+        "codeSystem": "2.16.840.1.113883.6.1",
+        "codeSystemName": "LOINC",
+        "displayName": "PO4"
+      },
+      "date": "2011-08-07T07:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "mg/dL",
+        "value": "3.8"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "PO4"
+    },
+    "section": "labResults"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "LOI-2823-3",
+        "codeSystem": "2.16.840.1.113883.6.1",
+        "codeSystemName": "LOINC",
+        "displayName": "POTASSIUM"
+      },
+      "date": "2011-08-07T07:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "mmol/L",
+        "value": "4.3"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "POTASSIUM"
+    },
+    "section": "labResults"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "LOI-1920-8",
+        "codeSystem": "2.16.840.1.113883.6.1",
+        "codeSystemName": "LOINC",
+        "displayName": "SGOT (AST)"
+      },
+      "date": "2011-08-07T07:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "units/L",
+        "value": "28"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "SGOT (AST)"
+    },
+    "section": "labResults"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "LOI-1742-6",
+        "codeSystem": "2.16.840.1.113883.6.1",
+        "codeSystemName": "LOINC",
+        "displayName": "SGPT (ALT)"
+      },
+      "date": "2011-12-09T07:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "units/L",
+        "value": "35"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "SGPT (ALT)"
+    },
+    "section": "labResults"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "LOI-3084-1",
+        "codeSystem": "2.16.840.1.113883.6.1",
+        "codeSystemName": "LOINC",
+        "displayName": "URIC ACID"
+      },
+      "date": "2011-12-09T07:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "mg/dL",
+        "value": "6.0"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "URIC ACID"
+    },
+    "section": "labResults"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "LOI-2532-0",
+        "codeSystem": "2.16.840.1.113883.6.1",
+        "codeSystemName": "LOINC",
+        "displayName": "LDH, TOTAL"
+      },
+      "date": "2011-12-09T07:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "intl units/L",
+        "value": "187"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "LDH, TOTAL"
+    },
+    "section": "labResults"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "LOI-2951-2",
+        "codeSystem": "2.16.840.1.113883.6.1",
+        "codeSystemName": "LOINC",
+        "displayName": "SODIUM"
+      },
+      "date": "2011-12-09T07:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "mmol/L",
+        "value": "140"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "SODIUM"
+    },
+    "section": "labResults"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "LOI-2823-3",
+        "codeSystem": "2.16.840.1.113883.6.1",
+        "codeSystemName": "LOINC",
+        "displayName": "POTASSIUM"
+      },
+      "date": "2011-12-09T07:00:00+0000",
+      "result": {
+        "level": "",
+        "unit": "mmol/L",
+        "value": "4.0"
+      },
+      "source": {
+        "id": "1.42.20120416202200.685",
+        "name": "Alpine Family Physicians"
+      },
+      "test": "POTASSIUM"
+    },
+    "section": "labResults"
+  },
+  {
+    "data": {
+      "actObservation": "Hives",
+      "actParticipant": "Penicillin",
+      "code": {
+        "code": "70618",
+        "codeSystem": "2.16.840.1.113883.6.88",
+        "codeSystemName": null,
+        "displayName": "Penicillin"
+      }
+    },
+    "section": "self.allergies"
+  },
+  {
+    "data": {
+      "actObservation": "Wheezing",
+      "actParticipant": "Aspirin",
+      "code": {
+        "code": "1191",
+        "codeSystem": "2.16.840.1.113883.6.88",
+        "codeSystemName": null,
+        "displayName": "Aspirin"
+      }
+    },
+    "section": "self.allergies"
+  },
+  {
+    "data": {
+      "actObservation": "Nausea",
+      "actParticipant": "Codeine",
+      "code": {
+        "code": "2670",
+        "codeSystem": "2.16.840.1.113883.6.88",
+        "codeSystemName": null,
+        "displayName": "Codeine"
+      }
+    },
+    "section": "self.allergies"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "225323000",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": "SNOMED CT",
+        "displayName": "Smoking cessation"
+      },
+      "source": {
+        "id": "",
+        "name": null
+      },
+      "status": "new",
+      "text": "Smoking cessation, Weight loss",
+      "type": "act"
+    },
+    "section": "planOfCare"
+  },
+  {
+    "data": {
+      "code": {
+        "code": null,
+        "codeSystem": null,
+        "codeSystemName": null,
+        "displayName": null
+      },
+      "effectiveDate": null,
+      "source": {
+        "id": "",
+        "name": null
+      },
+      "status": "new",
+      "text": "Plan Of Care Entry excluded/not available",
+      "type": "observation"
+    },
+    "section": "planOfCare"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "233604007",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": "SNOMED CT",
+        "displayName": "Pneumonia"
+      },
+      "name": "Pneumonia",
+      "started": "2012-08-06T07:00:00+0000"
+    },
+    "section": "hospitalDischargeDiagnosis"
+  },
+  {
+    "data": {
+      "author": {
+        "family": "",
+        "given": "",
+        "organization": ""
+      },
+      "code": {
+        "code": "309114",
+        "codeSystem": "2.16.840.1.113883.6.88",
+        "codeSystemName": "RxNorm",
+        "displayName": "Cephalexin 500 MG Oral Tablet"
+      },
+      "effectiveDate": {
+        "high": null,
+        "low": "2012-09-20T07:00:00+0000"
+      },
+      "frequency": "",
+      "material": "Cephalexin 500 MG Oral Tablet (Cephalexin)",
+      "prescriber": {
+        "family": "",
+        "given": "",
+        "prefix": ""
+      },
+      "status": "completed"
+    },
+    "section": "hospitalDischargeMedications"
+  },
+  {
+    "data": {
+      "author": {
+        "family": "",
+        "given": "",
+        "organization": ""
+      },
+      "code": {
+        "code": "313989",
+        "codeSystem": "2.16.840.1.113883.6.88",
+        "codeSystemName": "RxNorm",
+        "displayName": "Fluoxetine"
+      },
+      "effectiveDate": {
+        "high": null,
+        "low": "2011-11-20T23:43:00+0000"
+      },
+      "frequency": "",
+      "material": "Fluoxetine (Fluoxetine)",
+      "prescriber": {
+        "family": "",
+        "given": "",
+        "prefix": ""
+      },
+      "status": "completed"
+    },
+    "section": "hospitalDischargeMedications"
+  },
+  {
+    "data": {
+      "author": {
+        "family": "",
+        "given": "",
+        "organization": ""
+      },
+      "code": {
+        "code": "966247",
+        "codeSystem": "2.16.840.1.113883.6.88",
+        "codeSystemName": "RxNorm",
+        "displayName": "Levothyroxine Sodium"
+      },
+      "effectiveDate": {
+        "high": null,
+        "low": "2010-04-15T22:43:00+0000"
+      },
+      "frequency": "",
+      "material": "Levothyroxine Sodium (Synthroid)",
+      "prescriber": {
+        "family": "",
+        "given": "",
+        "prefix": ""
+      },
+      "status": "completed"
+    },
+    "section": "hospitalDischargeMedications"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "11289-6",
+        "codeSystem": "2.16.840.1.113883.11.19341",
+        "codeSystemName": "LOINC",
+        "displayName": "Body Temperature "
+      },
+      "effectiveTime": null,
+      "name": "Body Temperature "
+    },
+    "section": "physicalExamination"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "77057",
+        "codeSystem": "2.16.840.1.113883.6.12",
+        "codeSystemName": "CPT",
+        "displayName": "Mammogram, screening"
+      },
+      "effectiveTime": "2010-11-20T18:00:00+0000",
+      "name": "Mammogram, screening",
+      "status": "completed"
+    },
+    "section": "procedures"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "23852006",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": "SNOMED-CT",
+        "displayName": "Cardiac monitoring"
+      },
+      "effectiveTime": "2010-11-25T18:00:00+0000",
+      "name": "Cardiac monitoring",
+      "status": "completed"
+    },
+    "section": "procedures"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "S9451",
+        "codeSystem": "2.16.840.1.113883.6.13",
+        "codeSystemName": "HCPCS",
+        "displayName": "Exercise class"
+      },
+      "effectiveTime": "2010-11-25T18:00:00+0000",
+      "name": "Exercise class",
+      "status": "completed"
+    },
+    "section": "procedures"
+  }
+]
