@@ -23,6 +23,10 @@ class CcdConstants {
   public static final String ProceduresCode = '47519-4'
   public static final String EncountersCode = '46240-8'
   public static final String PlanOfCareCode = '18776-5'
+  public static final String HospitalDischargeDiagnosis = '11535-2'
+  public static final String HospitalDischargeMedications = '10183-2'
+  public static final String PhysicalExamination = '29545-1'
+  public static final String Procedures = '47519-4'
   public static final String hl7Namespace = "urn:hl7-org:v3"
 
   // CCD Constants

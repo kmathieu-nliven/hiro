@@ -1,11 +1,9 @@
 package com.cds.hiro.ccd
 
-import com.cds.hiro.ccd.model.Code
 import groovy.json.JsonBuilder
 import groovy.util.logging.Log4j
 import groovy.xml.Namespace
 import groovy.xml.QName
-import groovy.xml.XmlUtil
 
 import java.text.SimpleDateFormat
 
@@ -387,6 +385,18 @@ class CcdVisualizationHelper {
         case '18776-5':
           map.put('planOfCare', section);
           break
+        case '11535-2':
+          map.put('hospitalDischargeDiagnosis', section);
+          break
+        case '10183-2':
+          map.put('hospitalDischargeMedications', section);
+          break
+        case '29545-1':
+          map.put('physicalExamination', section);
+          break
+        case '47519-4':
+          map.put('procedures', section);
+          break
         default:
           log.warn "Unhandled section in createSectionMap: ${code}"
       }
@@ -699,6 +709,72 @@ class CcdVisualizationHelper {
         code: getCodeDetails(observation?.getAt(ns.code)?.getAt(0))
     ]).toString()
     return observations
+  }
+
+  String getHospitalDischargeDiagnosisAsJson(entry, section) {
+    def observation = entry?.getAt(ns.act)?.getAt(ns.entryRelationship)?.getAt(ns.observation)
+    def code = observation?.getAt(ns.value)?.getAt(0)
+
+    new JsonBuilder([
+        name: getText(section, observation),
+        started: parseDate(observation?.getAt(ns.effectiveTime)?.getAt(ns.low)?.@value?.getAt(0)),
+        code: getCodeDetails(code)
+    ]).toString()
+  }
+
+  String getHospitalDischargeMedicationsAsJson(entry, section) {
+    def substanceAdministration = entry?.getAt(ns.act)?.getAt(ns.entryRelationship)?.getAt(ns.substanceAdministration)
+    def material = substanceAdministration?.getAt(ns.consumable)?.getAt(ns.manufacturedProduct)?.getAt(ns.manufacturedMaterial)
+    def medication = material?.getAt(ns.name)?.text() ? "${material?.getAt(ns.code)?.@displayName?.getAt(0)} (${material?.getAt(ns.name)?.text()})" : "${material?.getAt(ns.code)?.@displayName?.getAt(0)}"
+    def effectiveTime = substanceAdministration?.getAt(ns.effectiveTime)
+    def assignedAuthor = substanceAdministration?.getAt(ns.author)?.getAt(ns.assignedAuthor)
+    def prescriber = substanceAdministration?.getAt(ns.performer)?.getAt(ns.assignedEntity)?.getAt(ns.assignedPerson)
+
+    String medicationsJson = new JsonBuilder([
+        status: substanceAdministration?.getAt(ns.statusCode)?.@code?.getAt(0),
+        material: medication,
+        frequency: getMedicationFrequency(section, entry),
+        effectiveDate: [
+            low: parseDate(effectiveTime?.getAt(ns.low)?.@value?.getAt(0)),
+            high: parseDate(effectiveTime?.getAt(ns.high)?.@value?.getAt(0))
+        ],
+        author: [
+            given: assignedAuthor?.getAt(ns.assignedPerson)?.getAt(ns.name)?.getAt(ns.given)?.text(),
+            family: assignedAuthor?.getAt(ns.assignedPerson)?.getAt(ns.name)?.getAt(ns.family)?.text(),
+            organization: assignedAuthor?.getAt(ns.representedOrganization)?.getAt(ns.name)?.text(),
+        ],
+        prescriber: [
+            prefix: (prescriber) ? prescriber?.getAt(ns.name)?.prefix?.text() : "",
+            given: prescriber?.getAt(ns.name)?.getAt(ns.given)?.text() ?: "",
+            family: prescriber?.getAt(ns.name)?.getAt(ns.family)?.text() ?: ""
+        ],
+        code: getCodeDetails(material?.getAt(ns.code)?.getAt(0))
+    ]).toString()
+    return medicationsJson
+  }
+
+  //TODO: get more real
+  String getPhysicalExaminationAsJson(entry, section) {
+    def observation = entry?.getAt(ns.observation)
+    def code = observation?.getAt(ns.code)?.getAt(0)
+
+    new JsonBuilder([
+        name: getText(section, observation),
+        effectiveTime: parseDate(observation?.getAt(ns.effectiveTime)?.@value?.getAt(0)),
+        code: getCodeDetails(code)
+    ]).toString()
+  }
+
+  String getProceduresAsJson(entry, section) {
+    def procedure = entry?.getAt(ns.procedure)
+    def code = procedure?.getAt(ns.code)?.getAt(0)
+
+    new JsonBuilder([
+        name: getText(section, procedure),
+        effectiveTime: parseDate(procedure?.getAt(ns.effectiveTime)?.@value?.getAt(0)),
+        status: procedure.getAt(ns.statusCode)?.@code?.getAt(0),
+        code: getCodeDetails(code)
+    ]).toString()
   }
 
   String getLabLevel(value, refRange) {

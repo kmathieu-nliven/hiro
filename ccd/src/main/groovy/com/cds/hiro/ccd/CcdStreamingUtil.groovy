@@ -62,6 +62,10 @@ class CcdStreamingUtil {
         '11369-6': [data: {vHelper.getImmunizationHistoryAsJson(it.entry)}, section: 'history.immunization'], //TODO: Get Sample and Add code
         '48765-2': [data: {vHelper.getAlertAsJson(it.entry, it.section)}, section: 'self.allergies'],
         '18776-5': [data: {vHelper.getPlanOfCareAsJson(it.entry, it.section)}, section: 'planOfCare'],
+        '11535-2': [data: {vHelper.getHospitalDischargeDiagnosisAsJson(it.entry, it.section)}, section: 'hospitalDischargeDiagnosis'],
+        '10183-2': [data: {vHelper.getHospitalDischargeMedicationsAsJson(it.entry, it.section)}, section: 'hospitalDischargeMedications'],
+        '29545-1': [data: {vHelper.getPhysicalExaminationAsJson(it.entry, it.section)}, section: 'physicalExamination'],
+        '47519-4': [data: {vHelper.getProceduresAsJson(it.entry, it.section)}, section: 'procedures']
     ]
     def helper = helpers[aggregated.sectionCode]
     if (helper) {
