@@ -30,6 +30,7 @@ class CcdAggregator {
       }
       ccd = newCcd
     } else if (newCcd) {
+      log.debug("Aggregating new ccd...")
       def aggregatedCcd = normalizeCcdUtil.getAggregatedCcd(ccd, [newCcd], [:], true, true, false, closuresMap)
       normalizeCcdUtil.executorService?.shutdown()
       ccd = aggregatedCcd
