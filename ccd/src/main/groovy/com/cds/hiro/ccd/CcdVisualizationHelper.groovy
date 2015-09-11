@@ -761,14 +761,12 @@ class CcdVisualizationHelper {
     return medicationsJson
   }
 
-  //TODO: get more real
-  String getPhysicalExaminationAsJson(entry, section) {
-    def observation = entry?.getAt(ns.observation)
-    def code = observation?.getAt(ns.code)?.getAt(0)
+  //TODO: get more real data...
+  String getPhysicalExaminationAsJson(component, section) {
+    def code = component?.getAt(ns.section)?.getAt(ns.code)?.getAt(0)
 
     new JsonBuilder([
-        name: getText(section, observation),
-        effectiveTime: parseDate(observation?.getAt(ns.effectiveTime)?.@value?.getAt(0)),
+        name: getText(section, component?.getAt(ns.section)),
         code: getCodeDetails(code)
     ]).toString()
   }

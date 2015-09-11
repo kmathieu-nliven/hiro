@@ -133,7 +133,12 @@ class NormalizeCcdUtil {
    */
   void streamComponent(def component, def oldEffectiveTime, Map closureMap) {
     def sectionCode = component[ns.section][ns.code]?.@code?.getAt(0)
-    List latestEntries = component[ns.section][ns.entry]
+    List latestEntries = []
+    if (sectionCode == CcdConstants.PhysicalExamination) {
+      latestEntries = component?.getAt(ns.section)?.getAt(ns.component)
+    } else {
+      latestEntries = component?.getAt(ns.section)?.getAt(ns.entry)
+    }
     if (oldEffectiveTime) {
       updateEffectiveTime(latestEntries, oldEffectiveTime, sectionCode)
     }

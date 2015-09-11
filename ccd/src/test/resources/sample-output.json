@@ -1010,13 +1010,12 @@
   {
     "data": {
       "code": {
-        "code": "11289-6",
-        "codeSystem": "2.16.840.1.113883.11.19341",
+        "code": "10197-2",
+        "codeSystem": "2.16.840.1.113883.6.1",
         "codeSystemName": "LOINC",
-        "displayName": "Body Temperature "
+        "displayName": "EYE"
       },
-      "effectiveTime": null,
-      "name": "Body Temperature "
+      "name": "Eye Exam"
     },
     "section": "physicalExamination"
   },

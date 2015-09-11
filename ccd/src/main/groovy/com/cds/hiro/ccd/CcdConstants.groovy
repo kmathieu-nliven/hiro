@@ -1,7 +1,7 @@
 package com.cds.hiro.ccd
 
 /**
- * TODO: Explain This
+ * CCD related constants
  *
  * Created by seth.darr on 8/20/15.
  */
