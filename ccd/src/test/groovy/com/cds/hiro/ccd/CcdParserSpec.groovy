@@ -1,5 +1,7 @@
 package com.cds.hiro.ccd
 
+import groovy.json.JsonSlurper
+
 /**
  * CCD parser spec
  *
@@ -36,10 +38,20 @@ class CcdParserSpec extends Specification {
     when: "parse it and map it to events"
     def obj = new CcdToEventsMapper()
     def results = obj.getEvents(ccdString)
-
     println(results)
 
-    then:
-    assert true
+    then: "result should match expected json"
+    JsonSlurper slurper = new JsonSlurper()
+    def expectedJson = slurper.parseText(this.class.classLoader.getResourceAsStream('sample-output.json').text)
+    def resultJson = slurper.parseText(results)
+    expectedJson == resultJson
+
+  }
+
+  private List<Map> jsonizeSingleComponent(def component) {
+    def normalizeCcdUtil = new NormalizeCcdUtil()
+    def ccdStreamingUtil = new CcdStreamingUtil(originalRequestId: '1234')
+    normalizeCcdUtil.streamComponent(component, null, [onNewEntry: ccdStreamingUtil.onNewEntry])
+    ccdStreamingUtil.events
   }
 }
