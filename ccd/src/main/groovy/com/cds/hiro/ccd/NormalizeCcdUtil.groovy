@@ -801,7 +801,7 @@ class NormalizeCcdUtil {
     if(newEntryMap.entry){
       newEntryMap.section = newEntryMap.entry.parent()
     }
-    callClosureAsync(newEntryClosure, newEntryMap)
+    newEntryClosure.call(newEntryMap)
   }
 
   /**
