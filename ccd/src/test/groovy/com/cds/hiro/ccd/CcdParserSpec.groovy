@@ -5,17 +5,15 @@ package com.cds.hiro.ccd
  *
  * Created by yuanyao on 9/4/15.
  */
-import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 class CcdParserSpec extends Specification {
   def "the code runs"() {
     given: "A ccd"
-    //def outFile = new File('build/foo.txt')
 
     def ccdString = this.class.classLoader.getResourceAsStream('sample-ccd.xml').text
 
-    when: "I send it into my my foooo"
+    when: "Parse it using CcdStreamingUtil"
     def aggregator = new CcdAggregator(ccd: new XmlParser().parseText(
         """<?xml version="1.0" encoding="UTF-8"?>
               <ClinicalDocument xmlns="urn:hl7-org:v3"
@@ -26,31 +24,22 @@ class CcdParserSpec extends Specification {
     )
     csu.streamCcdEntries(aggregator, [ccdString])
 
-//    csu.events.each {
-//      outFile << (new JsonBuilder(it).toString())
-//      outFile << '\n'
-//    }
-
     then:
-    csu.events.size() == 53
+    csu.events.size() == 56
 
   }
 
   def "test CcdToEventsMapper"() {
-    given: "init"
-
-    def outFile = new File('build/foo.txt')
+    given: "a sample ccd"
     def ccdString = this.class.classLoader.getResourceAsStream('sample-ccd.xml').text
 
-    when: "act"
-
+    when: "parse it and map it to events"
     def obj = new CcdToEventsMapper()
     def results = obj.getEvents(ccdString)
 
     println(results)
 
     then:
-
     assert true
   }
 }
