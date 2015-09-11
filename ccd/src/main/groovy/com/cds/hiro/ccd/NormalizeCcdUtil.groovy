@@ -801,7 +801,11 @@ class NormalizeCcdUtil {
     if(newEntryMap.entry){
       newEntryMap.section = newEntryMap.entry.parent()
     }
-    newEntryClosure.call(newEntryMap)
+    try {
+      newEntryClosure.call(newEntryMap)
+    } catch (Exception e) {
+      log.error("Failed to process section[${newEntryMap.sectionCode}] on new entry", e)
+    }
   }
 
   /**
