@@ -607,9 +607,10 @@ class CcdVisualizationHelper {
   }
 
   String getPastMedicalAsJson(pastMedical, section) {
-    def observation = pastMedical?.getAt(ns.act)?.getAt(ns.entryRelationship)?.getAt(ns.observation)
+    def observation = pastMedical?.getAt(ns.observation)
     new JsonBuilder([
-        name: getText(section, observation)
+        name: getText(section, observation),
+        code: getCodeDetails(observation?.getAt(ns.value)?.getAt(0))
     ]).toString()
   }
 
@@ -633,9 +634,13 @@ class CcdVisualizationHelper {
 
   String getImmunizationHistoryAsJson(immunization) {
     def substanceAdministration = immunization?.getAt(ns.substanceAdministration)
+    def code = substanceAdministration?.getAt(ns.consumable)?.getAt(ns.manufacturedProduct)?.getAt(ns.manufacturedMaterial)?.getAt(ns.code)?.getAt(0)
     Date parsedDate = parseDate(substanceAdministration?.getAt(ns.effectiveTime)?.getAt(ns.center)?.@value?.getAt(0))
-    return new JsonBuilder([name: substanceAdministration?.getAt(ns.consumable)?.getAt(ns.manufacturedProduct)?.getAt(ns.manufacturedMaterial)?.getAt(ns.code)?.@displayName,
-        date: parsedDate?.format("yyyy-MM-dd'T'HH:mm:ss'Z'")]).toString()
+    return new JsonBuilder([
+        name: code?.@displayName,
+        date: parsedDate?.format("yyyy-MM-dd'T'HH:mm:ss'Z'"),
+        code: getCodeDetails(code)
+    ]).toString()
   }
 
   Date parseDate(String dateString) {

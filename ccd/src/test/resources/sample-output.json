@@ -219,6 +219,43 @@
   },
   {
     "data": {
+      "code": {
+        "code": "141",
+        "codeSystem": "2.16.840.1.113883.12.292",
+        "codeSystemName": "CVX",
+        "displayName": "Influenza, seasonal, injectable"
+      },
+      "date": null,
+      "name": "Influenza, seasonal, injectable"
+    },
+    "section": "history.immunization"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "233604007",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": "SNOMED CT",
+        "displayName": "Pneumonia"
+      },
+      "name": "Pneumonia"
+    },
+    "section": "history.pastMedical"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "77528005",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": "SNOMED CT",
+        "displayName": "Cholelithiasis"
+      },
+      "name": "Cholelithiasis"
+    },
+    "section": "history.pastMedical"
+  },
+  {
+    "data": {
       "author": {
         "family": "",
         "given": "",

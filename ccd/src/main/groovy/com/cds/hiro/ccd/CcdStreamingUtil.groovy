@@ -55,11 +55,11 @@ class CcdStreamingUtil {
         '8716-3': [data: {vHelper.getObservationAsJson(it.observation)}, section: 'vitalSigns'],
         '48764-5': [data: {vHelper.getSummaryPurposeAsJson(it.entry)}, section: 'summaryPurpose'],
         '46240-8': [data: {vHelper.getVisitSummaryAsJson(it.entry, it.section)}, section: 'visitSummary'],
-        '11348-0': [data: {vHelper.getPastMedicalAsJson(it.entry, it.section)}, section: 'history.pastMedical'], //TODO: Get Sample and Add code
+        '11348-0': [data: {vHelper.getPastMedicalAsJson(it.entry, it.section)}, section: 'history.pastMedical'],
         '11450-4': [data: {vHelper.getProblemAsJson(it.entry, it.section)}, section: 'problems'],
         '10157-6': [data: {vHelper.getFamilyHistoryAsJson(it.entry)}, section: 'history.family'],
         '29762-2': [data: {vHelper.getSocialHistoryAsJson(it.entry, it.section)}, section: 'history.social'],
-        '11369-6': [data: {vHelper.getImmunizationHistoryAsJson(it.entry)}, section: 'history.immunization'], //TODO: Get Sample and Add code
+        '11369-6': [data: {vHelper.getImmunizationHistoryAsJson(it.entry)}, section: 'history.immunization'],
         '48765-2': [data: {vHelper.getAlertAsJson(it.entry, it.section)}, section: 'self.allergies'],
         '18776-5': [data: {vHelper.getPlanOfCareAsJson(it.entry, it.section)}, section: 'planOfCare'],
         '11535-2': [data: {vHelper.getHospitalDischargeDiagnosisAsJson(it.entry, it.section)}, section: 'hospitalDischargeDiagnosis'],
