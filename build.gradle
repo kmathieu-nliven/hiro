@@ -52,4 +52,4 @@ subprojects {
 
 }
 
-defaultTasks 'clean', 'check', 'uploadArchives'
+//defaultTasks 'clean', 'check', 'uploadArchives'
