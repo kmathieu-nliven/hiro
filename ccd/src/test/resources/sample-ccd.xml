@@ -123,6 +123,12 @@
                   <td>Alpine Family Physicians</td>
                   <td>Dec 9, 2011</td>
                 </tr>
+                <tr>
+                  <td ID="enc0">Primary Care Physician</td>
+                  <td>Logan Coture</td>
+                  <td>San Jose Primary Care</td>
+                  <td>Sep 10, 2013</td>
+                </tr>
               </tbody>
             </table>
           </text>
@@ -132,7 +138,7 @@
               <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.14" assigningAuthorityName="IHE PCC"/>
               <templateId root="2.16.840.1.113883.10.20.1.21" assigningAuthorityName="HL7 CCD"/>
               <id root="1226222703001060"/>
-              <code code="99241" displayName="Office consultation - 15 minutes" codeSystemName="CPT" codeSystem="2.16.840.1.113883.6.12">
+              <code code="99241" displayName="Office consultation" codeSystemName="CPT" codeSystem="2.16.840.1.113883.6.12">
                 <originalText>
                   <reference value="#enc0"/>
                 </originalText>
@@ -166,6 +172,60 @@
             </encounter>
             <text id="CcdSource" source="Alpine Family Physicians">
               <ccd>1.42.20120416202200.685</ccd>
+            </text>
+          </entry>
+          <entry typeCode="DRIV">
+            <encounter classCode="ENC" moodCode="EVN">
+              <templateId root="2.16.840.1.113883.3.88.11.83.16" assigningAuthorityName="HITSP C83"/>
+              <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.14" assigningAuthorityName="IHE PCC"/>
+              <templateId root="2.16.840.1.113883.10.20.1.21" assigningAuthorityName="HL7 CCD"/>
+              <id root="1226222703001060"/>
+              <code codeSystem="2.16.840.1.113883.6.12" code="99202" codeSystemName="CPT" displayName="Office Visit">
+                <originalText>Office Visit</originalText>
+              </code>
+              <text>
+                <reference value="Emergency Room Visit"/>
+              </text>
+              <effectiveTime>
+                <low value="20090304"/>
+                <high value="20090304"/>
+              </effectiveTime>
+              <performer>
+                <assignedEntity>
+                  <assignedPerson>
+                    <name>
+                      <given>Frank</given>
+                      <family>Schrieber</family>
+                    </name>
+                  </assignedPerson>
+                </assignedEntity>
+              </performer>
+              <Participant typeCode="LOC">
+                <templateId root="2.16.840.1.113883.10.20.1.45"/>
+                <ParticipantRole classCode="SDLOC">
+                  <id root="2.16.840.1.113883.19.5"/>
+                  <playingEntity classCode="PLC">
+                    <name>Campbell Urgent Care</name>
+                  </playingEntity>
+                </ParticipantRole>
+              </Participant>
+              <entryRelationship typeCode="RSON">
+                <observation classCode="OBS" moodCode="EVN">
+                  <templateId root="2.16.840.1.113883.10.20.1.28"/>
+                  <code code="ASSERTION" codeSystem="2.16.840.1.113883.5.4"/>
+                  <statusCode code="completed"/>
+                  <effectiveTime>
+                    <low value="20150323"/>
+                    <high value="20150323"/>
+                  </effectiveTime>
+                  <text>Tiredness, shortness of breath, weight gain</text>
+                  <value xsi:type="ST"/>
+                </observation>
+              </entryRelationship>
+            </encounter>
+            <text id="CcdSource" source="Campbell Urgent Care">
+              <ccd>1.42.20120522174034.8</ccd>
+              <ccd>1.3.6.1.4.1.21367.2014.12.2.1394585589977.7330544021855161642</ccd>
             </text>
           </entry>
         </section>
@@ -2123,13 +2183,13 @@
                   <templateId root="2.16.840.1.113883.10.20.22.4.4"/>
                   <id extension="61502880000311" root="1.3.6.1.4.1.22812.11.99930.3.4.1.2.1"/>
                   <id extension="65993520000111" root="1.3.6.1.4.1.22812.11.99930.3.4.1.2.1"/>
-                  <code codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" code="55607006" displayName="Problem"/>
+                  <code codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD-9-CM" code="250.03" displayName="Problem"/>
                   <text>
                     <reference value="#ID0ECBAGACA"/>
                   </text>
                   <statusCode code="completed"/>
                   <effectiveTime>
-                    <low value="20120806"/>
+                    <low value="20090304"/>
                   </effectiveTime>
                   <value xsi:type="CD" code="233604007" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Pneumonia">
                     <originalText>
@@ -2572,7 +2632,8 @@
               codeSystem='2.16.840.1.113883.6.1' codeSystemName='LOINC'/>
         <text>
           <list listType="ordered">
-            <item>Eye Exam</item>
+            <item>Retinal or Dilated Eye Exam</item>
+            <item>Heart Exam</item>
           </list>
         </text>
         <component>
@@ -2581,7 +2642,71 @@
             <id extension="44078" root="1.3.6.1.4.1.22812.4.11755.0.4.1"/>
             <!-- Optional Eyes Section content -->
             <code code='10197-2' displayName='EYE' codeSystem='2.16.840.1.113883.6.1' codeSystemName='LOINC'/>
-            <text>Eye Exam</text>
+            <text>
+              Text as described above
+            </text>
+            <entry> <!-- TODO: Fix this section -->
+              <observation classCode="OBS" moodCode="EVN">
+                <templateId root="2.16.840.1.113883.10.20.1.28"/>
+                <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+                <id root="780763294"/>
+                <code code="252779009" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT" displayName='Retinal or Dilated Eye Exam'/>
+                <statusCode code="completed"/>
+                <effectiveTime>
+                  <low value="20091010"/>
+                  <high value="20091010"/>
+                </effectiveTime>
+                <entryRelationship>
+                  <observation/>
+                </entryRelationship>
+                <entryRelationship>
+                  <observation/>
+                </entryRelationship>
+                <entryRelationship>
+                  <observation/>
+                </entryRelationship>
+                <entryRelationship>
+                  <act/>
+                </entryRelationship>
+              </observation>
+            </entry>
+          </section>
+        </component>
+
+        <component>
+          <section>
+            <templateId root='1.3.6.1.4.1.19376.1.5.3.1.1.9.29'/>
+            <id extension="44078" root="1.3.6.1.4.1.22812.4.11755.0.4.1"/>
+            <code code='10200-4' displayName='HEART'
+                  codeSystem='2.16.840.1.113883.6.1' codeSystemName='LOINC'/>
+            <text>
+              Text as described above
+            </text>
+            <entry>
+              <observation classCode="OBS" moodCode="EVN">
+                <templateId root="2.16.840.1.113883.10.20.1.28"/>
+                <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+                <id root="780763294"/>
+                <code code="363660007" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT" displayName='Heart Exam'/>
+                <statusCode code="completed"/>
+                <effectiveTime>
+                  <low value="20091010"/>
+                  <high value="20091010"/>
+                </effectiveTime>
+                <entryRelationship>
+                  <observation/>
+                </entryRelationship>
+                <entryRelationship>
+                  <observation/>
+                </entryRelationship>
+                <entryRelationship>
+                  <observation/>
+                </entryRelationship>
+                <entryRelationship>
+                  <act/>
+                </entryRelationship>
+              </observation>
+            </entry>
           </section>
         </component>
        </section>

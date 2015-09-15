@@ -135,7 +135,7 @@ class NormalizeCcdUtil {
     def sectionCode = component[ns.section][ns.code]?.@code?.getAt(0)
     List latestEntries = []
     if (sectionCode == CcdConstants.PhysicalExamination) {
-      latestEntries = component?.getAt(ns.section)?.getAt(ns.component)
+      latestEntries = component?.getAt(ns.section)?.getAt(ns.component)?.getAt(ns.section)?.getAt(ns.entry)
     } else {
       latestEntries = component?.getAt(ns.section)?.getAt(ns.entry)
     }

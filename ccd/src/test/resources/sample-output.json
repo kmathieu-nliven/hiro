@@ -5,7 +5,7 @@
         "code": "99241",
         "codeSystem": "2.16.840.1.113883.6.12",
         "codeSystemName": "CPT",
-        "displayName": "Office consultation - 15 minutes"
+        "displayName": "Office consultation"
       },
       "performer": {
         "date": {
@@ -21,6 +21,31 @@
       },
       "type": "Diagnostic Report Other",
       "visitDate": "2011-08-07T07:00:00+0000"
+    },
+    "section": "visitSummary"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "99202",
+        "codeSystem": "2.16.840.1.113883.6.12",
+        "codeSystemName": "CPT",
+        "displayName": "Office Visit"
+      },
+      "performer": {
+        "date": {
+          "start": "2009-03-04T08:00:00+0000",
+          "stop": "2009-03-04T08:00:00+0000"
+        },
+        "name": "Frank Schrieber"
+      },
+      "reason": "Tiredness, shortness of breath, weight gain",
+      "source": {
+        "id": "1.42.20120522174034.81.3.6.1.4.1.21367.2014.12.2.1394585589977.7330544021855161642",
+        "name": "Campbell Urgent Care"
+      },
+      "type": "N/A",
+      "visitDate": "2009-03-04T08:00:00+0000"
     },
     "section": "visitSummary"
   },
@@ -913,13 +938,13 @@
   {
     "data": {
       "code": {
-        "code": "233604007",
-        "codeSystem": "2.16.840.1.113883.6.96",
-        "codeSystemName": "SNOMED CT",
-        "displayName": "Pneumonia"
+        "code": "250.03",
+        "codeSystem": "2.16.840.1.113883.6.103",
+        "codeSystemName": "ICD-9-CM",
+        "displayName": "Problem"
       },
       "name": "Pneumonia",
-      "started": "2012-08-06T07:00:00+0000"
+      "started": "2009-03-04T08:00:00+0000"
     },
     "section": "hospitalDischargeDiagnosis"
   },
@@ -1010,12 +1035,24 @@
   {
     "data": {
       "code": {
-        "code": "10197-2",
-        "codeSystem": "2.16.840.1.113883.6.1",
-        "codeSystemName": "LOINC",
-        "displayName": "EYE"
+        "code": "252779009",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": "SNOMED-CT",
+        "displayName": "Retinal or Dilated Eye Exam"
       },
-      "name": "Eye Exam"
+      "name": "Retinal or Dilated Eye Exam"
+    },
+    "section": "physicalExamination"
+  },
+  {
+    "data": {
+      "code": {
+        "code": "363660007",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "codeSystemName": "SNOMED-CT",
+        "displayName": "Heart Exam"
+      },
+      "name": "Heart Exam"
     },
     "section": "physicalExamination"
   },

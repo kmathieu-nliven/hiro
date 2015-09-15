@@ -27,7 +27,7 @@ class CcdParserSpec extends Specification {
     csu.streamCcdEntries(aggregator, [ccdString])
 
     then:
-    csu.events.size() == 56
+    csu.events.size() == 58
 
   }
 
@@ -40,10 +40,12 @@ class CcdParserSpec extends Specification {
     def results = obj.getEvents(ccdString)
     println(results)
 
-    then: "result should match expected json"
+    and: "parse both events and expected text to json"
     JsonSlurper slurper = new JsonSlurper()
     def expectedJson = slurper.parseText(this.class.classLoader.getResourceAsStream('sample-output.json').text)
     def resultJson = slurper.parseText(results)
+
+    then: "result json should match expected json"
     expectedJson == resultJson
 
   }

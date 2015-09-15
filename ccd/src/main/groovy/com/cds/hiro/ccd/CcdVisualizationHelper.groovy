@@ -721,7 +721,7 @@ class CcdVisualizationHelper {
 
   String getHospitalDischargeDiagnosisAsJson(entry, section) {
     def observation = entry?.getAt(ns.act)?.getAt(ns.entryRelationship)?.getAt(ns.observation)
-    def code = observation?.getAt(ns.value)?.getAt(0)
+    def code = observation?.getAt(ns.code)?.getAt(0)
 
     new JsonBuilder([
         name: getText(section, observation),
@@ -762,11 +762,12 @@ class CcdVisualizationHelper {
   }
 
   //TODO: get more real data...
-  String getPhysicalExaminationAsJson(component, section) {
-    def code = component?.getAt(ns.section)?.getAt(ns.code)?.getAt(0)
+  String getPhysicalExaminationAsJson(entry, section) {
+    def observation = entry?.getAt(ns.observation)
+    def code = observation?.getAt(ns.code)?.getAt(0)
 
     new JsonBuilder([
-        name: getText(section, component?.getAt(ns.section)),
+        name: getText(section, observation),
         code: getCodeDetails(code)
     ]).toString()
   }
