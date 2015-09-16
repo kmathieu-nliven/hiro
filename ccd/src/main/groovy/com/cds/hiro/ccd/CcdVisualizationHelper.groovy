@@ -765,9 +765,14 @@ class CcdVisualizationHelper {
   String getPhysicalExaminationAsJson(entry, section) {
     def observation = entry?.getAt(ns.observation)
     def code = observation?.getAt(ns.code)?.getAt(0)
+    def effectiveTime = observation?.getAt(ns.effectiveTime)
 
     new JsonBuilder([
         name: getText(section, observation),
+        effectiveDate: [
+            low: parseDate(effectiveTime?.getAt(ns.low)?.@value?.getAt(0)),
+            high: parseDate(effectiveTime?.getAt(ns.high)?.@value?.getAt(0))
+        ],
         code: getCodeDetails(code)
     ]).toString()
   }

@@ -1040,6 +1040,10 @@
         "codeSystemName": "SNOMED-CT",
         "displayName": "Retinal or Dilated Eye Exam"
       },
+      "effectiveDate": {
+        "high": "2009-10-10T07:00:00+0000",
+        "low": "2009-10-10T07:00:00+0000"
+      },
       "name": "Retinal or Dilated Eye Exam"
     },
     "section": "physicalExamination"
@@ -1051,6 +1055,10 @@
         "codeSystem": "2.16.840.1.113883.6.96",
         "codeSystemName": "SNOMED-CT",
         "displayName": "Heart Exam"
+      },
+      "effectiveDate": {
+        "high": "2009-10-10T07:00:00+0000",
+        "low": "2009-10-10T07:00:00+0000"
       },
       "name": "Heart Exam"
     },
