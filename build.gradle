@@ -19,6 +19,8 @@ version = '1.0.0-SNAPSHOT'
 
 subprojects {
 
+  version = '1.0.0-SNAPSHOT'
+
   apply plugin: 'groovy'
   apply plugin: "nebula.maven-scm"
   apply plugin: "nebula.maven-dependencies"
