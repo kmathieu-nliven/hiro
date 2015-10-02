@@ -46,6 +46,8 @@ class CdaSpec extends Specification {
   static CE ICNP(String input) { ce(input, '2.16.840.1.113883.6.97', 'ICNP') }
 
   static CE Conf(String input) { ce(input, '2.16.840.1.113883.5.25', 'Confidentiality Codes') }
+
+  static CD CPT(String input) { cd(input, '2.16.840.1.113883.5.25', 'CPT') }
   /*
    * End cheats
    */
@@ -105,6 +107,10 @@ class CdaSpec extends Specification {
 
       // immunizations
       immunized CVX('88') by RouteOfAdministration('IM') on '199911'
+
+      // procedures
+      performed CPT('99203') on '20101120100000'
+      performed CPT('99203') from '20101120' to '20131220'
 
       // Past Medical History
       diagnosis {

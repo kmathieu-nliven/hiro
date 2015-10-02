@@ -79,15 +79,59 @@ class Cda {
     addMedications(structuredBody, context.medications)
     addVitalSigns(structuredBody, context.vitalsGroups)
     addDiagnoses(structuredBody, context.diagnoses)
+    addProcedures(structuredBody, context.procedures)
 
     document
+  }
+
+  private static void addProcedures(POCDMT000040StructuredBody structuredBody, List<CdaContext.Procedure> procedures) {
+    if (procedures)
+      addSection(structuredBody, generateSectionCode('47519-4')) {
+        procedures.each { procedure ->
+
+          def ivlts = procedure.on ?
+              new IVLTS().withValue(procedure.on) :
+              new IVLTS().withRest([
+                  procedure.from ? ItiHelper.jaxb('low', IVLTS, new IVLTS().withValue(procedure.from)) : null,
+                  procedure.to ? ItiHelper.jaxb('high', IVLTS, new IVLTS().withValue(procedure.to)) : null,
+              ].findAll {it})
+
+          withEntry(new POCDMT000040Entry().withTypeCode(XActRelationshipEntry.DRIV).
+              withProcedure(new POCDMT000040Procedure().
+                  withClassCode('OBS').withMoodCode(XDocumentProcedureMood.EVN).
+                  withCode(procedure.code).withEffectiveTime(ivlts)
+              )
+          )
+        }
+      }
   }
 
   private static void addDiagnoses(
       POCDMT000040StructuredBody structuredBody, List<CdaContext.Diagnosis> diagnoses) {
     if (diagnoses)
       addSection(structuredBody, generateSectionCode('11348-0')) {
-
+        diagnoses.each { diagnosis ->
+          withEntry(new POCDMT000040Entry().
+              withObservation(new POCDMT000040Observation().
+                  withClassCode('OBS').withMoodCode(XActMoodDocumentObservation.EVN).
+                  withCode(new CD().withCode('55607006').withCodeSystem('2.16.840.1.113883.6.96')).
+                  withValue(diagnosis.code).
+                  withPerformer(new POCDMT000040Performer2().
+                      withTypeCode(ParticipationPhysicalPerformer.PRF).
+                      withAssignedEntity(new POCDMT000040AssignedEntity().
+                          withId(new II().withExtension(diagnosis.performerId).withRoot(diagnosis.facilityRoot)).
+                          withAddr(new AD().withContent(
+                              ItiHelper.jaxb('streetAddressLine', AdxpStreetAddressLine, new AdxpStreetAddressLine().withContent(diagnosis.at))
+                          )).
+                          withAssignedPerson(new POCDMT000040Person().withName(new PN().withContent(
+                              ItiHelper.jaxb('given', EnGiven, new EnGiven().withContent(diagnosis.performerGiven)),
+                              ItiHelper.jaxb('family', EnFamily, new EnFamily().withContent(diagnosis.performerFamily)),
+                          )))
+                      )
+                  )
+              )
+          )
+        }
       }
 
   }

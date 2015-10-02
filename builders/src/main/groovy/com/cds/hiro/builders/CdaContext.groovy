@@ -382,4 +382,16 @@ class CdaContext {
     closure.resolveStrategy = Closure.DELEGATE_FIRST
     closure.call()
   }
+
+  @Builder(builderStrategy = SimpleStrategy, prefix = '')
+  static class Procedure {
+    CD code
+    String on, from, to
+  }
+  List<Procedure> procedures = []
+  Procedure performed(CD code) {
+    def procedure = new Procedure().code(code)
+    procedures << procedure
+    procedure
+  }
 }
