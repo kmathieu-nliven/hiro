@@ -56,4 +56,27 @@ class CcdParserSpec extends Specification {
     normalizeCcdUtil.streamComponent(component, null, [onNewEntry: ccdStreamingUtil.onNewEntry])
     ccdStreamingUtil.events
   }
+
+  def "test effectiveTime low high values"() {
+    given: "A ccd"
+
+    def ccdString = this.class.classLoader.getResourceAsStream('sample-ccd.xml').text
+
+    when: "Parse it using CcdStreamingUtil"
+    def aggregator = new CcdAggregator(ccd: new XmlParser().parseText(
+        """<?xml version="1.0" encoding="UTF-8"?>
+              <ClinicalDocument xmlns="urn:hl7-org:v3"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+              </ClinicalDocument>"""))
+    def csu = new CcdStreamingUtil(
+        originalRequestId: '1234'
+    )
+    csu.streamCcdEntries(aggregator, [ccdString])
+
+    then:
+    // procedure with event time should have high low values
+    csu.events[55].data.effectiveTime.low != null
+    csu.events[55].data.effectiveTime.high != null
+
+  }
 }
