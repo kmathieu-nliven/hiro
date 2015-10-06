@@ -302,12 +302,12 @@ class CdaContext {
 
   @Builder(builderStrategy = SimpleStrategy, prefix = '')
   static class Author {
-    String orgName, identifiedAs, at
+    String of, identifiedAs, at, given, family
   }
   Author author
 
-  Author authoredBy(String orgName) {
-    author = new Author().orgName(orgName)
+  Author authoredBy(String family, String given) {
+    author = new Author().family(family).given(given)
   }
 
   @Builder(builderStrategy = SimpleStrategy, prefix = '')

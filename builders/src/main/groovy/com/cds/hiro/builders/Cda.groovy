@@ -382,8 +382,13 @@ class Cda {
           withAssignedAuthor(new POCDMT000040AssignedAuthor().
               withRepresentedOrganization(new POCDMT000040Organization().
                   withId(new II().withRoot(author.identifiedAs)).
-                  withName(new ON().withContent(author.orgName))
-              )
+                  withName(new ON().withContent(author.of))
+              ).
+              withAssignedPerson(new POCDMT000040Person().
+                  withName(new PN().withContent([
+                  ItiHelper.jaxb('given', EnGiven, new EnGiven().withContent(author.given)),
+                  ItiHelper.jaxb('family', EnFamily, new EnFamily().withContent(author.family)),
+              ].findAll {it})))
           )
       )
   }
