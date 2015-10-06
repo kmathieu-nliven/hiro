@@ -72,11 +72,13 @@ class CcdParserSpec extends Specification {
         originalRequestId: '1234'
     )
     csu.streamCcdEntries(aggregator, [ccdString])
+    def procedureEvent = csu.events.find {it.section == 'procedures' && it.data.code.code == '77057'}
+    println(procedureEvent)
 
     then:
     // procedure with event time should have high low values
-    csu.events[55].data.effectiveTime.low != null
-    csu.events[55].data.effectiveTime.high != null
+    procedureEvent.data.effectiveTime?.low != null
+    procedureEvent.data.effectiveTime?.high != null
 
   }
 }

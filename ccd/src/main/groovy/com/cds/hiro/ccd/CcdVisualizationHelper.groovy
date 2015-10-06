@@ -780,13 +780,33 @@ class CcdVisualizationHelper {
   String getProceduresAsJson(entry, section) {
     def procedure = entry?.getAt(ns.procedure)
     def code = procedure?.getAt(ns.code)?.getAt(0)
+    def effectiveTime = procedure?.getAt(ns.effectiveTime)
 
-    new JsonBuilder([
-        name: getText(section, procedure),
-        effectiveTime: parseDate(procedure?.getAt(ns.effectiveTime)?.@value?.getAt(0)),
-        status: procedure.getAt(ns.statusCode)?.@code?.getAt(0),
-        code: getCodeDetails(code)
-    ]).toString()
+    if (effectiveTime?.@value?.getAt(0)) {
+      new JsonBuilder([
+          name: getText(section, procedure),
+          effectiveTime: parseDate(effectiveTime?.@value?.getAt(0)),
+          status: procedure.getAt(ns.statusCode)?.@code?.getAt(0),
+          code: getCodeDetails(code)
+      ]).toString()
+    } else if (effectiveTime?.getAt(ns.low)?.@value?.getAt(0)) {
+      new JsonBuilder([
+          name: getText(section, procedure),
+          effectiveTime: [
+              low: parseDate(effectiveTime?.getAt(ns.low)?.@value?.getAt(0)),
+              high: parseDate(effectiveTime?.getAt(ns.high)?.@value?.getAt(0))
+          ],
+          status: procedure.getAt(ns.statusCode)?.@code?.getAt(0),
+          code: getCodeDetails(code)
+      ]).toString()
+    } else {
+      new JsonBuilder([
+          name: getText(section, procedure),
+          status: procedure.getAt(ns.statusCode)?.@code?.getAt(0),
+          code: getCodeDetails(code)
+      ]).toString()
+
+    }
   }
 
   String getLabLevel(value, refRange) {
