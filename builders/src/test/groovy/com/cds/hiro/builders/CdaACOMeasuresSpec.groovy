@@ -203,7 +203,7 @@ class CdaACOMeasuresSpec extends Specification {
         birthTime '19400203'
         maritalStatus 'M'
 
-        id '99.1.2', 'ACO14ID'
+        id '99.1.2', 'ACO14N'
 
         addr {
           street '500 Washington Blvd'
@@ -224,6 +224,76 @@ class CdaACOMeasuresSpec extends Specification {
       performed SnomedCt('442333005') from '20141120' to '20141120'
     }
     new File('build/ACO-14-Numer.xml').text = Cda.serialize(ccd, true)
+
+    then: "All is well"
+    1 == 1
+  }
+
+  def "ACO-17-IPP-and-Denom.json"() {
+    when: "A ccd is generated"
+    def ccd = Cda.create {
+      code LOINC('34133-9')
+      confidentiality Conf('N')
+
+      patient {
+        name 'Riviere', 'Hallian'
+        gender 'M'
+        birthTime '19400203'
+        maritalStatus 'M'
+
+        id '99.1.2', 'ACO17ID'
+
+        addr {
+          street '500 Washington Blvd'
+          city 'San Jose'
+          state 'CA'
+          postalCode '95129'
+          country 'USA'
+        }
+      }
+
+      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+
+      performed CPT('99411') from '20150615' to '20150615'
+
+    }
+    new File('build/ACO-17-IPP-and-Denom.xml').text = Cda.serialize(ccd, true)
+
+    then: "All is well"
+    1 == 1
+  }
+  def "ACO-17-Numer.json"() {
+    when: "A ccd is generated"
+    def ccd = Cda.create {
+      code LOINC('34133-9')
+      confidentiality Conf('N')
+
+      patient {
+        name 'Kiddish', 'Craven'
+        gender 'M'
+        birthTime '19400203'
+        maritalStatus 'M'
+
+        id '99.1.2', 'ACO17N'
+
+        addr {
+          street '500 Washington Blvd'
+          city 'San Jose'
+          state 'CA'
+          postalCode '95129'
+          country 'USA'
+        }
+      }
+
+      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+
+      performed CPT('99411') from '20150615' to '20150615'
+
+      performed LOINC('68535-4') from '20140820' to '20140820'
+      performed SnomedCt('105539002') from '20141120' to '20141120'
+
+    }
+    new File('build/ACO-17-Numer.xml').text = Cda.serialize(ccd, true)
 
     then: "All is well"
     1 == 1
