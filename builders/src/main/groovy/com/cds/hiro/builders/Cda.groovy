@@ -212,6 +212,9 @@ class Cda {
                           withClassCode(RoleClassManufacturedProduct.MANU).
                           withManufacturedMaterial(new POCDMT000040Material().withCode(immunization.code))
                       )
+                  ).
+                  withStatusCode(new CS().
+                      withCode(immunization.withStatus)
                   )
               )
           )
