@@ -65,7 +65,7 @@ class CdaACOMeasuresSpec extends Specification {
         birthTime '19450901'
         maritalStatus 'M'
 
-        id '1.2.3.4', '42'
+        id '99.1.2', 'ACO15ID'
 
         addr {
           street '500 Washington Blvd'
@@ -98,7 +98,7 @@ class CdaACOMeasuresSpec extends Specification {
         birthTime '19450901'
         maritalStatus 'M'
 
-        id '1.2.3.4', '42'
+        id '99.1.2', 'ACO15N'
 
         addr {
           street '500 Washington Blvd'
@@ -133,7 +133,7 @@ class CdaACOMeasuresSpec extends Specification {
         birthTime '19400203'
         maritalStatus 'M'
 
-        id '1.2.3.4', '42'
+        id '99.1.2', 'ACO13N'
 
         addr {
           street '500 Washington Blvd'
@@ -168,7 +168,7 @@ class CdaACOMeasuresSpec extends Specification {
         birthTime '19400203'
         maritalStatus 'M'
 
-        id '1.2.3.4', '42'
+        id '99.1.2', 'ACO14ID'
 
         addr {
           street '500 Washington Blvd'
@@ -186,6 +186,44 @@ class CdaACOMeasuresSpec extends Specification {
 
     }
     new File('build/ACO-14-IPP-and-Denom.xml').text = Cda.serialize(ccd, true)
+
+    then: "All is well"
+    1 == 1
+  }
+
+  def "ACO-14-Numer.json"() {
+    when: "A ccd is generated"
+    def ccd = Cda.create {
+      code LOINC('34133-9')
+      confidentiality Conf('N')
+
+      patient {
+        name 'Tachina', 'Honky'
+        gender 'M'
+        birthTime '19400203'
+        maritalStatus 'M'
+
+        id '99.1.2', 'ACO14ID'
+
+        addr {
+          street '500 Washington Blvd'
+          city 'San Jose'
+          state 'CA'
+          postalCode '95129'
+          country 'USA'
+        }
+      }
+
+      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+
+      performed SnomedCt('12843005') from '20141120' to '20141120'
+
+      performed CPT('99341') from '20151003' to '20151003'
+      performed CPT('99341') from '20150615' to '20150615'
+
+      performed SnomedCt('442333005') from '20141120' to '20141120'
+    }
+    new File('build/ACO-14-Numer.xml').text = Cda.serialize(ccd, true)
 
     then: "All is well"
     1 == 1
