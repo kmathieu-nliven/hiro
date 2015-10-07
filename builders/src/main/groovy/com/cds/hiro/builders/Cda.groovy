@@ -99,7 +99,10 @@ class Cda {
           withEntry(new POCDMT000040Entry().withTypeCode(XActRelationshipEntry.DRIV).
               withProcedure(new POCDMT000040Procedure().
                   withClassCode('OBS').withMoodCode(XDocumentProcedureMood.EVN).
-                  withCode(procedure.code).withEffectiveTime(ivlts)
+                  withCode(procedure.code).withEffectiveTime(ivlts).
+                  withStatusCode(new CS().
+                      withCode(procedure.withStatus)
+                  )
               )
           )
         }

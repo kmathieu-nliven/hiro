@@ -112,6 +112,7 @@ class CdaSpec extends Specification {
       // procedures
       performed CPT('99203') on '20101120100000'
       performed CPT('99203') from '20101120' to '20131220'
+      performed SnomedCt('77528005') from '20101120' to '20131220' withStatus 'completed'
 
       // Past Medical History
       diagnosis {

@@ -386,7 +386,7 @@ class CdaContext {
   @Builder(builderStrategy = SimpleStrategy, prefix = '')
   static class Procedure {
     CD code
-    String on, from, to
+    String on, from, to, withStatus
   }
   List<Procedure> procedures = []
   Procedure performed(CD code) {
