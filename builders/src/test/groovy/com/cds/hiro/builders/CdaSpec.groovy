@@ -107,6 +107,7 @@ class CdaSpec extends Specification {
 
       // immunizations
       immunized CVX('88') by RouteOfAdministration('IM') on '199911'
+      immunized CVX('27') by RouteOfAdministration('IM') on '199911' withStatus 'completed'
 
       // procedures
       performed CPT('99203') on '20101120100000'

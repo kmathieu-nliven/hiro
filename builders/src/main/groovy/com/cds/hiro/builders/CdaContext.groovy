@@ -211,7 +211,7 @@ class CdaContext {
   static class Immunization {
     CE code
     CE by
-    String on
+    String on, withStatus
   }
   List<Immunization> immunizations = []
 
