@@ -770,4 +770,91 @@ class CdaACOMeasuresSpec extends Specification {
     1 == 1
   }
 
+  def "ACO-28-IPP-and-Denom.json"() {
+    when: "A ccd is generated"
+    def ccd = Cda.create {
+      confidentiality Conf('N')
+
+      patient {
+        name 'Island', 'Gunny'
+        gender 'F'
+        birthTime '19451106'
+        maritalStatus 'M'
+
+        id '99.1.2', 'ACO28ID'
+
+        addr {
+          street '500 Washington Blvd'
+          city 'San Jose'
+          state 'CA'
+          postalCode '95129'
+          country 'USA'
+        }
+      }
+
+      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+
+      performed SnomedCt('12843005') from '20150511' to '20150512' withStatus 'PERFORMED'
+      performed SnomedCt('12843005') from '20150509' to '20150514' withStatus 'PERFORMED'
+      performed SnomedCt('10725009') from '20150511' to '20150515' withStatus 'ACTIVE'
+
+      results {
+        on '20150507'
+        measured LOINC('8480-6') at '130 mmHg' of 'PQ' withRange '70-125' was 'High'
+      }
+
+      results {
+        on '20150507'
+        measured LOINC('8462-4') at '80 mmHg' of 'PQ' withRange '70-125' was 'High'
+      }
+    }
+    new File('build/ACO-28-IPP-and-Denom.xml').text = Cda.serialize(ccd, true)
+
+    then: "All is well"
+    1 == 1
+  }
+
+  def "ACO-28-Numer.json"() {
+    when: "A ccd is generated"
+    def ccd = Cda.create {
+      confidentiality Conf('N')
+
+      patient {
+        name 'More', 'Gent'
+        gender 'F'
+        birthTime '19451106'
+        maritalStatus 'M'
+
+        id '99.1.2', 'ACO28N'
+
+        addr {
+          street '500 Washington Blvd'
+          city 'San Jose'
+          state 'CA'
+          postalCode '95129'
+          country 'USA'
+        }
+      }
+
+      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+
+      performed SnomedCt('12843005') from '20150511' to '20150512' withStatus 'PERFORMED'
+      performed SnomedCt('12843005') from '20150509' to '20150514' withStatus 'PERFORMED'
+      performed SnomedCt('10725009') from '20150511' to '20150515' withStatus 'ACTIVE'
+
+      results {
+        on '20150507'
+        measured LOINC('8480-6') at '130 mmHg' of 'PQ' withRange '70-125' was 'High'
+      }
+
+      results {
+        on '20150510'
+        measured LOINC('8462-4') at '80 mmHg' of 'PQ' withRange '70-125' was 'High'
+      }
+    }
+    new File('build/ACO-28-Numer.xml').text = Cda.serialize(ccd, true)
+
+    then: "All is well"
+    1 == 1
+  }
 }
