@@ -490,4 +490,83 @@ class CdaACOMeasuresSpec extends Specification {
     1 == 1
   }
 
+  def "ACO-30-IPP-and-Denom.json"() {
+    when: "A ccd is generated"
+    def ccd = Cda.create {
+      code SnomedCt('103705002')
+      confidentiality Conf('N')
+
+      patient {
+        name 'Piercers', 'Zit'
+        gender 'F'
+        birthTime '19450511'
+        maritalStatus 'M'
+
+        id '99.1.2', 'ACO30ID'
+
+        addr {
+          street '500 Washington Blvd'
+          city 'San Jose'
+          state 'CA'
+          postalCode '95129'
+          country 'USA'
+        }
+      }
+
+      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+
+      performed SnomedCt('11101003') from '20150511' to '20150511' withStatus 'PERFORMED'
+      performed CPT('99213') from '20150511' to '20150511' withStatus 'PERFORMED'
+      performed SnomedCt('52035003') from '20140511' to '20140511' withStatus 'ACTIVE'
+      performed SnomedCt('1055001') from '20141230' to '20150111' withStatus 'ACTIVE'
+
+    }
+    new File('build/ACO-30-IPP-and-Denom.xml').text = Cda.serialize(ccd, true)
+
+    then: "All is well"
+    1 == 1
+  }
+
+  def "ACO-30-Numer.json"() {
+    when: "A ccd is generated"
+    def ccd = Cda.create {
+      code SnomedCt('103705002')
+      confidentiality Conf('N')
+
+      patient {
+        name 'Maki', 'Humite'
+        gender 'F'
+        birthTime '19450511'
+        maritalStatus 'M'
+
+        id '99.1.2', 'ACO30N'
+
+        addr {
+          street '500 Washington Blvd'
+          city 'San Jose'
+          state 'CA'
+          postalCode '95129'
+          country 'USA'
+        }
+      }
+
+      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+
+      performed SnomedCt('52035003') from '20140511' to '20140511' withStatus 'ACTIVE'
+      performed SnomedCt('11101003') from '20150511' to '20150511' withStatus 'PERFORMED'
+
+      prescribed RxNorm('432389') from '20141228' to '20150211'
+
+      performed SnomedCt('11101003') from '20150511' to '20150511' withStatus 'PERFORMED'
+      performed CPT('99213') from '20150511' to '20150511' withStatus 'PERFORMED'
+      performed SnomedCt('52035003') from '20140511' to '20140511' withStatus 'ACTIVE'
+      performed SnomedCt('1055001') from '20141230' to '20150111' withStatus 'ACTIVE'
+
+    }
+    new File('build/ACO-30-Numer.xml').text = Cda.serialize(ccd, true)
+
+    then: "All is well"
+    1 == 1
+  }
+
 }
