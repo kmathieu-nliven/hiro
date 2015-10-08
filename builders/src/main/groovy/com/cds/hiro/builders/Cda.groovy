@@ -80,6 +80,7 @@ class Cda {
     addVitalSigns(structuredBody, context.vitalsGroups)
     addDiagnoses(structuredBody, context.diagnoses)
     addProcedures(structuredBody, context.procedures)
+    addResults(structuredBody, context.resultsGroups)
 
     document
   }
@@ -94,7 +95,7 @@ class Cda {
               new IVLTS().withRest([
                   procedure.from ? ItiHelper.jaxb('low', IVLTS, new IVLTS().withValue(procedure.from)) : null,
                   procedure.to ? ItiHelper.jaxb('high', IVLTS, new IVLTS().withValue(procedure.to)) : null,
-              ].findAll {it})
+              ].findAll { it })
 
           withEntry(new POCDMT000040Entry().withTypeCode(XActRelationshipEntry.DRIV).
               withProcedure(new POCDMT000040Procedure().
@@ -176,6 +177,39 @@ class Cda {
       }
   }
 
+  private static void addResults(
+      POCDMT000040StructuredBody structuredBody, List<CdaContext.ResultsGroup> resultsGroups) {
+    if (resultsGroups)
+      addSection(structuredBody, generateSectionCode('30954-2')) {
+        resultsGroups.each { resultsGroup ->
+          withEntry(new POCDMT000040Entry().
+              withTypeCode(XActRelationshipEntry.DRIV).
+              withOrganizer(new POCDMT000040Organizer().
+                  withClassCode(XActClassDocumentEntryOrganizer.BATTERY).withMoodCode('EVN').
+                  withEffectiveTime(new IVLTS().withValue(resultsGroup.on)).
+                  withComponent(resultsGroup.results.collect { result ->
+                    new POCDMT000040Component4().
+                        withObservation(new POCDMT000040Observation().
+                            withClassCode('OBS').
+                            withMoodCode(XActMoodDocumentObservation.EVN).
+                            withCode(result.code).
+                            withValue(createValue(result.of, result.at)).
+                            withReferenceRange(new POCDMT000040ReferenceRange().
+                                withObservationRange(new POCDMT000040ObservationRange().
+                                    withText(new ED().withContent(result.withRange))
+                                )
+                            ).
+                            withInterpretationCode(new CE().
+                                withCode(result.was)
+                            )
+                        )
+                  })
+              )
+          )
+        }
+      }
+  }
+
   private static void addMedications(
       POCDMT000040StructuredBody structuredBody, List<CdaContext.Medication> medications) {
     if (medications)
@@ -212,6 +246,9 @@ class Cda {
                           withClassCode(RoleClassManufacturedProduct.MANU).
                           withManufacturedMaterial(new POCDMT000040Material().withCode(immunization.code))
                       )
+                  ).
+                  withStatusCode(new CS().
+                      withCode(immunization.withStatus)
                   )
               )
           )
@@ -382,8 +419,13 @@ class Cda {
           withAssignedAuthor(new POCDMT000040AssignedAuthor().
               withRepresentedOrganization(new POCDMT000040Organization().
                   withId(new II().withRoot(author.identifiedAs)).
-                  withName(new ON().withContent(author.orgName))
-              )
+                  withName(new ON().withContent(author.of))
+              ).
+              withAssignedPerson(new POCDMT000040Person().
+                  withName(new PN().withContent([
+                      ItiHelper.jaxb('given', EnGiven, new EnGiven().withContent(author.given)),
+                      ItiHelper.jaxb('family', EnFamily, new EnFamily().withContent(author.family)),
+                  ].findAll { it })))
           )
       )
   }
@@ -404,7 +446,7 @@ class Cda {
                   withName(new PN().withContent([
                       ItiHelper.jaxb('given', EnGiven, new EnGiven().withContent(patient.given)),
                       ItiHelper.jaxb('family', EnFamily, new EnFamily().withContent(patient.family)),
-                  ].findAll {it})).
+                  ].findAll { it })).
                   withAdministrativeGenderCode(new CE().
                       withCode(patient.gender).
                       withCodeSystem('2.16.840.1.113883.5.1').

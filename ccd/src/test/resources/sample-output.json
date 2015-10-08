@@ -1072,7 +1072,10 @@
         "codeSystemName": "CPT",
         "displayName": "Mammogram, screening"
       },
-      "effectiveTime": "2010-11-20T18:00:00+0000",
+      "effectiveTime": {
+        "low": "2010-11-20T18:00:00+0000",
+        "high": "2010-11-20T18:30:00+0000"
+      },
       "name": "Mammogram, screening",
       "status": "completed"
     },

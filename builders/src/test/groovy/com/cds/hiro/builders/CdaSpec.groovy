@@ -76,7 +76,7 @@ class CdaSpec extends Specification {
         }
       }
 
-      authoredBy 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
       informant 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771'
       custodian 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771'
 
@@ -107,6 +107,7 @@ class CdaSpec extends Specification {
 
       // immunizations
       immunized CVX('88') by RouteOfAdministration('IM') on '199911'
+      immunized CVX('27') by RouteOfAdministration('IM') on '199911' withStatus 'completed'
 
       // procedures
       performed CPT('99203') on '20101120100000'

@@ -2831,7 +2831,10 @@
                              displayName="Screening mammography" codeSystemName="SNOMED-CT"/>
               </code>
               <statusCode code="completed"/>
-              <effectiveTime value="20101120100000"/>
+              <effectiveTime>
+                <low value="20101120100000"/>
+                <high value="20101120103000"/>
+              </effectiveTime>
               <methodCode nullFlavor="UNK"/>
             </procedure>
           </entry>

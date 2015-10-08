@@ -10,20 +10,20 @@ import groovy.json.JsonSlurper
 import spock.lang.Specification
 
 class CcdParserSpec extends Specification {
+
+  public static final String EMPTY_DOCUMENT = """<?xml version="1.0" encoding="UTF-8"?>
+              <ClinicalDocument xmlns="urn:hl7-org:v3"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+              </ClinicalDocument>"""
+
   def "the code runs"() {
     given: "A ccd"
 
     def ccdString = this.class.classLoader.getResourceAsStream('sample-ccd.xml').text
 
     when: "Parse it using CcdStreamingUtil"
-    def aggregator = new CcdAggregator(ccd: new XmlParser().parseText(
-        """<?xml version="1.0" encoding="UTF-8"?>
-              <ClinicalDocument xmlns="urn:hl7-org:v3"
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-              </ClinicalDocument>"""))
-    def csu = new CcdStreamingUtil(
-        originalRequestId: '1234'
-    )
+    def aggregator = new CcdAggregator(ccd: new XmlParser().parseText(EMPTY_DOCUMENT))
+    def csu = new CcdStreamingUtil(originalRequestId: '1234')
     csu.streamCcdEntries(aggregator, [ccdString])
 
     then:
@@ -38,7 +38,6 @@ class CcdParserSpec extends Specification {
     when: "parse it and map it to events"
     def obj = new CcdToEventsMapper()
     def results = obj.getEvents(ccdString)
-    println(results)
 
     and: "parse both events and expected text to json"
     JsonSlurper slurper = new JsonSlurper()
@@ -55,5 +54,23 @@ class CcdParserSpec extends Specification {
     def ccdStreamingUtil = new CcdStreamingUtil(originalRequestId: '1234')
     normalizeCcdUtil.streamComponent(component, null, [onNewEntry: ccdStreamingUtil.onNewEntry])
     ccdStreamingUtil.events
+  }
+
+  def "test effectiveTime low high values"() {
+    given: "A ccd"
+
+    def ccdString = this.class.classLoader.getResourceAsStream('sample-ccd.xml').text
+
+    when: "Parse it using CcdStreamingUtil"
+    def aggregator = new CcdAggregator(ccd: new XmlParser().parseText(EMPTY_DOCUMENT))
+    def csu = new CcdStreamingUtil(originalRequestId: '1234')
+    csu.streamCcdEntries(aggregator, [ccdString])
+    def procedureEvent = csu.events.find {it.section == 'procedures' && it.data.code.code == '77057'}
+
+    then:
+    // procedure with event time should have high low values
+    procedureEvent.data.effectiveTime?.low != null
+    procedureEvent.data.effectiveTime?.high != null
+
   }
 }
