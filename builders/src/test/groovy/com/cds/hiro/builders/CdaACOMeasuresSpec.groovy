@@ -807,8 +807,7 @@ class CdaACOMeasuresSpec extends Specification {
     1 == 1
   }
 
-  // TODO: CDA generator currently doesn't support status code results
-  /*def "ACO-18-Numer.json"() {
+  def "ACO-18-Numer.json"() {
     when: "A ccd is generated"
     def ccd = Cda.create {
       code LOINC('34133-9')
@@ -836,11 +835,12 @@ class CdaACOMeasuresSpec extends Specification {
 
       performed SnomedCt('10197000') from '20150511' to '20150520' withStatus 'PERFORMED'
 
+      assessed LOINC('73831-0') toBe SnomedCt('428171000124102') on '2015052'
     }
     new File('build/ACO-18-Numer.xml').text = Cda.serialize(ccd, true)
 
     then: "All is well"
     1 == 1
-  }*/
+  }
 
 }
