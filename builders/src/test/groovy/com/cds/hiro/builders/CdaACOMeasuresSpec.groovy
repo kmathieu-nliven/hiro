@@ -229,6 +229,45 @@ class CdaACOMeasuresSpec extends Specification {
     1 == 1
   }
 
+  def "ACO-16-Numer.json"() {
+    when: "A ccd is generated"
+    def ccd = Cda.create {
+      code LOINC('34133-9')
+      confidentiality Conf('N')
+
+      patient {
+        name 'Sooth', 'Dadgum'
+        gender 'M'
+        birthTime '19400203'
+        maritalStatus 'M'
+
+        id '99.1.2', 'ACO16N'
+
+        addr {
+          street '500 Washington Blvd'
+          city 'San Jose'
+          state 'CA'
+          postalCode '95129'
+          country 'USA'
+        }
+      }
+
+      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+
+
+      performed CPT('99397') from '20150615' to '20150615'
+
+      results {
+        on '20150320'
+        measured LOINC('39156-5') at '25 kg/m2' of 'RTO_PQ_PQ'
+      }
+    }
+    new File('build/ACO-16-Numer.xml').text = Cda.serialize(ccd, true)
+
+    then: "All is well"
+    1 == 1
+  }
+
   def "ACO-17-IPP-and-Denom.json"() {
     when: "A ccd is generated"
     def ccd = Cda.create {
