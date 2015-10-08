@@ -94,6 +94,7 @@ class CdaSpec extends Specification {
 
       // problems
       suffered Icd9CM('415.0') between '20110805' and '20111231'
+      suffered Icd9CM('415.0') between '20110805' and '20111231' withStatus 'ACTIVE'
       suffers Icd9CM('724.5') since '20110805'
 
       // Family History

@@ -151,7 +151,7 @@ class CdaContext {
   @Builder(builderStrategy = SimpleStrategy, prefix = '')
   static class Problem {
     CE code
-    String between, and, since
+    String between, and, since, withStatus
     boolean active = false
   }
   List<Problem> problems = []

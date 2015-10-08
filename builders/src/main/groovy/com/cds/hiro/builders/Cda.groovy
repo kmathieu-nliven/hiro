@@ -315,6 +315,9 @@ class Cda {
                           withEffectiveTime(new IVLTS().withRest(/*TODO*/)).
                           withValue(problem.code)
                       )
+                  ).
+                  withStatusCode(new CS().
+                      withCode(problem.withStatus)
                   )
               )
           )
