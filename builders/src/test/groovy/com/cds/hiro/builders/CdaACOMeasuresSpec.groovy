@@ -368,4 +368,48 @@ class CdaACOMeasuresSpec extends Specification {
     1 == 1
   }
 
+  def "ACO-21-Numer.json"() {
+    when: "A ccd is generated"
+    def ccd = Cda.create {
+      code SnomedCt('103705002')
+      confidentiality Conf('N')
+
+      patient {
+        name 'Ahoy', 'Aurar'
+        gender 'M'
+        birthTime '19400901'
+        maritalStatus 'M'
+
+        id '99.1.2', 'ACO21N'
+
+        addr {
+          street '500 Washington Blvd'
+          city 'San Jose'
+          state 'CA'
+          postalCode '95129'
+          country 'USA'
+        }
+      }
+
+      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+
+      performed SnomedCt('103705002') from '20150615' to '20150615'
+
+      // results group
+      results {
+        on '20150615'
+        measured LOINC('8480-6') at '100 mmHg' of 'PQ' withRange '70-125' was 'High'
+      }
+
+      results {
+        on '20150615'
+        measured LOINC('"8462-4') at '60 mmHg' of 'PQ' withRange '70-125' was 'High'
+      }
+    }
+    new File('build/ACO-21-Numer.xml').text = Cda.serialize(ccd, true)
+
+    then: "All is well"
+    1 == 1
+  }
+
 }
