@@ -46,13 +46,14 @@ X12Util.inputDir = inputDir.absolutePath
 X12Util.outputDir = outputDir.absolutePath
 X12Util.basePackage = 'com.cds.hiro.x12_837p'
 
-println "InputDir : ${X12Util.inputDir}"
-println "OutputDir: ${X12Util.outputDir}"
+logger.debug "InputDir : ${X12Util.inputDir}"
+logger.debug "OutputDir: ${X12Util.outputDir}"
 
 @Canonical
 class TransactionSet {
   String transactionSetId, transactionSetName, functionalGroupId
   List<TransactionSetDetail> details = []
+  List<? extends BlockElement> children = []
 }
 
 @TupleConstructor
@@ -62,10 +63,18 @@ class TransactionSetDetail {
   String transactionSetId, area, sequence, segmentId, requirement, maxUse, loopLevel, loopRepeat, loopId
 }
 
+abstract class BlockElement {}
+
 @Canonical
-class Segment {
+class Segment extends BlockElement {
   String segmentId, segmentName
   List<SegmentDetail> details = []
+}
+
+@Canonical
+class Loop extends BlockElement {
+  String name
+  List<? extends BlockElement> children = []
 }
 
 @Canonical
@@ -195,7 +204,7 @@ class ${className} extends Message {
   }
   %>
 
-  void parse(String input) {
+  void parse(List<List<List<String[]>>> input) {
     // TODO
   }
 }
@@ -236,7 +245,7 @@ class ${className} extends Segment {
   }
   %>
 
-  void parse(String input) {
+  void parse(List<List<String[]>> input) {
     // TODO
   }
 }
@@ -290,7 +299,7 @@ import java.util.HashMap;
  * "${dataElementNumber}","${dataElementName}"
  * </pre>
  */
-enum ${className} {
+public enum ${className} {
 
   <%
   def size = enumerations.size()
@@ -372,7 +381,6 @@ enum ${className} {
   X12Util.from('setdetl').
       each { line ->
         def detail = new TransactionSetDetail(*line)
-        println detail
         transactionSetDetails << detail
         transactionSets.find { it.transactionSetId == line[0] }.details << detail
       }

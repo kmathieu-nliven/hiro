@@ -3,3 +3,5 @@ apply from: 'gradle/codegen.gradle'
 sourceSets.main.groovy.srcDirs = [
     'src/main/groovy','build/generatedSources/x12_837p',
 ]
+
+compileJava.dependsOn(codegen)
