@@ -394,4 +394,17 @@ class CdaContext {
     procedures << procedure
     procedure
   }
+
+  @Builder(builderStrategy = SimpleStrategy, prefix = '')
+  static class Assessment {
+    CD code
+    String on
+    CE toBe
+  }
+  List<Assessment> assessments = []
+  Assessment assessed(CD code) {
+    def assessment = new Assessment().code(code)
+    assessments << assessment
+    assessment
+  }
 }

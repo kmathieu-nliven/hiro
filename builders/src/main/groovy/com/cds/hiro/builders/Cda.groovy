@@ -81,6 +81,7 @@ class Cda {
     addDiagnoses(structuredBody, context.diagnoses)
     addProcedures(structuredBody, context.procedures)
     addResults(structuredBody, context.resultsGroups)
+    addAssessments(structuredBody, context.assessments)
 
     document
   }
@@ -174,6 +175,23 @@ class Cda {
                             withValue(createValue(vital.of, vital.at))
                         )
                   })
+              )
+          )
+        }
+      }
+  }
+
+  private static void addAssessments(
+      POCDMT000040StructuredBody structuredBody, List<CdaContext.Assessment> assessments) {
+    if (assessments)
+      addSection(structuredBody, generateSectionCode('51848-0')) {
+        assessments.each { assessment ->
+          withEntry(new POCDMT000040Entry().
+              withObservation(new POCDMT000040Observation().
+                  withClassCode('OBS').withMoodCode(XActMoodDocumentObservation.EVN).
+                  withCode(assessment.code).
+                  withValue(assessment.toBe).
+                  withEffectiveTime(new IVLTS().withValue(assessment.on))
               )
           )
         }
@@ -526,6 +544,7 @@ class Cda {
         '10183-2': 'Hospital Discharge Medications',
         '29545-1': 'Physical Examination',
         '47519-4': 'Procedures',
+        '51848-0': 'Assessment',
     ]
 
     new CE().
