@@ -81,17 +81,20 @@ class Loop extends BlockElement {
 class SegmentDetail {
   String segmentID, sequence, dataElementNumber, requirement, repeat
   Element element
+  String toJavaType() {
+    if (repeat != '1') {
+      "List<${element.toJavaType()}>"
+    } else {
+      element.toJavaType()
+    }
+  }
 }
 
 interface Element {
   String getDataElementNumber()
-
   String getDataElementName()
-
   String toJavaType()
-
   String toFieldName()
-
   String toRow()
 }
 
@@ -189,20 +192,14 @@ import com.cds.hiro.x12.structures.*
  */
 class ${className} extends Message {
 
-  <%
-  def lastDetail = null
-  details.each { detail ->
-  %>
+  <% details.each { detail -> %>
   /**
    * From sethead.txt
    * <pre>
    * "${detail.transactionSetId}","${detail.area}","${detail.sequence}","${detail.segmentId}","${detail.requirement}","${detail.maxUse}","${detail.loopLevel}","${detail.loopRepeat}","${detail.loopId}"
    * </pre>
    */
-  <%
-  lastDetail = detail
-  }
-  %>
+  <% } %>
 
   void parse(List<List<List<String[]>>> input) {
     // TODO
@@ -216,6 +213,7 @@ package ${packageName}
 import com.cds.hiro.x12.structures.*
 import com.cds.hiro.x12_837p.composites.*
 import com.cds.hiro.x12_837p.enums.*
+import groovy.transform.ToString
 
 /**
  * From seghead.txt
@@ -223,12 +221,10 @@ import com.cds.hiro.x12_837p.enums.*
  * "${segmentId}","${segmentName}"
  * </pre>
  */
+@ToString
 class ${className} extends Segment {
 
-  <%
-  def lastDetail = null
-  details.each { detail ->
-  %>
+  <% details.each { detail -> %>
   /**
    * From segdetl.txt:
    * <pre>
@@ -239,14 +235,20 @@ class ${className} extends Segment {
    * ${detail.element.toRow()}
    * </pre>
    */
-   ${detail.element.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
-  <%
-  lastDetail = detail
-  }
-  %>
+   ${detail.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
+  <% } %>
 
   void parse(List<List<String[]>> input) {
-    // TODO
+    <% details.eachWithIndex { detail, idx ->
+    %>this.${detail.element.toFieldName()}_${detail.sequence} = input.size() > ${idx + 1
+          } ? <%if (detail.repeat == '1') {
+          %> valueOf(input[${idx + 1}], ${detail.element.toJavaType()})<%
+          } else {
+          %> listOf(input[${idx + 1}], ${detail.element.toJavaType()})<%
+          }%> : null
+    <%
+    }
+    %>
   }
 }
 '''
@@ -265,10 +267,7 @@ import com.cds.hiro.x12_837p.enums.*
  */
 class ${className} extends Element {
 
-  <%
-  def lastDetail = null
-  details.each { detail ->
-  %>
+  <% details.each { detail -> %>
   /**
    * From comdetl.txt:
    * <pre>
@@ -276,10 +275,7 @@ class ${className} extends Element {
    * </pre>
    */
    ${detail.element.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
-  <%
-  lastDetail = detail
-  }
-  %>
+  <% } %>
 
   void parse(String input) {
     // TODO
@@ -304,7 +300,8 @@ public enum ${className} {
   <%
   def size = enumerations.size()
   enumerations.eachWithIndex { enumeration, idx ->
-  %>${enumeration.representation}_${enumeration.code}("${enumeration.code}")<% if (size - 1 > idx) {%>,
+  %>/** ${enumeration.name} */
+  ${enumeration.representation}_${enumeration.code}("${enumeration.code}")<% if (size - 1 > idx) {%>,
   <% } else {%>;
   <%}
   }
@@ -384,8 +381,6 @@ public enum ${className} {
         transactionSetDetails << detail
         transactionSets.find { it.transactionSetId == line[0] }.details << detail
       }
-
-
 
 
   new File(X12Util.outputDir).deleteDir()
