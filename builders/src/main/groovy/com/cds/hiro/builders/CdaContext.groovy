@@ -197,7 +197,7 @@ class CdaContext {
   @Builder(builderStrategy = SimpleStrategy, prefix = '')
   static class Medication {
     CE code
-    String from, to
+    String from, to, withStatus
   }
   List<Medication> medications = []
 

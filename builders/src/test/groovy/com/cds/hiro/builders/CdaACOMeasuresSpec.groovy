@@ -555,12 +555,9 @@ class CdaACOMeasuresSpec extends Specification {
       performed SnomedCt('52035003') from '20140511' to '20140511' withStatus 'ACTIVE'
       performed SnomedCt('11101003') from '20150511' to '20150511' withStatus 'PERFORMED'
 
-      prescribed RxNorm('432389') from '20141228' to '20150211'
-
-      performed SnomedCt('11101003') from '20150511' to '20150511' withStatus 'PERFORMED'
-      performed CPT('99213') from '20150511' to '20150511' withStatus 'PERFORMED'
-      performed SnomedCt('52035003') from '20140511' to '20140511' withStatus 'ACTIVE'
+      prescribed RxNorm('432389') from '20141228' to '20150211' withStatus 'ACTIVE'
       performed SnomedCt('1055001') from '20141230' to '20150111' withStatus 'ACTIVE'
+      performed CPT('99213') from '20150511' to '20150511' withStatus 'PERFORMED'
 
     }
     new File('build/ACO-30-Numer.xml').text = Cda.serialize(ccd, true)

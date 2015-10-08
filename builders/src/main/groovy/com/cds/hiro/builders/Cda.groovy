@@ -227,6 +227,9 @@ class Cda {
                           withClassCode(RoleClassManufacturedProduct.MANU).
                           withManufacturedMaterial(new POCDMT000040Material().withCode(medication.code))
                       )
+                  ).
+                  withStatusCode(new CS().
+                      withCode(medication.withStatus)
                   )
               )
           )

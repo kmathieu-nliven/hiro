@@ -105,6 +105,7 @@ class CdaSpec extends Specification {
 
       // Medications
       prescribed RxNorm('123') from '...' to '...'
+      prescribed RxNorm('123') from '...' to '...' withStatus 'ACTIVE'
 
       // immunizations
       immunized CVX('88') by RouteOfAdministration('IM') on '199911'
