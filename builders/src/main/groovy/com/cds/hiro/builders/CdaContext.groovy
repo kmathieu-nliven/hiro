@@ -151,7 +151,7 @@ class CdaContext {
   @Builder(builderStrategy = SimpleStrategy, prefix = '')
   static class Problem {
     CE code
-    String between, and, since
+    String between, and, since, withStatus
     boolean active = false
   }
   List<Problem> problems = []
@@ -197,7 +197,7 @@ class CdaContext {
   @Builder(builderStrategy = SimpleStrategy, prefix = '')
   static class Medication {
     CE code
-    String from, to
+    String from, to, withStatus
   }
   List<Medication> medications = []
 
@@ -386,7 +386,7 @@ class CdaContext {
   @Builder(builderStrategy = SimpleStrategy, prefix = '')
   static class Procedure {
     CD code
-    String on, from, to
+    String on, from, to, withStatus
   }
   List<Procedure> procedures = []
   Procedure performed(CD code) {
