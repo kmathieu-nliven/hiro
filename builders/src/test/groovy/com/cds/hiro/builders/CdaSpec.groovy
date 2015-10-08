@@ -31,6 +31,7 @@ class CdaSpec extends Specification {
   }
 
   static CE LOINC(String input) { ce(input, '2.16.840.1.113883.6.1', 'LOINC') }
+  static CD LoincCd(String input) { cd(input, '2.16.840.1.113883.6.1', 'LOINC') }
 
   static CE RxNorm(String input) { ce(input, '2.16.840.1.113883.6.88', 'RxNorm') }
 
@@ -94,6 +95,7 @@ class CdaSpec extends Specification {
 
       // problems
       suffered Icd9CM('415.0') between '20110805' and '20111231'
+      suffered Icd9CM('415.0') between '20110805' and '20111231' withStatus 'ACTIVE'
       suffers Icd9CM('724.5') since '20110805'
 
       // Family History
@@ -104,6 +106,7 @@ class CdaSpec extends Specification {
 
       // Medications
       prescribed RxNorm('123') from '...' to '...'
+      prescribed RxNorm('123') from '...' to '...' withStatus 'ACTIVE'
 
       // immunizations
       immunized CVX('88') by RouteOfAdministration('IM') on '199911'
@@ -112,6 +115,7 @@ class CdaSpec extends Specification {
       // procedures
       performed CPT('99203') on '20101120100000'
       performed CPT('99203') from '20101120' to '20131220'
+      performed SnomedCt('77528005') from '20101120' to '20131220' withStatus 'completed'
 
       // Past Medical History
       diagnosis {
@@ -141,6 +145,9 @@ class CdaSpec extends Specification {
 
       // payers
       payer 'Humana' identifiedAs '2.16.840.1.113883.19' identifierIs 'HPCG02815-00'
+
+      // assessments
+      assessed LoincCd('73831-0') toBe SnomedCt('428171000124102') on '20110923'
     }
     new File('build/test.xml').text = Cda.serialize(ccd, true)
 
