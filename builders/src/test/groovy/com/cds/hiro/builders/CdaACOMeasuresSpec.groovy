@@ -111,7 +111,7 @@ class CdaACOMeasuresSpec extends Specification {
 
       authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
 
-      performed SnomedCt('394678003') from '19980505' to '19980505'
+      performed SnomedCt('394678003') from '19980505' to '19980505' withStatus 'PERFORMED'
 
       performed CPT('99203') from '20150505' to '20150505'
     }
@@ -262,6 +262,7 @@ class CdaACOMeasuresSpec extends Specification {
     then: "All is well"
     1 == 1
   }
+
   def "ACO-17-Numer.json"() {
     when: "A ccd is generated"
     def ccd = Cda.create {
@@ -294,6 +295,74 @@ class CdaACOMeasuresSpec extends Specification {
 
     }
     new File('build/ACO-17-Numer.xml').text = Cda.serialize(ccd, true)
+
+    then: "All is well"
+    1 == 1
+  }
+
+  def "ACO-19-IPP-and-Denom.json"() {
+    when: "A ccd is generated"
+    def ccd = Cda.create {
+      code LOINC('34133-9')
+      confidentiality Conf('N')
+
+      patient {
+        name 'Tres', 'Hard'
+        gender 'M'
+        birthTime '19550901'
+        maritalStatus 'M'
+
+        id '99.1.2', 'ACO19ID'
+
+        addr {
+          street '500 Washington Blvd'
+          city 'San Jose'
+          state 'CA'
+          postalCode '95129'
+          country 'USA'
+        }
+      }
+
+      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+
+      performed CPT('99203') from '20150505' to '20150505'
+
+    }
+    new File('build/ACO-19-IPP-and-Denom.xml').text = Cda.serialize(ccd, true)
+
+    then: "All is well"
+    1 == 1
+  }
+
+  def "ACO-19-IPP-and-Denom-and-DenomEx.json"() {
+    when: "A ccd is generated"
+    def ccd = Cda.create {
+      code LOINC('34133-9')
+      confidentiality Conf('N')
+
+      patient {
+        name 'Rimes', 'Kith'
+        gender 'M'
+        birthTime '19550901'
+        maritalStatus 'M'
+
+        id '99.1.2', 'ACO19IDX'
+
+        addr {
+          street '500 Washington Blvd'
+          city 'San Jose'
+          state 'CA'
+          postalCode '95129'
+          country 'USA'
+        }
+      }
+
+      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+
+      performed CPT('99203') from '20150505' to '20150505'
+
+    }
+    new File('build/ACO-19-IPP-and-Denom-and-DenomEx.xml').text = Cda.serialize(ccd, true)
 
     then: "All is well"
     1 == 1
