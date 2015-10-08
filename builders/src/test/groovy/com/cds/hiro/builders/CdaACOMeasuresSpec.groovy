@@ -20,6 +20,7 @@ class CdaACOMeasuresSpec extends Specification {
   /*
    * Begin cheats
    */
+
   static ce(String code, String codeSystem, String codeSystemName) {
     new CE().withCode(code).withCodeSystem(codeSystem).
         withDisplayName("Code $code").withCodeSystemName(codeSystemName)
@@ -35,6 +36,7 @@ class CdaACOMeasuresSpec extends Specification {
   static CE RxNorm(String input) { ce(input, '2.16.840.1.113883.6.88', 'RxNorm') }
 
   static CE SnomedCt(String input) { ce(input, '2.16.840.1.113883.6.96', 'SNOMED CT') }
+
   static CD SnomedCtCd(String input) { cd(input, '2.16.840.1.113883.6.96', 'SNOMED CT') }
 
   static CE Icd9CM(String input) { ce(input, '2.16.840.1.113883.6.103', 'ICD9 CM') }
@@ -259,7 +261,7 @@ class CdaACOMeasuresSpec extends Specification {
 
       results {
         on '20150320'
-        measured LOINC('39156-5') at '25 kg/m2' of 'RTO_PQ_PQ'
+        measured LOINC('39156-5') at '25 kg/m2' of 'PQ'
       }
     }
     new File('build/ACO-16-Numer.xml').text = Cda.serialize(ccd, true)
@@ -481,7 +483,7 @@ class CdaACOMeasuresSpec extends Specification {
 
       results {
         on '20150615'
-        measured LOINC('"8462-4') at '60 mmHg' of 'PQ' withRange '70-125' was 'High'
+        measured LOINC('8462-4') at '60 mmHg' of 'PQ' withRange '70-125' was 'High'
       }
     }
     new File('build/ACO-21-Numer.xml').text = Cda.serialize(ccd, true)
@@ -769,6 +771,77 @@ class CdaACOMeasuresSpec extends Specification {
     then: "All is well"
     1 == 1
   }
+
+  def "ACO-18-IPP-and-Denom.json"() {
+    when: "A ccd is generated"
+    def ccd = Cda.create {
+      code LOINC('34133-9')
+      confidentiality Conf('N')
+
+      patient {
+        name 'Gomers', 'Gorier'
+        gender 'F'
+        birthTime '19700511'
+        maritalStatus 'M'
+
+        id '99.1.2', 'ACO18ID'
+
+        addr {
+          street '500 Washington Blvd'
+          city 'San Jose'
+          state 'CA'
+          postalCode '95129'
+          country 'USA'
+        }
+      }
+
+      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+
+
+      performed SnomedCt('10197000') from '20150511' to '20150513' withStatus 'PERFORMED'
+
+    }
+    new File('build/ACO-18-IPP-and-Denom.xml').text = Cda.serialize(ccd, true)
+
+    then: "All is well"
+    1 == 1
+  }
+
+  // TODO: CDA generator currently doesn't support status code results
+  /*def "ACO-18-Numer.json"() {
+    when: "A ccd is generated"
+    def ccd = Cda.create {
+      code LOINC('34133-9')
+      confidentiality Conf('N')
+
+      patient {
+        name 'Bluewood', 'Darken'
+        gender 'F'
+        birthTime '20000511'
+        maritalStatus 'M'
+
+        id '99.1.2', 'ACO18N'
+
+        addr {
+          street '500 Washington Blvd'
+          city 'San Jose'
+          state 'CA'
+          postalCode '95129'
+          country 'USA'
+        }
+      }
+
+      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+
+
+      performed SnomedCt('10197000') from '20150511' to '20150520' withStatus 'PERFORMED'
+
+    }
+    new File('build/ACO-18-Numer.xml').text = Cda.serialize(ccd, true)
+
+    then: "All is well"
+    1 == 1
+  }*/
 
   def "ACO-28-IPP-and-Denom.json"() {
     when: "A ccd is generated"
