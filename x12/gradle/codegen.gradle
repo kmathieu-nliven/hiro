@@ -1,0 +1,473 @@
+buildscript {
+  repositories {
+    mavenLocal()
+    maven { url 'http://cbees-ltdev1-oradb1.transcendinsights.com:8081/nexus/content/groups/public' }
+    maven { url "https://plugins.gradle.org/m2/" }
+    jcenter()
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'net.sf.opencsv:opencsv:2.3'
+  }
+}
+
+import au.com.bytecode.opencsv.CSVReader
+import groovy.text.GStringTemplateEngine
+import groovy.transform.Canonical
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
+import groovy.transform.TupleConstructor
+
+def inputDir = file('tables/x12_837p')
+def outputDir = file('build/generatedSources/x12_837p')
+
+class X12Util {
+
+  static String inputDir, outputDir, basePackage
+
+  static List<String[]> from(String filename) {
+    new CSVReader(new File("$inputDir/${filename}.txt").newReader()).
+        readAll()
+  }
+
+  static String toSymbol(String input, boolean downCase = false) {
+    def output = input.replaceAll(/[^A-Za-z0-9_]/, '')
+    def retval = output ==~ /^[0-9].*/ ? "M${output}" : output
+
+    if (downCase) {
+      retval[0].toLowerCase() + retval[1..-1]
+    } else {
+      retval
+    }
+  }
+}
+
+X12Util.inputDir = inputDir.absolutePath
+X12Util.outputDir = outputDir.absolutePath
+X12Util.basePackage = 'com.cds.hiro.x12_837p'
+
+logger.debug "InputDir : ${X12Util.inputDir}"
+logger.debug "OutputDir: ${X12Util.outputDir}"
+
+@Canonical
+class TransactionSet {
+  String transactionSetId, transactionSetName, functionalGroupId
+  List<TransactionSetDetail> details = []
+  List<? extends BlockElement> children = []
+}
+
+@TupleConstructor
+@EqualsAndHashCode
+@ToString(includeNames = true)
+class TransactionSetDetail {
+  String transactionSetId, area, sequence, segmentId, requirement, maxUse, loopLevel, loopRepeat, loopId
+}
+
+abstract class BlockElement {}
+
+@Canonical
+class Segment extends BlockElement {
+  String segmentId, segmentName
+  List<SegmentDetail> details = []
+}
+
+@Canonical
+class Loop extends BlockElement {
+  String name
+  List<? extends BlockElement> children = []
+}
+
+@Canonical
+class SegmentDetail {
+  String segmentID, sequence, dataElementNumber, requirement, repeat
+  Element element
+  String toJavaType() {
+    if (repeat != '1') {
+      "List<${element.toJavaType()}>"
+    } else {
+      element.toJavaType()
+    }
+  }
+}
+
+interface Element {
+  String getDataElementNumber()
+  String getDataElementName()
+  String toJavaType()
+  String toFieldName()
+  String toRow()
+}
+
+@Canonical
+class SimpleElement implements Element {
+  String dataElementNumber, dataElementName, dataElementType, minimumLength, maximumLength
+  List<EnumType> enumerations = []
+
+  @Override
+  String toJavaType() {
+    switch (dataElementType) {
+      case 'AN': return 'String'
+      case 'ID': return enumerations.size()>0 ? X12Util.toSymbol(dataElementName) : 'String'
+      case 'N0': return 'Integer'
+      case 'R': return 'Double'
+      case 'DT': return 'java.time.LocalDate'
+      case 'TM': return 'java.time.LocalTime'
+      default:
+        println "Unhandled type ${dataElementType}"
+        return 'Object'
+    }
+  }
+
+  @Override
+  String toFieldName() {
+    return X12Util.toSymbol(dataElementName, true)
+  }
+
+  @Override
+  String toRow() {
+    """\
+      |"${dataElementNumber}","${dataElementName}"
+      |   * "${dataElementNumber}","${dataElementType}","${minimumLength}","${maximumLength}" """.stripMargin()
+  }
+}
+
+@Canonical
+class CompositeElement implements Element {
+  String dataElementNumber, dataElementName
+  List<ElementDetail> details = []
+
+  @Override
+  String toJavaType() {
+    X12Util.toSymbol(dataElementName)
+  }
+
+  @Override
+  String toFieldName() {
+    return X12Util.toSymbol(dataElementName, true)
+  }
+
+  @Override
+  String toRow() {
+    /"${dataElementNumber}","${dataElementName}"/
+  }
+}
+
+@Canonical
+class ElementDetail {
+  String sequence, dataElementNumber, requirement
+  Element element
+}
+
+@Canonical
+class EnumType {
+  String code, name
+  String getRepresentation() {
+    X12Util.toSymbol(name)
+  }
+}
+
+File dir(String name) {
+  def basePackage = new File(name)
+  basePackage.mkdirs()
+  return basePackage
+}
+File dir(File parent, String name) {
+  def basePackage = new File(parent, name)
+  basePackage.mkdirs()
+  return basePackage
+}
+
+task codegen << {
+
+  def tsTemplate = '''
+package ${packageName}
+
+import com.cds.hiro.x12.structures.*
+
+/**
+ * From sethead.txt
+ * <pre>
+ * "${transactionSetId}","${transactionSetName}","${functionalGroupId}"
+ * </pre>
+ */
+class ${className} extends Message {
+
+  <% details.each { detail -> %>
+  /**
+   * From sethead.txt
+   * <pre>
+   * "${detail.transactionSetId}","${detail.area}","${detail.sequence}","${detail.segmentId}","${detail.requirement}","${detail.maxUse}","${detail.loopLevel}","${detail.loopRepeat}","${detail.loopId}"
+   * </pre>
+   */
+  <% } %>
+
+  void parse(List<List<List<String[]>>> input) {
+    // TODO
+  }
+}
+'''
+
+  def segTemplate = '''
+package ${packageName}
+
+import com.cds.hiro.x12.structures.*
+import com.cds.hiro.x12_837p.composites.*
+import com.cds.hiro.x12_837p.enums.*
+import groovy.transform.ToString
+
+/**
+ * From seghead.txt
+ * <pre>
+ * "${segmentId}","${segmentName}"
+ * </pre>
+ */
+@ToString
+class ${className} extends Segment {
+
+  <% details.each { detail -> %>
+  /**
+   * From segdetl.txt:
+   * <pre>
+   * "${detail.segmentID}","${detail.sequence}","${detail.dataElementNumber}","${detail.requirement}","${detail.repeat}"
+   * </pre>
+   * From elehead.txt + eledetl.txt or comhead.txt:
+   * <pre>
+   * ${detail.element.toRow()}
+   * </pre>
+   */
+   ${detail.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
+  <% } %>
+
+  void parse(List<List<String[]>> input) {
+    <% details.eachWithIndex { detail, idx ->
+    %>this.${detail.element.toFieldName()}_${detail.sequence} = input.size() > ${idx + 1
+          } ? <%if (detail.repeat == '1') {
+          %> valueOf(input[${idx + 1}], ${detail.element.toJavaType()})<%
+          } else {
+          %> listOf(input[${idx + 1}], ${detail.element.toJavaType()})<%
+          }%> : null
+    <%
+    }
+    %>
+  }
+}
+'''
+
+  def compositeTemplate = '''
+package ${packageName}
+
+import com.cds.hiro.x12.structures.*
+import com.cds.hiro.x12_837p.enums.*
+
+/**
+ * From seghead.txt
+ * <pre>
+ * "${dataElementNumber}","${dataElementName}"
+ * </pre>
+ */
+class ${className} extends Element {
+
+  <% details.each { detail -> %>
+  /**
+   * From comdetl.txt:
+   * <pre>
+   * "${dataElementNumber}","${detail.sequence}","${detail.dataElementNumber}","${detail.requirement}"
+   * </pre>
+   */
+   ${detail.element.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
+  <% } %>
+
+  void parse(String input) {
+    // TODO
+  }
+}
+'''
+
+  def enumTemplate = '''
+package ${packageName};
+
+import java.util.Map;
+import java.util.HashMap;
+
+/**
+ * From seghead.txt
+ * <pre>
+ * "${dataElementNumber}","${dataElementName}"
+ * </pre>
+ */
+public enum ${className} {
+
+  <%
+  def size = enumerations.size()
+  enumerations.eachWithIndex { enumeration, idx ->
+  %>/** ${enumeration.name} */
+  ${enumeration.representation}_${enumeration.code}("${enumeration.code}")<% if (size - 1 > idx) {%>,
+  <% } else {%>;
+  <%}
+  }
+  %>
+
+  static Map<String, ${className}> reverseLookupMap = new HashMap<String, ${className}>();
+
+  static {
+    ${className}[] values = (${className}[]) ${className}.values();
+    for (int i = 0; i < values.length; i ++) {
+      ${className} value = (${className}) values[i];
+      reverseLookupMap.put(value.code, value);
+    }
+  }
+
+  static ${className} byCode(String code) {
+    return reverseLookupMap.get(code);
+  }
+
+  String code;
+  ${className}(String code) {this.code = code;}
+}
+'''
+
+
+  List<TransactionSet> transactionSets = []
+  List<TransactionSetDetail> transactionSetDetails = []
+  List<Segment> segments = []
+  List<SegmentDetail> segmentDetails = []
+  List<? extends Element> elements = []
+
+
+  X12Util.from('elehead').
+      each { line -> elements << new SimpleElement(*line) }
+  X12Util.from('eledetl').
+      each { line ->
+        if (line.find { it.trim() }) {
+          def element = elements.find { it.dataElementNumber == line[0] } as SimpleElement
+          element.dataElementType = line[1]
+          element.minimumLength = line[2]
+          element.maximumLength = line[3]
+        }
+      }
+
+
+  X12Util.from('comhead').
+      each { line -> elements << new CompositeElement(*line) }
+  X12Util.from('comdetl').
+      each { line ->
+        if (line.find { it.trim() }) {
+          def element = elements.find { it.dataElementNumber == line[0] } as CompositeElement
+          def detail = new ElementDetail(*line[1..3])
+          detail.element = elements.find { it.dataElementNumber == detail.dataElementNumber }
+          element.details << detail
+        }
+      }
+
+
+  X12Util.from('seghead').
+      each { line -> segments << new Segment(*line) }
+  X12Util.from('segdetl').
+      each { line ->
+        if (line.find { it.trim() }) {
+          def detail = new SegmentDetail(*line)
+          detail.element = elements.find { it.dataElementNumber == detail.dataElementNumber }
+          segmentDetails << detail
+          segments.find { it.segmentId == line[0] }.details << detail
+        }
+      }
+
+
+  X12Util.from('sethead').
+      each { transactionSets << new TransactionSet(*it) }
+  X12Util.from('setdetl').
+      each { line ->
+        def detail = new TransactionSetDetail(*line)
+        transactionSetDetails << detail
+        transactionSets.find { it.transactionSetId == line[0] }.details << detail
+      }
+
+
+  new File(X12Util.outputDir).deleteDir()
+  new File(X12Util.outputDir).mkdirs()
+
+  def basePackage = dir("${X12Util.outputDir}/${X12Util.basePackage.replace('.', '/')}")
+  def segsDir = dir(basePackage, 'segments')
+  def tsDir = dir(basePackage, 'transactionsets')
+  def comDir = dir(basePackage, 'composites')
+  def eDir = dir(basePackage, 'enums')
+
+  def ffData = new File(X12Util.inputDir, 'freeform.txt').text.split(/\n\*/)
+  ffData.
+      findAll {it.startsWith 'ELECOD'}.
+      each {
+        def str = it.replace('\r', '\n')
+        def (header, dataLine, text) = it.split(/\n/, 3).toList()
+        def data = dataLine.split(',')
+        def et = new EnumType(data[2], text.replaceAll(/[\r\n]/, ' ').trim())
+        def element = elements.find {it.dataElementNumber == data[0]} as SimpleElement
+        if (element) {
+          element.enumerations << et
+        }
+      }
+
+
+  elements.
+      findAll { it instanceof SimpleElement && it.dataElementType == 'ID' && it.enumerations.size() > 0 }.
+      each {
+        def map = it.properties
+        map['packageName'] = 'com.cds.hiro.x12_837p.enums'
+
+        map.className = X12Util.toSymbol(it.dataElementName)
+        new GStringTemplateEngine().
+            createTemplate(enumTemplate).
+            make(map).
+            writeTo(
+                new File(eDir, "${map.className}.java").newWriter()
+            ).
+            close()
+      }
+
+  elements.
+      findAll { it instanceof CompositeElement }.
+      each {
+        def map = it.properties
+        map['packageName'] = 'com.cds.hiro.x12_837p.composites'
+
+        map.className = X12Util.toSymbol(it.dataElementName)
+        new GStringTemplateEngine().
+            createTemplate(compositeTemplate).
+            make(map).
+            writeTo(
+                new File(comDir, "${map.className}.groovy").newWriter()
+            ).
+            close()
+      }
+
+  segments.
+      each {
+        def map = it.properties
+        map['packageName'] = 'com.cds.hiro.x12_837p.segments'
+
+        map.className = X12Util.toSymbol(it.segmentId)
+        new GStringTemplateEngine().
+            createTemplate(segTemplate).
+            make(map).
+            writeTo(
+                new File(segsDir, "${map.className}.groovy").newWriter()
+            ).
+            close()
+      }
+
+  transactionSets.
+      each {
+        def map = it.properties
+        map['packageName'] = 'com.cds.hiro.x12_837p.transactionsets'
+
+        map.className = X12Util.toSymbol(it.transactionSetId)
+        new GStringTemplateEngine().
+            createTemplate(tsTemplate).
+            make(map).
+            writeTo(
+                new File(tsDir, "${map.className}.groovy").newWriter()
+            ).
+            close()
+      }
+
+}
+
