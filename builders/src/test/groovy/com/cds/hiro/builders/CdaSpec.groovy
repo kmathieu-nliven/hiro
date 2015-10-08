@@ -94,6 +94,7 @@ class CdaSpec extends Specification {
 
       // problems
       suffered Icd9CM('415.0') between '20110805' and '20111231'
+      suffered Icd9CM('415.0') between '20110805' and '20111231' withStatus 'ACTIVE'
       suffers Icd9CM('724.5') since '20110805'
 
       // Family History
@@ -104,6 +105,7 @@ class CdaSpec extends Specification {
 
       // Medications
       prescribed RxNorm('123') from '...' to '...'
+      prescribed RxNorm('123') from '...' to '...' withStatus 'ACTIVE'
 
       // immunizations
       immunized CVX('88') by RouteOfAdministration('IM') on '199911'
@@ -112,6 +114,7 @@ class CdaSpec extends Specification {
       // procedures
       performed CPT('99203') on '20101120100000'
       performed CPT('99203') from '20101120' to '20131220'
+      performed SnomedCt('77528005') from '20101120' to '20131220' withStatus 'completed'
 
       // Past Medical History
       diagnosis {

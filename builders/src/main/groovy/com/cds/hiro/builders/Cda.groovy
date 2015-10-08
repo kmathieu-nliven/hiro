@@ -100,7 +100,10 @@ class Cda {
           withEntry(new POCDMT000040Entry().withTypeCode(XActRelationshipEntry.DRIV).
               withProcedure(new POCDMT000040Procedure().
                   withClassCode('OBS').withMoodCode(XDocumentProcedureMood.EVN).
-                  withCode(procedure.code).withEffectiveTime(ivlts)
+                  withCode(procedure.code).withEffectiveTime(ivlts).
+                  withStatusCode(new CS().
+                      withCode(procedure.withStatus)
+                  )
               )
           )
         }
@@ -224,6 +227,9 @@ class Cda {
                           withClassCode(RoleClassManufacturedProduct.MANU).
                           withManufacturedMaterial(new POCDMT000040Material().withCode(medication.code))
                       )
+                  ).
+                  withStatusCode(new CS().
+                      withCode(medication.withStatus)
                   )
               )
           )
@@ -312,6 +318,9 @@ class Cda {
                           withEffectiveTime(new IVLTS().withRest(/*TODO*/)).
                           withValue(problem.code)
                       )
+                  ).
+                  withStatusCode(new CS().
+                      withCode(problem.withStatus)
                   )
               )
           )
