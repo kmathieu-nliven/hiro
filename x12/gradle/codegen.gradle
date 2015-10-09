@@ -73,7 +73,9 @@ class Segment extends BlockElement {
 
 @Canonical
 class Loop extends BlockElement {
-  String name
+  String name, loopId
+  int loopLevel
+  Loop parent
   List<? extends BlockElement> children = []
 }
 
@@ -375,6 +377,8 @@ public enum ${className} {
         }
       }
 
+  Loop baseLoop = new Loop(loopId: 'BASE', loopLevel: 0)
+  Loop current = baseLoop
 
   X12Util.from('sethead').
       each { transactionSets << new TransactionSet(*it) }
@@ -383,6 +387,32 @@ public enum ${className} {
         def detail = new TransactionSetDetail(*line)
         transactionSetDetails << detail
         transactionSets.find { it.transactionSetId == line[0] }.details << detail
+        ///TODO: finish the tree
+        int loopLevel = Integer.parseInt(detail.loopLevel)
+        if (current.loopLevel == loopLevel) {
+          if (!detail.loopId) {
+            //TODO extract values from this line, insert into:
+            current.children << new Segment(segmentId: detail.segmentId, details: [new SegmentDetail(segmentID: detail.segmentId, sequence: detail.sequence, requirement: detail.requirement)])
+          } else {
+            def parent = current.parent
+            current = new Loop(loopId: loopId, loopLevel: loopLevel, parent: parent)
+            parent.children << current
+          }
+        } else if (current.loopLevel + 1 == loopLevel) {
+          Node newChild = new Loop(loopId: detail.loopId, loopLevel: loopLevel, parent: current)
+          current.children << newChild
+          current = newChild
+        } else if (current.loopLevel > loopLevel) {
+          (current.loopLevel - loopLevel).times { current = current.parent }
+          if (!detail.loopId) {
+            //TODO extract values from this line, insert into:
+            current.children << new Segment(segmentId: detail.segmentId, details: [new SegmentDetail(segmentID: detail.segmentId, sequence: detail.sequence, requirement: detail.requirement)])
+          } else {
+            def parent = current.parent
+            current = new Loop(loopId: loopId, loopLevel: loopLevel, parent: parent)
+            parent.children << current
+          }
+        }
       }
 
 
