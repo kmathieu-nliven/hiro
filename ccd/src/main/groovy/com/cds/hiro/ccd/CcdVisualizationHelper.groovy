@@ -386,7 +386,9 @@ class CcdVisualizationHelper {
 
   static String getObservation(observation) {
     def val = observation?.getAt(ns.value)?.getAt(0)
-    def ccdSource = observation?.parent()?.parent()?.parent()?.getAt(ns.text)
+
+    def organizer = observation?.parent()?.parent()
+    def ccdSource = organizer?.parent()?.getAt(ns.text)
     def refRange = observation?.getAt(ns.referenceRange)?.getAt(0)
 
 
@@ -399,7 +401,10 @@ class CcdVisualizationHelper {
             code          : val?.@code,
             codeSystemName: val?.@codeSystemName,
         ].findAll {k,v -> v != null},
-        date  : parseDate(observation?.getAt(ns.effectiveTime)?.@value?.getAt(0)),
+        date  : parseDate(
+            observation?.getAt(ns.effectiveTime)?.@value?.getAt(0) ?:
+                organizer?.getAt(ns.effectiveTime)?.@value?.getAt(0)
+        ),
         source: [
             name: ccdSource?.@source?.getAt(0),
             id  : ccdSource?.getAt(ns.ccd)?.text(),
