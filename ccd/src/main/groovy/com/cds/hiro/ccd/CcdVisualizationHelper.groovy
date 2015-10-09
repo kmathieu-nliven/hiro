@@ -290,7 +290,7 @@ class CcdVisualizationHelper {
     observation.equalsIgnoreCase("null") ? null : observation
   }
 
-  String getAlertAsJson(alert, section) {
+  String getAlert(alert, section) {
     def observation = alert?.getAt(ns.act)?.getAt(ns.entryRelationship)?.getAt(ns.observation)
     def playingEntity = observation?.getAt(ns.participant)?.getAt(ns.participantRole)?.getAt(ns.playingEntity)
     def observation2 = observation?.getAt(ns.entryRelationship)?.find { er -> er.@typeCode == 'MFST' }?.getAt(ns.observation)
@@ -302,7 +302,7 @@ class CcdVisualizationHelper {
     return alerts
   }
 
-  String getSummaryPurposeAsJson(purpose) {
+  String getSummaryPurpose(purpose) {
     def source = purpose?.getAt(ns.text)?.@source
     def code = purpose?.getAt(ns.act)?.getAt(ns.entryRelationship)?.getAt(ns.act)?.getAt(ns.code)?.getAt(0)
     new JsonBuilder([
@@ -316,7 +316,7 @@ class CcdVisualizationHelper {
     ])
   }
 
-  String getVisitSummaryAsJson(entry, section) {
+  String getVisitSummary(entry, section) {
     def name = entry?.getAt(ns.encounter)?.getAt(ns.performer)?.getAt(ns.assignedEntity)?.getAt(ns.assignedPerson)?.getAt(ns.name)
     def source = entry?.getAt(ns.text)?.@source
     def reasonForVisit = entry?.getAt(ns.encounter)?.getAt(ns.entryRelationship)?.find { it.@typeCode == 'RSON' }
@@ -357,7 +357,7 @@ class CcdVisualizationHelper {
       return null
   }
 
-  String getProblemAsJson(problem, section) {
+  String getProblem(problem, section) {
     def observation = problem?.getAt(ns.act)?.getAt(ns.entryRelationship)?.getAt(ns.observation)
     def ccdSource = problem.getAt(ns.text).find { it.@id == 'CcdSource' }
     def code = observation?.getAt(ns.value)?.getAt(0)
@@ -372,7 +372,7 @@ class CcdVisualizationHelper {
     ]).toString()
   }
 
-  String getPastMedicalAsJson(pastMedical, section) {
+  String getPastMedical(pastMedical, section) {
     def observation = pastMedical?.getAt(ns.observation)
     new JsonBuilder([
         name: getText(section, observation),
@@ -380,7 +380,7 @@ class CcdVisualizationHelper {
     ]).toString()
   }
 
-  static String getFamilyHistoryAsJson(family) {
+  static String getFamilyHistory(family) {
     def observation = family?.getAt(ns.observation)
     def relatedSubject = observation?.getAt(ns.subject)?.getAt(ns.relatedSubject)
     def code = relatedSubject?.getAt(ns.code)?.get(0)
@@ -390,7 +390,7 @@ class CcdVisualizationHelper {
     ]).toString()
   }
 
-  String getSocialHistoryAsJson(social, section) {
+  String getSocialHistory(social, section) {
     new JsonBuilder([
         name  : getText(section, social?.getAt(ns.observation)),
         status: social?.getAt(ns.observation)?.getAt(ns.value)?.getAt(0)?.text(),
@@ -398,7 +398,7 @@ class CcdVisualizationHelper {
     ]).toString()
   }
 
-  String getImmunizationHistoryAsJson(immunization) {
+  String getImmunizationHistory(immunization) {
     def substanceAdministration = immunization?.getAt(ns.substanceAdministration)
     def code = substanceAdministration?.getAt(ns.consumable)?.getAt(ns.manufacturedProduct)?.getAt(ns.manufacturedMaterial)?.getAt(ns.code)?.getAt(0)
     Date parsedDate = parseDate(substanceAdministration?.getAt(ns.effectiveTime)?.getAt(ns.center)?.@value?.getAt(0))
@@ -427,7 +427,7 @@ class CcdVisualizationHelper {
     }
   }
 
-  String getMedicationAsJson(entry, medications = null) {
+  String getMedication(entry, medications = null) {
     def material = entry?.getAt(ns.substanceAdministration)?.getAt(ns.consumable)?.getAt(ns.manufacturedProduct)?.getAt(ns.manufacturedMaterial)
     def source = entry?.getAt(ns.text)?.@source
     def medication = material?.getAt(ns.name)?.text() ? "${material?.getAt(ns.code)?.@displayName?.getAt(0)} (${material?.getAt(ns.name)?.text()})" : "${material?.getAt(ns.code)?.@displayName?.getAt(0)}"
@@ -462,7 +462,7 @@ class CcdVisualizationHelper {
     return medicationsJson
   }
 
-  static String getObservationAsJson(observation) {
+  static String getObservation(observation) {
     def val = observation?.getAt(ns.value)?.getAt(0)
     def ccdSource = observation?.parent()?.parent()?.parent()?.getAt(ns.text)
     def refRange = observation?.getAt(ns.referenceRange)?.getAt(0)
@@ -485,7 +485,7 @@ class CcdVisualizationHelper {
     return observations
   }
 
-  String getHospitalDischargeDiagnosisAsJson(entry, section) {
+  String getDischargeDiagnosis(entry, section) {
     def observation = entry?.getAt(ns.act)?.getAt(ns.entryRelationship)?.getAt(ns.observation)
     def code = observation?.getAt(ns.code)?.getAt(0)
 
@@ -496,7 +496,7 @@ class CcdVisualizationHelper {
     ]).toString()
   }
 
-  String getHospitalDischargeMedicationsAsJson(entry, section) {
+  String getDischargeMedications(entry, section) {
     def substanceAdministration = entry?.getAt(ns.act)?.getAt(ns.entryRelationship)?.getAt(ns.substanceAdministration)
     def material = substanceAdministration?.getAt(ns.consumable)?.getAt(ns.manufacturedProduct)?.getAt(ns.manufacturedMaterial)
     def medication = material?.getAt(ns.name)?.text() ? "${material?.getAt(ns.code)?.@displayName?.getAt(0)} (${material?.getAt(ns.name)?.text()})" : "${material?.getAt(ns.code)?.@displayName?.getAt(0)}"
@@ -528,7 +528,7 @@ class CcdVisualizationHelper {
   }
 
   //TODO: get more real data...
-  String getPhysicalExaminationAsJson(entry, section) {
+  String getPhysicalExamination(entry, section) {
     def observation = entry?.getAt(ns.observation)
     def code = observation?.getAt(ns.code)?.getAt(0)
     def effectiveTime = observation?.getAt(ns.effectiveTime)
@@ -543,7 +543,7 @@ class CcdVisualizationHelper {
     ]).toString()
   }
 
-  String getProceduresAsJson(entry, section) {
+  String getProcedures(entry, section) {
     def procedure = entry?.getAt(ns.procedure)
     def code = procedure?.getAt(ns.code)?.getAt(0)
     def effectiveTime = procedure?.getAt(ns.effectiveTime)
@@ -610,7 +610,7 @@ class CcdVisualizationHelper {
     return ''
   }
 
-  String getPlanOfCareAsJson(def entry, def section) {
+  String getPlanOfCare(def entry, def section) {
     def theMap = entry.children().collect { getPlanOfCareAsMap(it, section) }.find { it }
     return new JsonBuilder(theMap).toString()
   }

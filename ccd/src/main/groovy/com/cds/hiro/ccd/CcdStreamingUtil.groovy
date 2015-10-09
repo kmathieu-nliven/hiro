@@ -50,22 +50,22 @@ class CcdStreamingUtil {
   private synchronized void onNewEntrySynchronized(aggregated, sourceData) {
     def vHelper = new CcdVisualizationHelper()
     def helpers = [
-        '10160-0': [data: {vHelper.getMedicationAsJson(it.entry, it.section)}, section: 'medications'],
-        '30954-2': [data: {vHelper.getObservationAsJson(it.observation)}, section: 'labResults'],
-        '8716-3': [data: {vHelper.getObservationAsJson(it.observation)}, section: 'vitalSigns'],
-        '48764-5': [data: {vHelper.getSummaryPurposeAsJson(it.entry)}, section: 'summaryPurpose'],
-        '46240-8': [data: {vHelper.getVisitSummaryAsJson(it.entry, it.section)}, section: 'visitSummary'],
-        '11348-0': [data: {vHelper.getPastMedicalAsJson(it.entry, it.section)}, section: 'history.pastMedical'],
-        '11450-4': [data: {vHelper.getProblemAsJson(it.entry, it.section)}, section: 'problems'],
-        '10157-6': [data: {vHelper.getFamilyHistoryAsJson(it.entry)}, section: 'history.family'],
-        '29762-2': [data: {vHelper.getSocialHistoryAsJson(it.entry, it.section)}, section: 'history.social'],
-        '11369-6': [data: {vHelper.getImmunizationHistoryAsJson(it.entry)}, section: 'history.immunization'],
-        '48765-2': [data: {vHelper.getAlertAsJson(it.entry, it.section)}, section: 'self.allergies'],
-        '18776-5': [data: {vHelper.getPlanOfCareAsJson(it.entry, it.section)}, section: 'planOfCare'],
-        '11535-2': [data: {vHelper.getHospitalDischargeDiagnosisAsJson(it.entry, it.section)}, section: 'hospitalDischargeDiagnosis'],
-        '10183-2': [data: {vHelper.getHospitalDischargeMedicationsAsJson(it.entry, it.section)}, section: 'hospitalDischargeMedications'],
-        '29545-1': [data: {vHelper.getPhysicalExaminationAsJson(it.entry, it.section)}, section: 'physicalExamination'],
-        '47519-4': [data: {vHelper.getProceduresAsJson(it.entry, it.section)}, section: 'procedures']
+        '10160-0': [data: {vHelper.getMedication(it.entry, it.section)}, section: 'medications'],
+        '30954-2': [data: {vHelper.getObservation(it.observation)}, section: 'labResults'],
+        '8716-3' : [data: {vHelper.getObservation(it.observation)}, section: 'vitalSigns'],
+        '48764-5': [data: {vHelper.getSummaryPurpose(it.entry)}, section: 'summaryPurpose'],
+        '46240-8': [data: {vHelper.getVisitSummary(it.entry, it.section)}, section: 'visitSummary'],
+        '11348-0': [data: {vHelper.getPastMedical(it.entry, it.section)}, section: 'history.pastMedical'],
+        '11450-4': [data: {vHelper.getProblem(it.entry, it.section)}, section: 'problems'],
+        '10157-6': [data: {vHelper.getFamilyHistory(it.entry)}, section: 'history.family'],
+        '29762-2': [data: {vHelper.getSocialHistory(it.entry, it.section)}, section: 'history.social'],
+        '11369-6': [data: {vHelper.getImmunizationHistory(it.entry)}, section: 'history.immunization'],
+        '48765-2': [data: {vHelper.getAlert(it.entry, it.section)}, section: 'self.allergies'],
+        '18776-5': [data: {vHelper.getPlanOfCare(it.entry, it.section)}, section: 'planOfCare'],
+        '11535-2': [data: {vHelper.getDischargeDiagnosis(it.entry, it.section)}, section: 'hospitalDischargeDiagnosis'],
+        '10183-2': [data: {vHelper.getDischargeMedications(it.entry, it.section)}, section: 'hospitalDischargeMedications'],
+        '29545-1': [data: {vHelper.getPhysicalExamination(it.entry, it.section)}, section: 'physicalExamination'],
+        '47519-4': [data: {vHelper.getProcedures(it.entry, it.section)}, section: 'procedures'],
     ]
     def helper = helpers[aggregated.sectionCode]
     if (helper) {
