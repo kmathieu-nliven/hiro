@@ -82,12 +82,12 @@ class Loop extends BlockElement {
 def renderSetDetl(Loop root) {
   def firstSegment = root.children.first()
   String indent =  "  " * root.loopLevel
-  println "${indent}${firstSegment.segmentName} ${firstSegment.segmentId} ${root.loopId}"
+  logger.info ("${indent}${firstSegment.segmentId} ${root.loopId}".padRight(20) + indent + firstSegment.segmentName)
   //root.children[1..-1].each
   for(int i=1; i<root.children.size(); i++) {
     def child = root.children.get(i)
     if (child instanceof Segment) {
-      println "${indent}${child.segmentName} ${child.segmentId}"
+      logger.info "${indent}${child.segmentId}".padRight(20) + indent + child.segmentName
     } else {
       assert child instanceof Loop
       renderSetDetl(child)
