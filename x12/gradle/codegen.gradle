@@ -201,7 +201,7 @@ class ${className} extends Message {
    */
   <% } %>
 
-  void parse(List<List<List<String[]>>> input) {
+  void parse(List<List<List<List<String>>>> input) {
     // TODO
   }
 }
@@ -238,7 +238,7 @@ class ${className} extends Segment {
    ${detail.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
   <% } %>
 
-  void parse(List<List<String[]>> input) {
+  void parse(List<List<List<String>>> input) {
     <% details.eachWithIndex { detail, idx ->
     %>this.${detail.element.toFieldName()}_${detail.sequence} = input.size() > ${idx + 1
           } ? <%if (detail.repeat == '1') {
@@ -265,7 +265,7 @@ import com.cds.hiro.x12_837p.enums.*
  * "${dataElementNumber}","${dataElementName}"
  * </pre>
  */
-class ${className} extends Element {
+class ${className} extends Composite {
 
   <% details.each { detail -> %>
   /**
@@ -277,8 +277,10 @@ class ${className} extends Element {
    ${detail.element.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
   <% } %>
 
-  void parse(String input) {
-    // TODO
+  void parse(List<String> input) {
+    <% details.eachWithIndex { detail, idx ->
+    %>this.${detail.element.toFieldName()}_${detail.sequence} = input.size() > ${idx} ? valueOf(input[${idx}],${detail.element.toJavaType()}) : null;
+    <% } %>
   }
 }
 '''
