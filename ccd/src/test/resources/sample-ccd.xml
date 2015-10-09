@@ -2882,6 +2882,19 @@
           </entry>
         </section>
       </component>
+      <component>
+        <section>
+          <code code="51848-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Assessment"/>
+          <title>Assessment</title>
+          <entry>
+            <observation classCode="OBS" moodCode="EVN">
+              <code code="73831-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Code 73831-0"/>
+              <effectiveTime value="20110923"/>
+              <value xsi:type="CE" code="428171000124102" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Code 428171000124102"/>
+            </observation>
+          </entry>
+        </section>
+      </component>
     </structuredBody>
   </component>
 </ClinicalDocument>

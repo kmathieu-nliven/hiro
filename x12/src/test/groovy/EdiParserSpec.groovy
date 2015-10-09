@@ -1,4 +1,14 @@
 import com.cds.hiro.x12.EdiParser
+import com.cds.hiro.x12_837p.enums.CodeListQualifierCode
+import com.cds.hiro.x12_837p.enums.DateTimePeriodFormatQualifier
+import com.cds.hiro.x12_837p.enums.GenderCode
+import com.cds.hiro.x12_837p.enums.MaritalStatusCode
+import com.cds.hiro.x12_837p.enums.RaceorEthnicityCode
+import com.cds.hiro.x12_837p.enums.TransactionSetIdentifierCode
+import com.cds.hiro.x12_837p.segments.CLM
+import com.cds.hiro.x12_837p.segments.DMG
+import com.cds.hiro.x12_837p.segments.SE
+import com.cds.hiro.x12_837p.segments.ST
 import spock.lang.Specification
 
 /**
@@ -20,18 +30,19 @@ ST*Foo Bar*Fubar
         [
             [['ISA']],
             [['12']],
-            [['23']]
+            [['23']],
         ],
         [
             [['ST']],
             [['Foo Bar']],
-            [['Fubar']]
+            [['Fubar']],
         ]
     ]
   }
+
   def "Tokenizing can be customized"() {
     given: "A builder"
-    def parser = new EdiParser().setSegmentSeperator('~').setFieldSeperator(/\|/)
+    def parser = new EdiParser().segmentSeperator('~').fieldSeperator(/\|/)
 
     when: "I give it inputs without composites or reps"
     def tree = parser.extractTree("""ISA|12|23~ST|Foo Bar|Fubar""")
@@ -41,13 +52,124 @@ ST*Foo Bar*Fubar
         [
             [['ISA']],
             [['12']],
-            [['23']]
+            [['23']],
         ],
         [
             [['ST']],
             [['Foo Bar']],
-            [['Fubar']]
+            [['Fubar']],
         ]
     ]
+  }
+
+  def "A segment can be parsed"() {
+    given: "A segment tree"
+    def segmentTree =
+        [
+            [['ST']],
+            [['837']],
+            [['Fubar']],
+            [['Snafu']],
+        ]
+
+    when: "I parse it into an ST"
+    ST segment = new ST()
+    segment.parse(segmentTree)
+
+    then: "Segment is valid"
+    segment.transactionSetIdentifierCode_01 == TransactionSetIdentifierCode.HealthCareClaim_837
+    segment.transactionSetControlNumber_02 == 'Fubar'
+    segment.implementationConventionReference_03 == 'Snafu'
+  }
+
+  def "A segment can be parsed even if it is incomplete"() {
+    given: "A segment tree"
+    def segmentTree =
+        [
+            [['ST']],
+            [['837']],
+            [['Fubar']],
+        ]
+
+    when: "I parse it into an ST"
+    ST segment = new ST()
+    segment.parse(segmentTree)
+
+    then: "Segment is valid"
+    segment.transactionSetIdentifierCode_01 == TransactionSetIdentifierCode.HealthCareClaim_837
+    segment.transactionSetControlNumber_02 == 'Fubar'
+    segment.implementationConventionReference_03 == null
+  }
+
+  def "A segment can be parsed when there are repetitions of a field"() {
+    given: "A segment tree"
+    def segmentTree =
+        [
+            [['DMG']],
+            [['D8']],
+            [['19330706']],
+            [['M']],
+            [['I']],
+            [['H','0','4'], ['G','1']],
+        ]
+
+    when: "I parse it into an ST"
+    DMG segment = new DMG()
+    segment.parse(segmentTree)
+
+    then: "Segment is valid"
+    segment.dateTimePeriodFormatQualifier_01 == DateTimePeriodFormatQualifier.DateExpressedinFormatCCYYMMDD_D8
+    segment.dateTimePeriod_02 == '19330706'
+    segment.genderCode_03 == GenderCode.Male_M
+    segment.maritalStatusCode_04 == MaritalStatusCode.Single_I
+    segment.compositeRaceorEthnicityInformation_05.size() == 2
+    with (segment.compositeRaceorEthnicityInformation_05[0]) {
+      raceorEthnicityCode_01 == RaceorEthnicityCode.Hispanic_H
+      codeListQualifierCode_02 == CodeListQualifierCode.DocumentIdentificationCode_0
+      industryCode_03 == '4'
+    }
+    with (segment.compositeRaceorEthnicityInformation_05[1]) {
+      raceorEthnicityCode_01 == RaceorEthnicityCode.NativeAmerican_G
+      codeListQualifierCode_02 == CodeListQualifierCode.FreeOnBoardSiteCode_1
+      industryCode_03 == null
+    }
+  }
+
+  def "A segment can be parsed when there is an Integer"() {
+    given: "A segment tree"
+    def segmentTree =
+        [
+            [['SE']],
+            [['31']],
+            [['3701']],
+        ]
+
+    when: "I parse it into an ST"
+    SE segment = new SE()
+    segment.parse(segmentTree)
+
+    then: "Segment is valid"
+    segment.numberofIncludedSegments_01 == 31
+    segment.transactionSetControlNumber_02 == '3701'
+  }
+
+  def "A segment can be parsed when there is a Double"() {
+    given: "A segment tree"
+    def segmentTree =
+        [
+            [['CLM']],
+            [['ABC7001']],
+            [['65']],
+            [[]],
+            [[]],
+        ]
+
+    when: "I parse it into an ST"
+    CLM segment = new CLM()
+    segment.parse(segmentTree)
+
+    then: "Segment is valid"
+    segment.claimSubmittersIdentifier_01 == 'ABC7001'
+    segment.monetaryAmount_02 == 65.0
   }
 }

@@ -27,7 +27,7 @@ class CcdParserSpec extends Specification {
     csu.streamCcdEntries(aggregator, [ccdString])
 
     then:
-    csu.events.size() == 58
+    csu.events.size() == 59
 
   }
 
@@ -47,13 +47,6 @@ class CcdParserSpec extends Specification {
     then: "result json should match expected json"
     expectedJson == resultJson
 
-  }
-
-  private List<Map> jsonizeSingleComponent(def component) {
-    def normalizeCcdUtil = new NormalizeCcdUtil()
-    def ccdStreamingUtil = new CcdStreamingUtil(originalRequestId: '1234')
-    normalizeCcdUtil.streamComponent(component, null, [onNewEntry: ccdStreamingUtil.onNewEntry])
-    ccdStreamingUtil.events
   }
 
   def "test effectiveTime low high values"() {

@@ -25,17 +25,17 @@ class EdiParser {
 
   public <T extends Message> T parse(Class<T> clazz, String input) {
     def retval = clazz.newInstance()
-    List<List<List<String[]>>> tree = extractTree(input)
+    List<List<List<List<String>>>> tree = extractTree(input)
     println tree
     retval
   }
 
   @PackageScope
-  List<List<List<String[]>>> extractTree(String input) {
+  List<List<List<List<String>>>> extractTree(String input) {
     input.split(segmentSeperator).collect {
       it.split(fieldSeperator).collect {
         it.split(repetitionSeperator).collect {
-          it.split(compositeSeperator)
+          it.split(compositeSeperator).toList()*.trim()
         }
       }
     }
