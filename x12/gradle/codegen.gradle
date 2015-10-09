@@ -317,8 +317,7 @@ public enum ${className} {
 
   static {
     ${className}[] values = (${className}[]) ${className}.values();
-    for (int i = 0; i < values.length; i ++) {
-      ${className} value = (${className}) values[i];
+    for (${className} value: values) {
       reverseLookupMap.put(value.code, value);
     }
   }
