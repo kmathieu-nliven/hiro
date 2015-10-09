@@ -377,8 +377,8 @@ public enum ${className} {
         }
       }
 
-  Loop baseLoop = new Loop(loopId: 'BASE', loopLevel: 0)
-  Loop current = baseLoop
+  Loop root
+  Loop current
 
   X12Util.from('sethead').
       each { transactionSets << new TransactionSet(*it) }
@@ -388,6 +388,11 @@ public enum ${className} {
         transactionSetDetails << detail
         transactionSets.find { it.transactionSetId == line[0] }.details << detail
         ///TODO: finish the tree
+        if (!root) {
+          root = new Loop(loopId: 'BASE', loopLevel: 0)
+          current = root
+          return
+        }
         int loopLevel = Integer.parseInt(detail.loopLevel)
         if (current.loopLevel == loopLevel) {
           if (detail.loopId) {
