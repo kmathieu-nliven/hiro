@@ -404,35 +404,34 @@ public enum ${className} {
         transactionSetDetails << detail
         transactionSets.find { it.transactionSetId == line[0] }.details << detail
         ///TODO: finish the tree
+        int loopLevel = Integer.parseInt(detail.loopLevel)
         if (!root) {
           root = new Loop(loopId: 'BASE', loopLevel: 0)
           current = root
-          return
-        }
-        int loopLevel = Integer.parseInt(detail.loopLevel)
-        if (current.loopLevel == loopLevel) {
-          if (detail.loopId) {
-            def parent = current.parent
-            current = new Loop(loopId: detail.loopId, loopLevel: loopLevel, parent: parent)
-            parent.children << current
+        } else {
+          if (current.loopLevel == loopLevel) {
+            if (detail.loopId) {
+              def parent = current.parent
+              current = new Loop(loopId: detail.loopId, loopLevel: loopLevel, parent: parent)
+              parent.children << current
+            }
+          } else if (current.loopLevel + 1 == loopLevel) {
+            Loop newChild = new Loop(loopId: detail.loopId, loopLevel: loopLevel, parent: current)
+            current.children << newChild
+            current = newChild
+          } else if (current.loopLevel > loopLevel) {
+            (current.loopLevel - loopLevel).times { current = current.parent }
+            if (detail.loopId) {
+              def parent = current.parent
+              current = new Loop(loopId: detail.loopId, loopLevel: loopLevel, parent: parent)
+              parent.children << current
+            }
           }
-          //TODO extract values from this line, insert into:
-          current.children << new Segment(segmentId: detail.segmentId, details: [new SegmentDetail(segmentID: detail.segmentId, sequence: detail.sequence, requirement: detail.requirement)])
-        } else if (current.loopLevel + 1 == loopLevel) {
-          Loop newChild = new Loop(loopId: detail.loopId, loopLevel: loopLevel, parent: current)
-          current.children << newChild
-          current = newChild
-        } else if (current.loopLevel > loopLevel) {
-          (current.loopLevel - loopLevel).times { current = current.parent }
-          if (detail.loopId) {
-            def parent = current.parent
-            current = new Loop(loopId: detail.loopId, loopLevel: loopLevel, parent: parent)
-            parent.children << current
-          }
-          //TODO extract values from this line, insert into:
-          current.children << new Segment(segmentId: detail.segmentId, details: [new SegmentDetail(segmentID: detail.segmentId, sequence: detail.sequence, requirement: detail.requirement)])
         }
+        //Given the current node, add segment to its children
+        current.children << new Segment(segmentId: detail.segmentId, details: [new SegmentDetail(segmentID: detail.segmentId, sequence: detail.sequence, requirement: detail.requirement)])
       }
+
   logger.info ("rendering tree...")
   renderSetDetl (root)
 
