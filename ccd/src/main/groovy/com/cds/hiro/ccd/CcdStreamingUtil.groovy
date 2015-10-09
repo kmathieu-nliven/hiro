@@ -66,6 +66,7 @@ class CcdStreamingUtil {
         '10183-2': [data: {vHelper.getDischargeMedications(it.entry, it.section)}, section: 'hospitalDischargeMedications'],
         '29545-1': [data: {vHelper.getPhysicalExamination(it.entry, it.section)}, section: 'physicalExamination'],
         '47519-4': [data: {vHelper.getProcedures(it.entry, it.section)}, section: 'procedures'],
+        '51848-0': [data: {vHelper.getAssessment(it.entry.observation)}, section: 'assessments'],
     ]
     def helper = helpers[aggregated.sectionCode]
     if (helper) {

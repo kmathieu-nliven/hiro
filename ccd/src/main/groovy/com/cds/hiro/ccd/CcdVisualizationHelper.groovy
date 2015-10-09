@@ -21,7 +21,7 @@ class CcdVisualizationHelper {
   void renderText(Node node, StringWriter sb) {
     node?.children()?.each {
       if (it instanceof String) {
-        sb.append it.replaceAll('\\\\n', '<br/>\n')
+        sb.append it.replaceAll(/\\n/, '<br/>\n')
       } else {
         renderText(it as Node, sb)
         sb.append(' ')
@@ -121,7 +121,7 @@ class CcdVisualizationHelper {
    * @return a map for json usage
    */
   @Deprecated
-  def printEffectiveDateForJson(effectiveDate) {
+  static def printEffectiveDateForJson(effectiveDate) {
     if (effectiveDate) {
       if (effectiveDate.@value) {
         ["time:" + reprintDateForJson(effectiveDate?.@value?.getAt(0))]
@@ -142,22 +142,7 @@ class CcdVisualizationHelper {
     }
   }
 
-  @Deprecated
-  String plotFunctionalStatus(section) {
-    StringBuilder sb = new StringBuilder()
-    section?.getAt(ns.entry)?.each { entry ->
-      sb.append "events.push({"
-      def observation = entry?.getAt(ns.act)?.getAt(ns.entryRelationship)?.getAt(ns.observation)
-      def props = printEffectiveDateForJson(observation?.getAt(ns.effectiveTime)?.getAt(0))
-      props << "classification: '${section?.getAt(ns.title)?.text()}'"
-      props << "  text: '${observation?.getAt(ns.value)?.@displayName?.getAt(0) ?: observation?.getAt(ns.value)?.getAt(ns.translation)?.@displayName?.getAt(0)?.replaceAll("'", "\\\\'") ?: ''}'"
-      sb.append props.join(", ")
-      sb.append "});\n"
-    }
-    getNonNullString(sb)
-  }
-
-  private String getValue(section, dt, row) {
+  private static String getValue(section, dt, row) {
     if (!section) {
       return null
     }
@@ -193,71 +178,8 @@ class CcdVisualizationHelper {
     return inString
   }
 
-  private String getNonNullString(StringBuilder sb) {
+  private static String getNonNullString(StringBuilder sb) {
     return sb != null && sb.toString().length() != 4 ? sb.toString() : ''
-  }
-
-  static def createSectionMap(sections) {
-    def map = [:]
-    sections.each { section ->
-      def code = section?.getAt(ns.code)?.@code?.getAt(0)
-      switch (code) {
-        case '11348-0':
-          map.put('pastMedical', section);
-          break
-        case '10160-0':
-          map.put('medications', section);
-          break
-        case '30954-2':
-          map.put('labResults', section);
-          break
-        case '8716-3':
-          map.put('vitalSigns', section);
-          break
-        case '48764-5':
-          map.put('summaryPurpose', section);
-          break
-        case '46240-8':
-          map.put('visitSummary', section);
-          break
-        case '11450-4':
-          map.put('problems', section);
-          break
-        case '10157-6':
-          map.put('familyHistory', section);
-          break
-        case '29762-2':
-          map.put('socialHistory', section);
-          break
-        case '11369-6':
-          map.put('immunizationHistory', section);
-          break
-        case '48765-2':
-          map.put('alerts', section);
-          break
-        case '48768-6':
-          map.put('payer', section);
-          break
-        case '18776-5':
-          map.put('planOfCare', section);
-          break
-        case '11535-2':
-          map.put('hospitalDischargeDiagnosis', section);
-          break
-        case '10183-2':
-          map.put('hospitalDischargeMedications', section);
-          break
-        case '29545-1':
-          map.put('physicalExamination', section);
-          break
-        case '47519-4':
-          map.put('procedures', section);
-          break
-        default:
-          log.warn "Unhandled section in createSectionMap: ${code}"
-      }
-    }
-    return map
   }
 
   /**
@@ -398,7 +320,7 @@ class CcdVisualizationHelper {
     ]).toString()
   }
 
-  String getImmunizationHistory(immunization) {
+  static String getImmunizationHistory(immunization) {
     def substanceAdministration = immunization?.getAt(ns.substanceAdministration)
     def code = substanceAdministration?.getAt(ns.consumable)?.getAt(ns.manufacturedProduct)?.getAt(ns.manufacturedMaterial)?.getAt(ns.code)?.getAt(0)
     Date parsedDate = parseDate(substanceAdministration?.getAt(ns.effectiveTime)?.getAt(ns.center)?.@value?.getAt(0))
@@ -471,10 +393,34 @@ class CcdVisualizationHelper {
     String observations = new JsonBuilder([
         test  : observation?.getAt(ns.code)?.@displayName?.getAt(0),
         result: [
-            value: val?.@value ?: val?.text(),
-            unit : val?.@unit,
-            level: getLabLevel(val?.@value, refRange)
+            value         : val?.@value ?: val?.text(),
+            unit          : val?.@unit,
+            level         : getLabLevel(val?.@value, refRange),
+            code          : val?.@code,
+            codeSystemName: val?.@codeSystemName,
+        ].findAll {k,v -> v != null},
+        date  : parseDate(observation?.getAt(ns.effectiveTime)?.@value?.getAt(0)),
+        source: [
+            name: ccdSource?.@source?.getAt(0),
+            id  : ccdSource?.getAt(ns.ccd)?.text(),
         ],
+        code  : getCodeDetails(observation?.getAt(ns.code)?.getAt(0))
+    ]).toString()
+    return observations
+  }
+
+  static String getAssessment(observation) {
+    def val = observation?.getAt(ns.value)?.getAt(0)
+    def ccdSource = null
+
+    String observations = new JsonBuilder([
+//        test  : observation?.getAt(ns.code)?.@displayName?.getAt(0),
+        result: [
+//            value         : val?.@value ?: val?.text(),
+            unit          : val?.@unit,
+            code          : val?.@code,
+            codeSystemName: val?.@codeSystemName,
+        ].findAll {k,v -> v != null},
         date  : parseDate(observation?.getAt(ns.effectiveTime)?.@value?.getAt(0)),
         source: [
             name: ccdSource?.@source?.getAt(0),
@@ -607,7 +553,7 @@ class CcdVisualizationHelper {
         return "high"
       }
     }
-    return ''
+    return null
   }
 
   String getPlanOfCare(def entry, def section) {

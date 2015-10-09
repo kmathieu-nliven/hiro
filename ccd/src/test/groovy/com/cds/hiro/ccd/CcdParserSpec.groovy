@@ -27,7 +27,7 @@ class CcdParserSpec extends Specification {
     csu.streamCcdEntries(aggregator, [ccdString])
 
     then:
-    csu.events.size() == 58
+    csu.events.size() == 59
 
   }
 
