@@ -79,6 +79,22 @@ class Loop extends BlockElement {
   List<? extends BlockElement> children = []
 }
 
+def renderSetDetl(Loop root) {
+  def firstSegment = root.children.first()
+  String indent =  "  " * root.loopLevel
+  println "${indent}${firstSegment.segmentName} ${firstSegment.segmentId} ${root.loopId}"
+  //root.children[1..-1].each
+  for(int i=1; i<root.children.size(); i++) {
+    def child = root.children.get(i)
+    if (child instanceof Segment) {
+      println "${indent}${child.segmentName} ${child.segmentId}"
+    } else {
+      assert child instanceof Loop
+      renderSetDetl(child)
+    }
+  }
+}
+
 @Canonical
 class SegmentDetail {
   String segmentID, sequence, dataElementNumber, requirement, repeat
@@ -397,27 +413,28 @@ public enum ${className} {
         if (current.loopLevel == loopLevel) {
           if (detail.loopId) {
             def parent = current.parent
-            current = new Loop(loopId: loopId, loopLevel: loopLevel, parent: parent)
+            current = new Loop(loopId: detail.loopId, loopLevel: loopLevel, parent: parent)
             parent.children << current
           }
           //TODO extract values from this line, insert into:
           current.children << new Segment(segmentId: detail.segmentId, details: [new SegmentDetail(segmentID: detail.segmentId, sequence: detail.sequence, requirement: detail.requirement)])
         } else if (current.loopLevel + 1 == loopLevel) {
-          Node newChild = new Loop(loopId: detail.loopId, loopLevel: loopLevel, parent: current)
+          Loop newChild = new Loop(loopId: detail.loopId, loopLevel: loopLevel, parent: current)
           current.children << newChild
           current = newChild
         } else if (current.loopLevel > loopLevel) {
           (current.loopLevel - loopLevel).times { current = current.parent }
           if (detail.loopId) {
             def parent = current.parent
-            current = new Loop(loopId: loopId, loopLevel: loopLevel, parent: parent)
+            current = new Loop(loopId: detail.loopId, loopLevel: loopLevel, parent: parent)
             parent.children << current
           }
           //TODO extract values from this line, insert into:
           current.children << new Segment(segmentId: detail.segmentId, details: [new SegmentDetail(segmentID: detail.segmentId, sequence: detail.sequence, requirement: detail.requirement)])
         }
       }
-
+  logger.info ("rendering tree...")
+  renderSetDetl (root)
 
 
 
