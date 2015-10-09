@@ -190,6 +190,8 @@ import com.cds.hiro.x12.structures.*
  * "${transactionSetId}","${transactionSetName}","${functionalGroupId}"
  * </pre>
  */
+@groovy.transform.CompileStatic
+@groovy.transform.ToString
 class ${className} extends Message {
 
   <% details.each { detail -> %>
@@ -213,7 +215,6 @@ package ${packageName}
 import com.cds.hiro.x12.structures.*
 import com.cds.hiro.x12_837p.composites.*
 import com.cds.hiro.x12_837p.enums.*
-import groovy.transform.ToString
 
 /**
  * From seghead.txt
@@ -221,7 +222,8 @@ import groovy.transform.ToString
  * "${segmentId}","${segmentName}"
  * </pre>
  */
-@ToString
+@groovy.transform.CompileStatic
+@groovy.transform.ToString
 class ${className} extends Segment {
 
   <% details.each { detail -> %>
@@ -265,6 +267,8 @@ import com.cds.hiro.x12_837p.enums.*
  * "${dataElementNumber}","${dataElementName}"
  * </pre>
  */
+@groovy.transform.CompileStatic
+@groovy.transform.ToString
 class ${className} extends Composite {
 
   <% details.each { detail -> %>

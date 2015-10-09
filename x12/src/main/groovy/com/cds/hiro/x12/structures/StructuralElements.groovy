@@ -1,5 +1,7 @@
 package com.cds.hiro.x12.structures
 
+import groovy.transform.CompileStatic
+
 abstract class Element {
   protected static <T> T valueOf(String input, Class<T> clazz) {
     if (Enum.isAssignableFrom(clazz)) {
@@ -16,21 +18,26 @@ abstract class Element {
   }
 }
 
+@CompileStatic
 abstract class Composite extends Element {
   abstract void parse(List<String> input)
 
 }
 
+@CompileStatic
 abstract class BlockElement extends Element {}
 
+@CompileStatic
 abstract class Message extends BlockElement {
   abstract void parse(List<List<List<List<String>>>> input)
 }
 
+@CompileStatic
 abstract class Loop extends BlockElement {
   abstract void parse(List<List<List<List<String>>>> input)
 }
 
+@CompileStatic
 abstract class Segment extends BlockElement {
   abstract void parse(List<List<List<String>>> input)
 
@@ -42,12 +49,13 @@ abstract class Segment extends BlockElement {
   protected static <T> List<T> listOf(List<List<String>> strings, Class<T> clazz) {
     if (Composite.isAssignableFrom(clazz)) {
       strings.collect { array ->
-        clazz.newInstance().
+        Composite instance1 = clazz.newInstance() as Composite
+        instance1.
             with { instance ->
               instance.parse(array)
               instance
-            }
-      }
+            } as T
+      } as List<T>
     } else {
       strings.collect {valueOf(it[0], clazz)}
     }
