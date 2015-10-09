@@ -393,11 +393,11 @@ public enum ${className} {
         }
       }
 
-  Loop root
-  Loop current
-
   X12Util.from('sethead').
       each { transactionSets << new TransactionSet(*it) }
+
+  Loop root
+  Loop current
   X12Util.from('setdetl').
       each { line ->
         def detail = new TransactionSetDetail(*line)
@@ -409,18 +409,14 @@ public enum ${className} {
           root = new Loop(loopId: 'BASE', loopLevel: 0)
           current = root
         } else {
-          if (current.loopLevel == loopLevel) {
-            if (detail.loopId) {
-              def parent = current.parent
-              current = new Loop(loopId: detail.loopId, loopLevel: loopLevel, parent: parent)
-              parent.children << current
-            }
-          } else if (current.loopLevel + 1 == loopLevel) {
+          if (current.loopLevel + 1 == loopLevel) { //we're going to next level
             Loop newChild = new Loop(loopId: detail.loopId, loopLevel: loopLevel, parent: current)
             current.children << newChild
             current = newChild
-          } else if (current.loopLevel > loopLevel) {
-            (current.loopLevel - loopLevel).times { current = current.parent }
+          } else { //we're on the same level or need to go back to same level
+            if (current.loopLevel > loopLevel) {
+              (current.loopLevel - loopLevel).times { current = current.parent }
+            }
             if (detail.loopId) {
               def parent = current.parent
               current = new Loop(loopId: detail.loopId, loopLevel: loopLevel, parent: parent)
@@ -429,11 +425,14 @@ public enum ${className} {
           }
         }
         //Given the current node, add segment to its children
-        current.children << new Segment(segmentId: detail.segmentId, details: [new SegmentDetail(segmentID: detail.segmentId, sequence: detail.sequence, requirement: detail.requirement)])
+        def segment = segments.find { it.segmentId == detail.segmentId }
+        assert segment
+        current.children << segment
       }
 
-  logger.info ("rendering tree...")
+  logger.info ("------------ start rendering tree ---------")
   renderSetDetl (root)
+  logger.info ("------------ end rendering tree -----------")
 
 
 
