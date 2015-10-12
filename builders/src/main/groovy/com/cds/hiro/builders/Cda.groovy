@@ -239,7 +239,10 @@ class Cda {
           withEntry(new POCDMT000040Entry().
               withSubstanceAdministration(new POCDMT000040SubstanceAdministration().
                   withClassCode('SBADM').withMoodCode(XDocumentSubstanceMood.EVN).
-                  withEffectiveTime(/* TODO */).
+                  withEffectiveTime(new IVLTS().withRest([
+                      medication.from ? ItiHelper.jaxb('low', IVLTS, new IVLTS().withValue(medication.from)) : null,
+                      medication.to ? ItiHelper.jaxb('high', IVLTS, new IVLTS().withValue(medication.to)) : null,
+                  ].findAll { it })).
                   withConsumable(new POCDMT000040Consumable().
                       withManufacturedProduct(new POCDMT000040ManufacturedProduct().
                           withClassCode(RoleClassManufacturedProduct.MANU).
@@ -333,7 +336,10 @@ class Cda {
                           withCode(new CD().
                               withCode('64572001').withCodeSystem('2.16.840.1.113883.6.96')
                           ).
-                          withEffectiveTime(new IVLTS().withRest(/*TODO*/)).
+                          withEffectiveTime(new IVLTS().withRest([
+                              problem.between ? ItiHelper.jaxb('low', IVLTS, new IVLTS().withValue(problem.between)) : null,
+                              problem.and ? ItiHelper.jaxb('high', IVLTS, new IVLTS().withValue(problem.and)) : null,
+                          ].findAll { it })).
                           withValue(problem.code)
                       )
                   ).
@@ -353,7 +359,10 @@ class Cda {
             withTypeCode(XActRelationshipEntry.DRIV).
             withEncounter(new POCDMT000040Encounter().
                 withCode(null /*TODO*/).
-                withEffectiveTime(new IVLTS().withRest(/*TODO*/)).
+                withEffectiveTime(new IVLTS().withRest([
+                    encounter.between ? ItiHelper.jaxb('low', IVLTS, new IVLTS().withValue(encounter.between)) : null,
+                    encounter.and ? ItiHelper.jaxb('high', IVLTS, new IVLTS().withValue(encounter.and)) : null,
+                ].findAll { it })).
                 withText(new ED().withContent('TODO')).
                 withPerformer(new POCDMT000040Performer2().
                     withAssignedEntity(new POCDMT000040AssignedEntity().
