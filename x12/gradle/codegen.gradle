@@ -213,7 +213,7 @@ class ${className} extends Message {
   /**
    * From sethead.txt
    * <pre>
-   * "${transactionSetId}","${detail.area}","${detail.sequence}","${detail.segmentId}","${detail.requirement}","${detail.maxUse}","${detail.loopLevel}","${detail.loopRepeat}","${detail.loopId}"
+   *
    * </pre>
    */
    ${detail.segmentId} ${detail.segmentId.toLowerCase()}
