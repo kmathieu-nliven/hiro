@@ -34,11 +34,7 @@ class X12Util {
     def output = input.replaceAll(/[^A-Za-z0-9_]/, '')
     def retval = output ==~ /^[0-9].*/ ? "M${output}" : output
 
-    if (downCase) {
-      retval[0].toLowerCase() + retval[1..-1]
-    } else {
-      retval
-    }
+    downCase ? (retval[0].toLowerCase() + retval[1..-1]) : retval
   }
 }
 
@@ -100,6 +96,8 @@ interface Element {
   String toJavaType()
   String toFieldName()
   String toRow()
+  boolean isEnum()
+  boolean isComposite()
 }
 
 @Canonical
@@ -133,6 +131,16 @@ class SimpleElement implements Element {
       |"${dataElementNumber}","${dataElementName}"
       |   * "${dataElementNumber}","${dataElementType}","${minimumLength}","${maximumLength}" """.stripMargin()
   }
+
+  @Override
+  boolean isEnum() {
+    return enumerations.size() > 0
+  }
+
+  @Override
+  boolean isComposite() {
+    return false
+  }
 }
 
 @Canonical
@@ -153,6 +161,16 @@ class CompositeElement implements Element {
   @Override
   String toRow() {
     /"${dataElementNumber}","${dataElementName}"/
+  }
+
+  @Override
+  boolean isEnum() {
+    return false
+  }
+
+  @Override
+  boolean isComposite() {
+    return true
   }
 }
 
@@ -183,6 +201,13 @@ File dir(File parent, String name) {
 
 task codegen << {
 
+
+  List<TransactionSet> transactionSets = []
+  List<TransactionSetDetail> transactionSetDetails = []
+  List<Segment> segments = []
+  List<SegmentDetail> segmentDetails = []
+  List<? extends Element> elements = []
+
   def tsTemplate = '''
 package ${packageName}
 
@@ -198,6 +223,7 @@ import com.cds.hiro.x12_837p.loops.*
  */
 @groovy.transform.CompileStatic
 @groovy.transform.ToString
+@groovy.transform.builder.Builder(builderStrategy = groovy.transform.builder.SimpleStrategy, prefix = 'with')
 class ${className} extends Message {
 
   <% children.each { detail -> %>
@@ -223,6 +249,18 @@ class ${className} extends Message {
   void parse(List<List<List<List<String>>>> input) {
     // TODO
   }
+
+  List<List<List<List<String>>>> toTokens() {
+    def retval = []
+    <% children.each { detail -> %>
+      <% if (detail.class.simpleName == 'Loop') {
+      %>if (${detail.name.toLowerCase()}) retval.addAll (${detail.name.toLowerCase()}.toTokens())<%
+      } else {
+      %>if (${detail.segmentId.toLowerCase()}) retval.add (${detail.segmentId.toLowerCase()}.toTokens())<%
+      } %>
+    <% } %>
+    retval
+  }
 }
 '''
   def loopTemplate = '''
@@ -239,6 +277,7 @@ import com.cds.hiro.x12_837p.segments.*
  */
 @groovy.transform.CompileStatic
 @groovy.transform.ToString
+@groovy.transform.builder.Builder(builderStrategy = groovy.transform.builder.SimpleStrategy, prefix = 'with')
 class ${className} extends Loop {
 
   // ${children.size()}
@@ -259,6 +298,19 @@ class ${className} extends Loop {
   void parse(List<List<List<List<String>>>> input) {
     // TODO
   }
+
+
+  List<List<List<List<String>>>> toTokens() {
+    def retval = []
+    <% children.eachWithIndex { detail, idx -> %>
+      <% if (detail.class.simpleName == 'Loop') {
+      %>if (${detail.name.toLowerCase()}_${idx+1}) retval.addAll (${detail.name.toLowerCase()}_${idx+1}.toTokens())<%
+      } else {
+      %>if (${detail.segmentId.toLowerCase()}_${idx+1}) retval.add (${detail.segmentId.toLowerCase()}_${idx+1}.toTokens())<%
+      } %>
+    <% } %>
+    retval
+  }
 }
 '''
 
@@ -277,6 +329,7 @@ import com.cds.hiro.x12_837p.enums.*
  */
 @groovy.transform.CompileStatic
 @groovy.transform.ToString
+@groovy.transform.builder.Builder(builderStrategy = groovy.transform.builder.SimpleStrategy, prefix = 'with')
 class ${className} extends Segment {
 
   <% details.each { detail -> %>
@@ -305,6 +358,45 @@ class ${className} extends Segment {
     }
     %>
   }
+
+  List<List<List<String>>> toTokens() {
+    def retval = new ArrayList().with {
+      add(new ArrayList().with {
+        add new ArrayList().with {
+          add '${className}'
+          it
+        }
+        it
+      })
+      it
+    }
+
+    <% details.each { detail -> %>
+      retval.add(<%
+        if (detail.toJavaType().startsWith('List')) {
+        %>${detail.element.toFieldName()}_${detail.sequence}.<%
+        } else {
+        %>[${detail.element.toFieldName()}_${detail.sequence}].<%
+        } %>
+          collect { rep ->
+              <% if (detail.element.toJavaType() in ['String', 'Integer', 'Double']) { %>
+                rep ? [rep.toString()] : []
+              <% } else if (detail.element.toJavaType()  ==  'java.time.LocalDate') { %>
+                rep ? [rep.format(com.cds.hiro.x12.EdiParser.DateFormat) ] : []
+              <% } else if (detail.element.toJavaType()  ==  'java.time.LocalTime') { %>
+                rep ? [rep.format(com.cds.hiro.x12.EdiParser.TimeFormat)] : []
+              <% } else if (detail.element.isEnum()) { %>
+                rep ? [rep.toString() ] : []
+              <% } else if (detail.element.isComposite()) { %>
+                rep?.toTokens() ?: []
+              <% } else { %>
+                throw new Exception("tokenize not implemented for \\\${rep.class}")
+              <% } %>
+            }
+      )
+    <% } %>
+    retval
+  }
 }
 '''
 
@@ -322,6 +414,7 @@ import com.cds.hiro.x12_837p.enums.*
  */
 @groovy.transform.CompileStatic
 @groovy.transform.ToString
+@groovy.transform.builder.Builder(builderStrategy = groovy.transform.builder.SimpleStrategy, prefix = 'with')
 class ${className} extends Composite {
 
   <% details.each { detail -> %>
@@ -339,6 +432,16 @@ class ${className} extends Composite {
     %>this.${detail.element.toFieldName()}_${detail.sequence} = input.size() > ${idx} ? valueOf(input[${idx}],${detail.element.toJavaType()}) : null;
     <% } %>
   }
+
+  @Override
+  List<String> toTokens() {
+    def retval = []
+    <% details.each { detail -> %>
+    retval.add(${detail.element.toFieldName()}_${detail.sequence}.toString() ?: '')
+    <% } %>
+    retval
+  }
+
 }
 '''
 
@@ -367,7 +470,6 @@ public enum ${className} {
   %>
 
   static Map<String, ${className}> reverseLookupMap = new HashMap<String, ${className}>();
-
   static {
     ${className}[] values = ${className}.values();
     for (${className} value: values) {
@@ -375,21 +477,14 @@ public enum ${className} {
     }
   }
 
-  static ${className} byCode(String code) {
-    return reverseLookupMap.get(code);
-  }
+  static ${className} byCode(String code) { return reverseLookupMap.get(code); }
 
   String code;
   ${className}(String code) {this.code = code;}
+
+  @Override public String toString() { return this.code; }
 }
 '''
-
-
-  List<TransactionSet> transactionSets = []
-  List<TransactionSetDetail> transactionSetDetails = []
-  List<Segment> segments = []
-  List<SegmentDetail> segmentDetails = []
-  List<? extends Element> elements = []
 
 
   X12Util.from('elehead').
