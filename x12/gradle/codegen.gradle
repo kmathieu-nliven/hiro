@@ -1,10 +1,10 @@
 buildscript {
   repositories {
     mavenLocal()
-    maven { url 'http://cbees-ltdev1-oradb1.transcendinsights.com:8081/nexus/content/groups/public' }
-    maven { url "https://plugins.gradle.org/m2/" }
     jcenter()
     mavenCentral()
+    maven { url 'http://cbees-ltdev1-oradb1.transcendinsights.com:8081/nexus/content/groups/public' }
+    maven { url "https://plugins.gradle.org/m2/" }
   }
   dependencies {
     classpath 'net.sf.opencsv:opencsv:2.3'
@@ -61,19 +61,23 @@ class TransactionSet {
 @ToString(includeNames = true)
 class TransactionSetDetail {
   String transactionSetId, area, sequence, segmentId, requirement, maxUse, loopLevel, loopRepeat, loopId
+  Segment theSegment
+  Loop theLoop
 }
 
 abstract class BlockElement {}
 
-@Canonical
+@Canonical(excludes = 'details')
 class Segment extends BlockElement {
   String segmentId, segmentName
   List<SegmentDetail> details = []
 }
 
-@Canonical
+@Canonical(excludes = 'children,parent')
 class Loop extends BlockElement {
-  String name
+  String name, loopId
+  int loopLevel
+  Loop parent
   List<? extends BlockElement> children = []
 }
 
@@ -183,6 +187,8 @@ task codegen << {
 package ${packageName}
 
 import com.cds.hiro.x12.structures.*
+import com.cds.hiro.x12_837p.segments.*
+import com.cds.hiro.x12_837p.loops.*
 
 /**
  * From sethead.txt
@@ -190,18 +196,67 @@ import com.cds.hiro.x12.structures.*
  * "${transactionSetId}","${transactionSetName}","${functionalGroupId}"
  * </pre>
  */
+@groovy.transform.CompileStatic
+@groovy.transform.ToString
 class ${className} extends Message {
 
-  <% details.each { detail -> %>
+  <% children.each { detail -> %>
+   <% if (detail.class.simpleName == 'Loop') { %>
   /**
    * From sethead.txt
    * <pre>
-   * "${detail.transactionSetId}","${detail.area}","${detail.sequence}","${detail.segmentId}","${detail.requirement}","${detail.maxUse}","${detail.loopLevel}","${detail.loopRepeat}","${detail.loopId}"
+   * "${detail}"
    * </pre>
    */
+   ${detail.name} ${detail.name.toLowerCase()}
+   <% } else { %>
+  /**
+   * From sethead.txt
+   * <pre>
+   *
+   * </pre>
+   */
+   ${detail.segmentId} ${detail.segmentId.toLowerCase()}
+   <% } %>
   <% } %>
 
-  void parse(List<List<List<String[]>>> input) {
+  void parse(List<List<List<List<String>>>> input) {
+    // TODO
+  }
+}
+'''
+  def loopTemplate = '''
+package ${packageName}
+
+import com.cds.hiro.x12.structures.*
+import com.cds.hiro.x12_837p.segments.*
+
+/**
+ * From nowhere
+ * <pre>
+ * "${name}","${loopId}""
+ * </pre>
+ */
+@groovy.transform.CompileStatic
+@groovy.transform.ToString
+class ${className} extends Loop {
+
+  // ${children.size()}
+  <% children.eachWithIndex { detail, idx -> %>
+  /**
+   * From sethead.txt
+   * <pre>
+   * "${detail}"
+   * </pre>
+   */
+   <% if (detail.class.simpleName == 'Loop') { %>
+   ${detail.name} ${detail.name.toLowerCase()}_${idx+1}
+   <% } else { %>
+   ${detail.segmentId} ${detail.segmentId.toLowerCase()}_${idx+1}
+   <% } %>
+  <% } %>
+
+  void parse(List<List<List<List<String>>>> input) {
     // TODO
   }
 }
@@ -213,7 +268,6 @@ package ${packageName}
 import com.cds.hiro.x12.structures.*
 import com.cds.hiro.x12_837p.composites.*
 import com.cds.hiro.x12_837p.enums.*
-import groovy.transform.ToString
 
 /**
  * From seghead.txt
@@ -221,7 +275,8 @@ import groovy.transform.ToString
  * "${segmentId}","${segmentName}"
  * </pre>
  */
-@ToString
+@groovy.transform.CompileStatic
+@groovy.transform.ToString
 class ${className} extends Segment {
 
   <% details.each { detail -> %>
@@ -238,7 +293,7 @@ class ${className} extends Segment {
    ${detail.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
   <% } %>
 
-  void parse(List<List<String[]>> input) {
+  void parse(List<List<List<String>>> input) {
     <% details.eachWithIndex { detail, idx ->
     %>this.${detail.element.toFieldName()}_${detail.sequence} = input.size() > ${idx + 1
           } ? <%if (detail.repeat == '1') {
@@ -265,7 +320,9 @@ import com.cds.hiro.x12_837p.enums.*
  * "${dataElementNumber}","${dataElementName}"
  * </pre>
  */
-class ${className} extends Element {
+@groovy.transform.CompileStatic
+@groovy.transform.ToString
+class ${className} extends Composite {
 
   <% details.each { detail -> %>
   /**
@@ -277,8 +334,10 @@ class ${className} extends Element {
    ${detail.element.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
   <% } %>
 
-  void parse(String input) {
-    // TODO
+  void parse(List<String> input) {
+    <% details.eachWithIndex { detail, idx ->
+    %>this.${detail.element.toFieldName()}_${detail.sequence} = input.size() > ${idx} ? valueOf(input[${idx}],${detail.element.toJavaType()}) : null;
+    <% } %>
   }
 }
 '''
@@ -310,9 +369,8 @@ public enum ${className} {
   static Map<String, ${className}> reverseLookupMap = new HashMap<String, ${className}>();
 
   static {
-    ${className}[] values = (${className}[]) ${className}.values();
-    for (int i = 0; i < values.length; i ++) {
-      ${className} value = (${className}) values[i];
+    ${className}[] values = ${className}.values();
+    for (${className} value: values) {
       reverseLookupMap.put(value.code, value);
     }
   }
@@ -372,37 +430,78 @@ public enum ${className} {
         }
       }
 
-
   X12Util.from('sethead').
       each { transactionSets << new TransactionSet(*it) }
+
+  List<Loop> loops = []
+  Loop root
+  Loop current
   X12Util.from('setdetl').
       each { line ->
         def detail = new TransactionSetDetail(*line)
         transactionSetDetails << detail
         transactionSets.find { it.transactionSetId == line[0] }.details << detail
+        ///TODO: finish the tree
+        int loopLevel = Integer.parseInt(detail.loopLevel)
+        if (!root) {
+          root = new Loop(loopId: 'BASE', loopLevel: 0)
+          current = root
+        } else {
+          if (current.loopLevel + 1 == loopLevel) { //we're going to next level
+            Loop newChild = new Loop(
+                loopId: detail.loopId, loopLevel: loopLevel, parent: current,
+                name: X12Util.toSymbol("L${detail.loopId}")
+            )
+            detail.theLoop = newChild
+            loops << newChild
+            current.children << newChild
+            current = newChild
+          } else { //we're on the same level or need to go back to same level
+            if (current.loopLevel > loopLevel) {
+              (current.loopLevel - loopLevel).times { current = current.parent }
+            }
+            if (detail.loopId) {
+              def parent = current.parent
+              current = new Loop(
+                  loopId: detail.loopId, loopLevel: loopLevel, parent: parent,
+                  name: X12Util.toSymbol("L${detail.loopId}")
+              )
+              detail.theLoop = current
+              loops << current
+              parent.children << current
+            } else {
+              detail.theSegment = segments.find {it.segmentId == detail.segmentId}
+            }
+          }
+        }
+        //Given the current node, add segment to its children
+        def segment = segments.find { it.segmentId == detail.segmentId }
+        assert segment
+        current.children << segment
       }
 
+  transactionSets.find {it}.children = root.children
 
   new File(X12Util.outputDir).deleteDir()
   new File(X12Util.outputDir).mkdirs()
 
   def basePackage = dir("${X12Util.outputDir}/${X12Util.basePackage.replace('.', '/')}")
   def segsDir = dir(basePackage, 'segments')
-  def tsDir = dir(basePackage, 'transactionsets')
+  def transactionSetDir = dir(basePackage, 'transactionsets')
   def comDir = dir(basePackage, 'composites')
   def eDir = dir(basePackage, 'enums')
+  def loopsDir = dir(basePackage, 'loops')
 
   def ffData = new File(X12Util.inputDir, 'freeform.txt').text.split(/\n\*/)
   ffData.
       findAll {it.startsWith 'ELECOD'}.
       each {
-        def str = it.replace('\r', '\n')
         def (header, dataLine, text) = it.split(/\n/, 3).toList()
         def data = dataLine.split(',')
-        def et = new EnumType(data[2], text.replaceAll(/[\r\n]/, ' ').trim())
+        def enumType = new EnumType(data[2], text.replaceAll(/[\r\n]/, ' ').trim())
         def element = elements.find {it.dataElementNumber == data[0]} as SimpleElement
         if (element) {
-          element.enumerations << et
+          element.enumerations << enumType
         }
       }
 
@@ -454,6 +553,21 @@ public enum ${className} {
             close()
       }
 
+  loops.
+      each {
+        def map = it.properties
+        map['packageName'] = 'com.cds.hiro.x12_837p.loops'
+
+        map.className = X12Util.toSymbol(it.name)
+        new GStringTemplateEngine().
+            createTemplate(loopTemplate).
+            make(map).
+            writeTo(
+                new File(loopsDir, "${map.className}.groovy").newWriter()
+            ).
+            close()
+      }
+
   transactionSets.
       each {
         def map = it.properties
@@ -464,7 +578,7 @@ public enum ${className} {
             createTemplate(tsTemplate).
             make(map).
             writeTo(
-                new File(tsDir, "${map.className}.groovy").newWriter()
+                new File(transactionSetDir, "${map.className}.groovy").newWriter()
             ).
             close()
       }
