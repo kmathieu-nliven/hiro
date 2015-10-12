@@ -223,7 +223,7 @@ class CdaACOMeasuresSpec extends Specification {
       performed CPT('99341') from '20151003' to '20151003'
       performed CPT('99341') from '20150615' to '20150615'
 
-      performed SnomedCt('442333005') from '20141120' to '20141120'
+      performed SnomedCt('442333005') from '20141120' to '20141120' withStatus 'PERFORMED'
     }
     new File('build/ACO-14-Numer.xml').text = Cda.serialize(ccd, true)
 
@@ -400,7 +400,7 @@ class CdaACOMeasuresSpec extends Specification {
 
       authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
 
-
+      // Dates are not being generated
       suffered Icd9CM('153.5') between '20080505' and '20080505' withStatus 'ACTIVE'
       performed SnomedCt('446745002') from '20050505' to '20050505' withStatus 'PERFORMED'
       performed CPT('99203') from '20150505' to '20150505'
@@ -557,6 +557,7 @@ class CdaACOMeasuresSpec extends Specification {
       performed SnomedCt('52035003') from '20140511' to '20140511' withStatus 'ACTIVE'
       performed SnomedCt('11101003') from '20150511' to '20150511' withStatus 'PERFORMED'
 
+      // date not being generated
       prescribed RxNorm('432389') from '20141228' to '20150211' withStatus 'ACTIVE'
       performed SnomedCt('1055001') from '20141230' to '20150111' withStatus 'ACTIVE'
       performed CPT('99213') from '20150511' to '20150511' withStatus 'PERFORMED'
@@ -635,7 +636,7 @@ class CdaACOMeasuresSpec extends Specification {
     1 == 1
   }
 
-  def "ACO-41-IPP-and-Denom.json"() {
+  def "ACO-41-Denom.json"() {
     when: "A ccd is generated"
     def ccd = Cda.create {
       confidentiality Conf('N')
@@ -646,7 +647,7 @@ class CdaACOMeasuresSpec extends Specification {
         birthTime '19501106'
         maritalStatus 'M'
 
-        id '99.1.2', 'ACO41ID'
+        id '99.1.2', 'ACO41D'
 
         addr {
           street '500 Washington Blvd'
@@ -660,10 +661,11 @@ class CdaACOMeasuresSpec extends Specification {
       authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
 
       performed CPT('99202') from '20150304' to '20150304'
+      // Dates are not generated
       suffered Icd9CM('250.03') between '20150304' and '20150304'
 
     }
-    new File('build/ACO-41-IPP-and-Denom.xml').text = Cda.serialize(ccd, true)
+    new File('build/ACO-41-Denom.xml').text = Cda.serialize(ccd, true)
 
     then: "All is well"
     1 == 1
@@ -763,7 +765,7 @@ class CdaACOMeasuresSpec extends Specification {
       authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
 
       performed CPT('99397') from '20150511' to '20150512'
-      performed LOINC('346351-3') from '20140511' to '20140513' withStatus 'PERFORMED'
+      performed LOINC('46351-3') from '20140511' to '20140513' withStatus 'PERFORMED'
 
     }
     new File('build/ACO-20-Numer.xml').text = Cda.serialize(ccd, true)
@@ -807,8 +809,7 @@ class CdaACOMeasuresSpec extends Specification {
     1 == 1
   }
 
-  // TODO: CDA generator currently doesn't support status code results
-  /*def "ACO-18-Numer.json"() {
+  def "ACO-18-Numer.json"() {
     when: "A ccd is generated"
     def ccd = Cda.create {
       code LOINC('34133-9')
@@ -836,12 +837,13 @@ class CdaACOMeasuresSpec extends Specification {
 
       performed SnomedCt('10197000') from '20150511' to '20150520' withStatus 'PERFORMED'
 
+      assessed LOINC('73831-0') toBe SnomedCt('428171000124102') on '2015052'
     }
     new File('build/ACO-18-Numer.xml').text = Cda.serialize(ccd, true)
 
     then: "All is well"
     1 == 1
-  }*/
+  }
 
   def "ACO-28-IPP-and-Denom.json"() {
     when: "A ccd is generated"

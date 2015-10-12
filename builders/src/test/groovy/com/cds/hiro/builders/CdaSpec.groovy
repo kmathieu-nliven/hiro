@@ -31,6 +31,7 @@ class CdaSpec extends Specification {
   }
 
   static CE LOINC(String input) { ce(input, '2.16.840.1.113883.6.1', 'LOINC') }
+  static CD LoincCd(String input) { cd(input, '2.16.840.1.113883.6.1', 'LOINC') }
 
   static CE RxNorm(String input) { ce(input, '2.16.840.1.113883.6.88', 'RxNorm') }
 
@@ -144,6 +145,9 @@ class CdaSpec extends Specification {
 
       // payers
       payer 'Humana' identifiedAs '2.16.840.1.113883.19' identifierIs 'HPCG02815-00'
+
+      // assessments
+      assessed LoincCd('73831-0') toBe SnomedCt('428171000124102') on '20110923'
     }
     new File('build/test.xml').text = Cda.serialize(ccd, true)
 

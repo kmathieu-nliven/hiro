@@ -49,13 +49,6 @@ class CcdParserSpec extends Specification {
 
   }
 
-  private List<Map> jsonizeSingleComponent(def component) {
-    def normalizeCcdUtil = new NormalizeCcdUtil()
-    def ccdStreamingUtil = new CcdStreamingUtil(originalRequestId: '1234')
-    normalizeCcdUtil.streamComponent(component, null, [onNewEntry: ccdStreamingUtil.onNewEntry])
-    ccdStreamingUtil.events
-  }
-
   def "test effectiveTime low high values"() {
     given: "A ccd"
 
