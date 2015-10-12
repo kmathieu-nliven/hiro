@@ -33,10 +33,9 @@ class EdiParserSpec extends Specification {
     def parser = new EdiParser()
 
     when: "I give it inputs without composites or reps"
-    def tree = parser.extractTree("""\
-ISA*12*23
-ST*Foo Bar*Fubar
-""")
+    def tree = parser.extractTree('''\
+          |ISA*12*23
+          |ST*Foo Bar*Fubar'''.stripMargin())
 
     then: "It works"
     tree == [
@@ -242,6 +241,17 @@ ST*Foo Bar*Fubar
         |ST*837*123*ABC
         |BHT*0211*57*12345*20140903*2145*CK
         |REF****'''.stripMargin()
+
+    then: "Edi matches expectation"
+    edi == expected
+
+    when: "I convert it to a pretty edi"
+    edi = new EdiParser().toEdi(x12.toTokens(0))
+
+    expected ='''\
+        |ST*837*123*ABC
+        |  BHT*0211*57*12345*20140903*2145*CK
+        |  REF****'''.stripMargin()
 
     then: "Edi matches expectation"
     edi == expected
