@@ -343,7 +343,8 @@ class ${className} extends Segment {
    * ${detail.element.toRow()}
    * </pre>
    */
-   ${detail.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
+   <% if (detail.requirement == 'C') { %>@Deprecated <% }
+   %>${detail.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
   <% } %>
 
   void parse(List<List<List<String>>> input) {
@@ -359,41 +360,32 @@ class ${className} extends Segment {
     %>
   }
 
-  List<List<List<String>>> toTokens() {
+  List<List<List<String>>> toTokens(String indent = '') {
     def retval = new ArrayList().with {
-      add(new ArrayList().with {
-        add new ArrayList().with {
-          add '${className}'
-          it
-        }
-        it
-      })
-      it
+      add(new ArrayList().with { add new ArrayList().with { add "\\\${indent}${className}".toString(); it }; it }); it
     }
 
-    <% details.each { detail -> %>
-      retval.add(<%
+    <% details.each { detail ->
+    %>retval.add(<%
         if (detail.toJavaType().startsWith('List')) {
-        %>${detail.element.toFieldName()}_${detail.sequence}.<%
+        %>${detail.element.toFieldName()}_${detail.sequence}<%
         } else {
-        %>[${detail.element.toFieldName()}_${detail.sequence}].<%
-        } %>
-          collect { rep ->
-              <% if (detail.element.toJavaType() in ['String', 'Integer', 'Double']) { %>
-                rep ? [rep.toString()] : []
-              <% } else if (detail.element.toJavaType()  ==  'java.time.LocalDate') { %>
-                rep ? [rep.format(com.cds.hiro.x12.EdiParser.DateFormat) ] : []
-              <% } else if (detail.element.toJavaType()  ==  'java.time.LocalTime') { %>
-                rep ? [rep.format(com.cds.hiro.x12.EdiParser.TimeFormat)] : []
-              <% } else if (detail.element.isEnum()) { %>
-                rep ? [rep.toString() ] : []
-              <% } else if (detail.element.isComposite()) { %>
-                rep?.toTokens() ?: []
-              <% } else { %>
-                throw new Exception("tokenize not implemented for \\\${rep.class}")
-              <% } %>
-            }
-      )
+        %>[${detail.element.toFieldName()}_${detail.sequence}]<%
+        }
+        %>.collect { rep -> <%
+              if (detail.element.toJavaType() in ['String', 'Integer', 'Double']) {
+              %>rep ? [rep.toString()] : []<%
+              } else if (detail.element.toJavaType()  ==  'java.time.LocalDate') {
+              %>rep ? [rep.format(com.cds.hiro.x12.EdiParser.DateFormat) ] : []<%
+              } else if (detail.element.toJavaType()  ==  'java.time.LocalTime') {
+              %>rep ? [rep.format(com.cds.hiro.x12.EdiParser.TimeFormat)] : []<%
+              } else if (detail.element.isEnum()) {
+              %>rep ? [rep.toString() ] : []<%
+              } else if (detail.element.isComposite()) {
+              %>rep?.toTokens() ?: []<%
+              } else {
+              %>throw new Exception("tokenize not implemented for \\\${rep.class}")<%
+              } %> })
     <% } %>
     retval
   }
