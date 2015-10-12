@@ -1,3 +1,5 @@
+targetCompatibility = JavaVersion.VERSION_1_7
+
 dependencies {
   compile 'com.github.rahulsom:ihe-iti:0.8'
 }
