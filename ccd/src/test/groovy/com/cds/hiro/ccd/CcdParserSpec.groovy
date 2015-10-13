@@ -11,10 +11,11 @@ import spock.lang.Specification
 
 class CcdParserSpec extends Specification {
 
-  public static final String EMPTY_DOCUMENT = """<?xml version="1.0" encoding="UTF-8"?>
-              <ClinicalDocument xmlns="urn:hl7-org:v3"
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-              </ClinicalDocument>"""
+  public static final String EMPTY_DOCUMENT = '''\
+      <?xml version="1.0" encoding="UTF-8"?>
+      <ClinicalDocument xmlns="urn:hl7-org:v3"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      </ClinicalDocument>'''.stripIndent()
 
   def "the code runs"() {
     given: "A ccd"
