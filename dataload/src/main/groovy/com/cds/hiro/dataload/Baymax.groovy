@@ -130,7 +130,6 @@ class Baymax {
     def status = client.post(
         path: "${facility.nickName}/ccd.json", body: docString, requestContentType: ContentType.XML
     ) { HttpResponseDecorator resp ->
-      println resp.entity.content.text
       resp.statusLine
     }
     log.info "${'CCD'.padLeft(20)} : ${status}"
