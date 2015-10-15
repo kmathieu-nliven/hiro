@@ -1,5 +1,7 @@
 package com.cds.hiro.dataload
 
+import com.cds.hiro.builders.Cda
+import com.github.rahulsom.cda.POCDMT000040ClinicalDocument
 import com.github.rahulsom.genealogy.Person
 import com.github.rahulsom.geocoder.domain.Address
 import groovy.json.JsonSlurper
@@ -104,7 +106,7 @@ class Baymax {
     return identifier
   }
 
-  def createPatient(Person person, Address address, String dob, String idntfr, Facility facility) {
+  void createPatient(Person person, Address address, String dob, String idntfr, Facility facility) {
     def nameS = "${person.lastName}^${person.firstName}"
     def idString = "${idntfr}^^^${facility.idx}&${facility.identifier}&ISO"
     def addrS = "${address.street}^^${address.city}^${address.state}^${address.zip}"
@@ -121,5 +123,16 @@ class Baymax {
     ) { HttpResponseDecorator resp -> resp.statusLine }
     log.info "${'ADT'.padLeft(20)} : ${adtStatus}"
 
+  }
+
+  def addDocument(POCDMT000040ClinicalDocument document, Facility facility) {
+    def docString = Cda.serialize(document)
+    def status = client.post(
+        path: "${facility.nickName}/ccd.json", body: docString, requestContentType: ContentType.XML
+    ) { HttpResponseDecorator resp ->
+      println resp.entity.content.text
+      resp.statusLine
+    }
+    log.info "${'CCD'.padLeft(20)} : ${status}"
   }
 }

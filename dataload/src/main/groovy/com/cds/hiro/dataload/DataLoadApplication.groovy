@@ -13,8 +13,6 @@ import com.github.rahulsom.geocoder.domain.LatLng
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import groovy.util.logging.Log4j
-import groovyx.net.http.ContentType
-import groovyx.net.http.HttpResponseDecorator
 import org.yaml.snakeyaml.Yaml
 
 import java.security.MessageDigest
@@ -122,9 +120,8 @@ class DataLoadApplication {
             }
           }
           def cda = Cda.createCcd(cdaContext)
-          println Cda.serialize(cda, true)
-          println "${'CCD'.padLeft(20)} : ${''}"
-          println "${'X12'.padLeft(20)} : ${''}"
+          baymax.addDocument(cda, facility)
+          // println "${'X12'.padLeft(20)} : ${''}"
         }
 
   }
