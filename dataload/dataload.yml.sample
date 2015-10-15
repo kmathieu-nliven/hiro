@@ -1,0 +1,15 @@
+geonamesUsername: demo
+facilities: 4
+patients: 16
+startingPort: 9000
+baymax:
+  baseUrl: http://localhost:8080/healthdock/
+#  username: admin
+#  password: admin
+measures:
+  - name: ACO0014
+    compliant: 0.5
+    complement: 1.0
+  - name: ACO0016
+    compliant: 0.6
+    complement: 1.2
