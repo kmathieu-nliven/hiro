@@ -16,23 +16,23 @@ import com.cds.hiro.x12_837p.loops.*
 class ${className} extends Message {
 
   <% children.each { detail -> %>
-   <% if (detail.class.simpleName == 'Loop') { %>
+  <%   if (detail.class.simpleName == 'Loop') { %>
   /**
    * From sethead.txt
    * <pre>
-   * "${detail}"
+   * "${details.find{it.loopId == detail.loopId}}"
    * </pre>
    */
-   ${detail.name} ${detail.name.toLowerCase()}
-   <% } else { %>
+  ${detail.name} ${detail.name.toLowerCase()}
+  <%   } else { %>
   /**
    * From sethead.txt
    * <pre>
-   *
+   * "${details.find{it.segmentId == detail.segmentId}}"
    * </pre>
    */
-   ${detail.segmentId} ${detail.segmentId.toLowerCase()}
-   <% } %>
+  ${detail.segmentId} ${detail.segmentId.toLowerCase()}
+  <%   } %>
   <% } %>
 
   void parse(List<List<List<List<String>>>> input) {
@@ -45,21 +45,17 @@ class ${className} extends Message {
     def indentNew = indent > -1 ? (indent+1) : -1
 
     <% children.eachWithIndex { detail, idx ->
-      if (idx) {
-
-      } else {
-
-      }
-      if (detail.class.simpleName == 'Loop') {
-        %>
+         if (detail.class.simpleName == 'Loop') {
+    %>
     if (${detail.name.toLowerCase()}) retval.addAll (${detail.name.toLowerCase()}.toTokens(<%
             if (idx == 0) {%>indentOld<%} else {%>indentNew<%}%>))<%
-      } else {
+          } else {
         %>
     if (${detail.segmentId.toLowerCase()}) retval.add (${detail.segmentId.toLowerCase()}.toTokens(<%
             if (idx == 0) {%>indentOld<%} else {%>indentNew<%}%>))<%
-      }
-    } %>
+          }
+       }
+    %>
     retval
   }
 }

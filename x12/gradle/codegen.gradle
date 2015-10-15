@@ -54,7 +54,7 @@ class TransactionSet {
 
 @TupleConstructor
 @EqualsAndHashCode
-@ToString(includeNames = true)
+@ToString(includeNames = true, excludes = 'theSegment,theLoop')
 class TransactionSetDetail {
   String transactionSetId, area, sequence, segmentId, requirement, maxUse, loopLevel, loopRepeat, loopId
   Segment theSegment
@@ -208,13 +208,6 @@ task codegen << {
   List<SegmentDetail> segmentDetails = []
   List<? extends Element> elements = []
 
-  def tsTemplate = file('templates/transactionset.gtpl').text
-  def loopTemplate = file('templates/loop.gtpl').text
-  def segTemplate = file('templates/segment.gtpl').text
-  def compositeTemplate = file('templates/composite.gtpl').text
-  def enumTemplate = file('templates/enum.gtpl').text
-
-
   X12Util.from('elehead').
       each { line -> elements << new SimpleElement(*line) }
   X12Util.from('eledetl').
@@ -253,12 +246,11 @@ task codegen << {
         }
       }
 
-  X12Util.from('sethead').
-      each { transactionSets << new TransactionSet(*it) }
 
   List<Loop> loops = []
-  Loop root
-  Loop current
+  Loop root, current
+  X12Util.from('sethead').
+      each { transactionSets << new TransactionSet(*it) }
   X12Util.from('setdetl').
       each { line ->
         def detail = new TransactionSetDetail(*line)
@@ -337,7 +329,7 @@ task codegen << {
 
         map.className = X12Util.toSymbol(it.dataElementName)
         new GStringTemplateEngine().
-            createTemplate(enumTemplate).
+            createTemplate(file('templates/enum.gtpl')).
             make(map).
             writeTo(
                 new File(eDir, "${map.className}.java").newWriter()
@@ -353,7 +345,7 @@ task codegen << {
 
         map.className = X12Util.toSymbol(it.dataElementName)
         new GStringTemplateEngine().
-            createTemplate(compositeTemplate).
+            createTemplate(file('templates/composite.gtpl')).
             make(map).
             writeTo(
                 new File(comDir, "${map.className}.groovy").newWriter()
@@ -368,7 +360,7 @@ task codegen << {
 
         map.className = X12Util.toSymbol(it.segmentId)
         new GStringTemplateEngine().
-            createTemplate(segTemplate).
+            createTemplate(file('templates/segment.gtpl')).
             make(map).
             writeTo(
                 new File(segsDir, "${map.className}.groovy").newWriter()
@@ -383,7 +375,7 @@ task codegen << {
 
         map.className = X12Util.toSymbol(it.name)
         new GStringTemplateEngine().
-            createTemplate(loopTemplate).
+            createTemplate(file('templates/loop.gtpl')).
             make(map).
             writeTo(
                 new File(loopsDir, "${map.className}.groovy").newWriter()
@@ -398,7 +390,7 @@ task codegen << {
 
         map.className = X12Util.toSymbol(it.transactionSetId)
         new GStringTemplateEngine().
-            createTemplate(tsTemplate).
+            createTemplate(file('templates/transactionset.gtpl')).
             make(map).
             writeTo(
                 new File(transactionSetDir, "${map.className}.groovy").newWriter()

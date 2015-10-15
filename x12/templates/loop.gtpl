@@ -14,10 +14,9 @@ import com.cds.hiro.x12_837p.segments.*
 @groovy.transform.builder.Builder(builderStrategy = groovy.transform.builder.SimpleStrategy, prefix = 'with')
 class ${className} extends Loop {
 
-  // ${children.size()}
   <% children.eachWithIndex { detail, idx -> %>
   /**
-   * From sethead.txt
+   * From seghead.txt
    * <pre>
    * "${detail}"
    * </pre>
