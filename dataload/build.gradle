@@ -1,0 +1,10 @@
+apply plugin: 'application'
+
+dependencies {
+  compile project(':builders')
+  compile 'com.github.rahulsom:geocoder:1.0'
+  compile 'com.github.rahulsom:genealogy:1.3'
+  compile 'org.yaml:snakeyaml:1.16'
+}
+
+mainClassName = "com.cds.hiro.dataload.DataLoadApplication"

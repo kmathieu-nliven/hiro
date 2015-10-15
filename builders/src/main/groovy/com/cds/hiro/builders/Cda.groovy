@@ -7,6 +7,9 @@ import javax.xml.bind.JAXBContext
 import javax.xml.bind.JAXBElement
 import javax.xml.bind.Marshaller
 import javax.xml.namespace.QName
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /**
  * Builder for creating CDA documents.
@@ -58,13 +61,16 @@ class Cda {
     if (context.id) {
       document.id = new II().withRoot(context.id)
     }
+    if (context.created) {
+      document.effectiveTime = new TS().withValue(context.created.toString())
+    }
     document.code = context.code
     document.title = new ST().withContent(context.title)
     document.confidentialityCode = context.confidentiality
     document.languageCode = new CS().withCode(context.language.toLanguageTag())
 
+    configureAuthor(document, context)
     configurePatient(context.patient, document)
-    configureAuthor(document, context.author)
     configureInformant(document, context.informant)
     configureCustodian(document, context.custodian)
     configureServiceEvent(document, context.serviceEvent)
@@ -446,12 +452,13 @@ class Cda {
       )
   }
 
-  private static void configureAuthor(POCDMT000040ClinicalDocument document, CdaContext.Author author) {
+  private static void configureAuthor(POCDMT000040ClinicalDocument document, CdaContext context) {
+    def author = context.author
     if (author)
       document.withAuthor(new POCDMT000040Author().
           withTypeCode('AUT').
           withContextControlCode('OP').
-          withTime(new TS().withValue(new Date().format('yyyyMMddHHmmssZ'))).
+          withTime(new TS().withValue(context.created.toString())).
           withAssignedAuthor(new POCDMT000040AssignedAuthor().
               withRepresentedOrganization(new POCDMT000040Organization().
                   withId(new II().withRoot(author.identifiedAs)).

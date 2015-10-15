@@ -8,6 +8,9 @@ import groovy.transform.CompileStatic
 import groovy.transform.builder.Builder
 import groovy.transform.builder.SimpleStrategy
 
+import java.time.Instant
+import java.time.LocalDateTime
+
 /**
  * Represents a CDA Document's data as used by the {@link Cda} class.
  *
@@ -18,6 +21,7 @@ import groovy.transform.builder.SimpleStrategy
 @Builder(builderStrategy = SimpleStrategy, prefix = '')
 class CdaContext {
 
+  Instant created = Instant.now()
   String realmCode = 'US'
 
   II CDA_R2 = new II().withRoot('2.16.840.1.113883.3.27.1776').withAssigningAuthorityName('CDA/R2'),
@@ -302,7 +306,7 @@ class CdaContext {
 
   @Builder(builderStrategy = SimpleStrategy, prefix = '')
   static class Author {
-    String of, identifiedAs, at, given, family
+    String of, identifiedAs, at, given, family, phone
   }
   Author author
 

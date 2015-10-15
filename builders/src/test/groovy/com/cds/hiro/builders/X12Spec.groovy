@@ -8,7 +8,7 @@ import spock.lang.Specification
 import java.time.Instant
 
 /**
- * Tests for the {@link Cda} class.
+ * Tests for the {@link X12} class.
  *
  * This class contains several cheats to make testing easy. If you are using Cda to generate tests, feel free to
  * extract these cheats into a util class and use them.
@@ -17,8 +17,7 @@ import java.time.Instant
  *
  * @author Rahul Somasunderam
  */
-class CdaSpec extends Specification {
-
+class X12Spec extends Specification {
   /*
    * Begin cheats
    */
@@ -56,12 +55,12 @@ class CdaSpec extends Specification {
    */
 
   @CompileStatic
-  def "Construct CCD"() {
+  def "Construct X12"() {
     when: "A ccd is generated"
-    def ccd = Cda.create {
+    def x12 = X12.create {
       created Instant.parse('2007-12-03T10:15:30.00Z')
-      code LOINC('34133-9')
-      confidentiality Conf('N')
+
+      id '1234567890'
 
       patient {
         name 'Wilson', 'Paul'
@@ -80,7 +79,8 @@ class CdaSpec extends Specification {
         }
       }
 
-      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+      authoredBy 'Johnson', 'Kimberly' phone '4082361234' of 'Alpine Family Physicians' \
+          identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
       informant 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771'
       custodian 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771'
 
@@ -108,8 +108,8 @@ class CdaSpec extends Specification {
       social SnomedCt('229819007') status 'never'
 
       // Medications
-      prescribed RxNorm('123') from '...' to '...'
-      prescribed RxNorm('123') from '...' to '...' withStatus 'ACTIVE'
+      prescribed RxNorm('123') from '20110101' to '20120101'
+      prescribed RxNorm('456') from '20130101' to '20130204' withStatus 'ACTIVE'
 
       // immunizations
       immunized CVX('88') by RouteOfAdministration('IM') on '199911'
@@ -152,40 +152,22 @@ class CdaSpec extends Specification {
       // assessments
       assessed LoincCd('73831-0') toBe SnomedCt('428171000124102') on '20110923'
     }
-    new File('build/test.xml').text = Cda.serialize(ccd, true)
+
+    def edi = X12.serialize(x12, true)
+    new File('build/test.edi').text = edi
+    def controlValue = '''\
+ST*837*1234567890*005010X222A1
+  BHT*0019*00*1234567890*20071203*0215*CH
+  REF*D9*1234567890*Claim*
+  NM1*41*2*20111118014000*****46*2.16.840.1.113883.3.771***
+    PER*IC*Kimberly Johnson*TE*4082361234*****
+    NM1*IL*1*Wilson*Paul****MI*42***
+      N3*500 Washington Blvd*
+      N4*San Jose*CA*95129*USA*H**'''
 
     then: "All is well"
-    1 == 1
+    edi == controlValue
 
   }
 
-  def "John Doe has never smoked"() {
-    when: "A ccd is generated"
-    def ccd = Cda.create {
-      code LOINC('34133-9')
-      confidentiality Conf('N')
-      patient()
-
-      social SnomedCt('229819007') status 'never'
-    }
-    new File('build/never-smoked.xml').text = Cda.serialize(ccd, true)
-
-    then: "All is well"
-    1 == 1
-  }
-
-  def "Jane Doe has never smoked"() {
-    when: "A ccd is generated"
-    def ccd = Cda.create {
-      code LOINC('34133-9')
-      confidentiality Conf('N')
-      patient().given 'Jane' gender 'F'
-
-      social SnomedCtCd('229819007') status 'never'
-    }
-    new File('build/jane-doe.xml').text = Cda.serialize(ccd, true)
-
-    then: "All is well"
-    1 == 1
-  }
 }
