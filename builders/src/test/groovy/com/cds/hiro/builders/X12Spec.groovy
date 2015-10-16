@@ -161,6 +161,8 @@ ST*837*1234567890*005010X222A1
   REF*D9*1234567890*Claim*
   NM1*41*2*20111118014000*****46*2.16.840.1.113883.3.771***
     PER*IC*Kimberly Johnson*TE*4082361234*****
+  NM1*40*2*Humana*****46*2.16.840.1.113883.19***
+  HL****
     NM1*IL*1*Wilson*Paul****MI*42***
       N3*500 Washington Blvd*
       N4*San Jose*CA*95129*USA*H**'''
