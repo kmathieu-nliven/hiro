@@ -1,5 +1,6 @@
 package com.cds.hiro.ccd
 
+import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
 /**
@@ -44,6 +45,7 @@ class CcdParserSpec extends Specification {
     JsonSlurper slurper = new JsonSlurper()
     def expectedJson = slurper.parseText(this.class.classLoader.getResourceAsStream('sample-output.json').text)
     def resultJson = slurper.parseText(results)
+    new File('build/actual-output.json').text = new JsonBuilder(resultJson).toPrettyString()
 
     then: "result json should match expected json"
     expectedJson == resultJson
