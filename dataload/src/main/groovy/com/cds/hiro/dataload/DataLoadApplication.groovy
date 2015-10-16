@@ -73,6 +73,23 @@ class DataLoadApplication {
 
     List<Facility> facilities = []
     int portNum = execCon.startingPort
+
+    def facilitiesFile = new File('build/facilities.csv').with {
+      text = ''
+      newWriter()
+    }
+    def patientsFile = new File('build/patients.csv').with {
+      text = ''
+      newWriter()
+    }
+
+    facilitiesFile.println (['name', 'nsid', 'uid', 'uidtype'].collect {$/"${it}"/$}.join(','))
+    patientsFile.println ([
+        'local.id', 'local.nsid', 'local.uid', 'local.uidtype',
+        'aco.id', 'aco.nsid', 'aco.uid', 'aco.uidtype',
+        'firstName', 'lastName', 'gender', 'dob',
+        'measures'
+    ].collect {$/"${it}"/$}.join(','))
     execCon.facilities.
         times { id ->
           def idx = 1000 + id
@@ -86,10 +103,12 @@ class DataLoadApplication {
               atnaConfig_atnaProtocol: 'TCP', owner_id: userId
           )
 
-          String identifier = baymax.createFacility(facility, idx)
+          String identifier = baymax.createFacility(facility, idx, execCon.aco)
           facility.idx = idx.toString()
           facility.identifier = identifier
           facilities << facility
+          facilitiesFile.println ([name, facility.idx, facility.identifier, 'ISO'].collect {$/"${it}"/$}.join(','))
+
         }
 
     execCon.patients.
@@ -98,11 +117,14 @@ class DataLoadApplication {
           def person = names.person
           def address = getAddress(execCon)
           def dob = (new SimpleDateFormat('yyyyMMdd').parse('19700101') + rnd.nextInt(365 * 80) - 365 * 40).format('yyyyMMdd')
-          def identifier = generateMD5_A("${person.firstName} ${person.lastName} ${dob.format('yyyyMMdd')}", 8)
-          log.info "Creating patient ${person.firstName} ${person.lastName} at ${facility.nickName} as ${identifier}"
+          def localId = generateMD5_A("${person.firstName} ${person.lastName} ${dob.format('yyyyMMdd')}", 8)
+          def acoId = generateMD5_A("${person.firstName} ${person.lastName} ${dob.format('yyyyMMdd')} ${execCon.aco.universalId}", 8)
+          log.info "Creating patient ${person.firstName} ${person.lastName} at ${facility.nickName} as ${localId}"
 
-          baymax.createPatient(person, address, dob, identifier, facility)
-          CdaContext cdaContext = createCdaContext(person, dob, facility, identifier, address)
+          baymax.createPatient(person, address, dob, localId, facility, execCon.aco, acoId)
+          CdaContext cdaContext = createCdaContext(person, dob, facility, localId, address)
+
+          def measures = ''
 
           execCon.measures.
               each { measure ->
@@ -113,21 +135,33 @@ class DataLoadApplication {
 
                 switch (evalMeasure(random, measure)) {
                   case MeasureInfo.Compliant:
-                    log.info "Will apply ${measure} as Compliant for ${identifier}"
+                    log.info "${measure.name.padLeft(20)} : + Compliant"
+                    measures += "+${measure.name} "
                     measureGenerator.applyCompliant(cdaContext); break
                   case MeasureInfo.Complement:
-                    log.info "Will apply ${measure} as Complement for ${identifier}"
+                    log.info "${measure.name.padLeft(20)} : - Complement"
+                    measures += "-${measure.name} "
                     measureGenerator.applyComplement(cdaContext); break
                   default:
-                    log.debug "Will not apply ${measure} for ${identifier}"
+                    log.debug "Will not apply ${measure} for ${localId}"
                 }
 
               }
+
+          patientsFile.println ([
+              localId, facility.idx, facility.identifier, 'ISO',
+              acoId, execCon.aco.namespaceId, execCon.aco.universalId, 'ISO',
+              person.firstName, person.lastName, person.gender, dob,
+              measures.trim()
+          ].collect {$/"${it}"/$}.join(','))
+
           def cda = Cda.createCcd(cdaContext)
           baymax.addDocument(cda, facility)
           // TODO Generate X12
         }
 
+    patientsFile.close()
+    facilitiesFile.close()
   }
 
   static MeasureInfo evalMeasure(double random, ExecutionConfig.Measure measure) {
@@ -142,7 +176,7 @@ class DataLoadApplication {
     }
   }
 
-  private static CdaContext createCdaContext(Person person, String dob, Facility facility, String idntfr, Address address) {
+  private static CdaContext createCdaContext(Person person, String dob, Facility facility, String identifier, Address address) {
     def cdaContext = new CdaContext()
     cdaContext.with {
       code LOINC('34133-9')
@@ -153,7 +187,7 @@ class DataLoadApplication {
         birthTime dob
         maritalStatus rnd.nextBoolean() ? 'M' : 'S'
 
-        id facility.identifier, idntfr
+        id facility.identifier, identifier
 
         addr {
           street address.street
