@@ -102,7 +102,7 @@ class DataLoadApplication {
           log.info "Creating patient ${person.firstName} ${person.lastName} at ${facility.nickName} as ${identifier}"
 
           baymax.createPatient(person, address, dob, identifier, facility)
-          CdaContext cdaContext = createCdaContext(person, dob, facility, identifier)
+          CdaContext cdaContext = createCdaContext(person, dob, facility, identifier, address)
 
           execCon.measures.
               each { measure ->
@@ -142,7 +142,7 @@ class DataLoadApplication {
     }
   }
 
-  private static CdaContext createCdaContext(Person person, String dob, Facility facility, String idntfr) {
+  private static CdaContext createCdaContext(Person person, String dob, Facility facility, String idntfr, Address address) {
     def cdaContext = new CdaContext()
     cdaContext.with {
       code LOINC('34133-9')
@@ -156,14 +156,14 @@ class DataLoadApplication {
         id facility.identifier, idntfr
 
         addr {
-          street '500 Washington Blvd'
-          city 'San Jose'
-          state 'CA'
-          postalCode '95129'
-          country 'USA'
+          street address.street
+          city address.city
+          state address.state
+          postalCode address.zip
+          country address.country
         }
       }
-      authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+      authoredBy 'Johnson', 'Kimberly' of facility.name identifiedAs facility.identifier at new Date().format('yyyyMMdd')
     }
     cdaContext
   }

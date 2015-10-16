@@ -79,7 +79,8 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
-      "started": "2011-08-05T07:00:00+0000"
+      "started": "2011-08-05T07:00:00+0000",
+      "status": "completed"
     },
     "section": "problems"
   },
@@ -96,7 +97,8 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
-      "started": "1993-04-23T07:00:00+0000"
+      "started": "1993-04-23T07:00:00+0000",
+      "status": "completed"
     },
     "section": "problems"
   },
@@ -113,7 +115,8 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
-      "started": null
+      "started": null,
+      "status": "completed"
     },
     "section": "problems"
   },
@@ -392,6 +395,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "Height"
     },
     "section": "vitalSigns"
@@ -413,6 +417,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "Weight"
     },
     "section": "vitalSigns"
@@ -433,6 +438,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "Body mass index"
     },
     "section": "vitalSigns"
@@ -454,6 +460,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "Systolic BP"
     },
     "section": "vitalSigns"
@@ -475,6 +482,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "Diastolic BP"
     },
     "section": "vitalSigns"
@@ -496,6 +504,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "Heart rate"
     },
     "section": "vitalSigns"
@@ -516,6 +525,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "Pulse rhythm"
     },
     "section": "vitalSigns"
@@ -537,6 +547,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "Respiratory rate"
     },
     "section": "vitalSigns"
@@ -559,6 +570,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "BG RANDOM"
     },
     "section": "labResults"
@@ -581,6 +593,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "BUN"
     },
     "section": "labResults"
@@ -603,6 +616,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "CALCIUM"
     },
     "section": "labResults"
@@ -625,6 +639,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "CHOLESTEROL"
     },
     "section": "labResults"
@@ -646,6 +661,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "CREATININE"
     },
     "section": "labResults"
@@ -667,6 +683,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "MAGNESIUM"
     },
     "section": "labResults"
@@ -688,6 +705,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "PO4"
     },
     "section": "labResults"
@@ -709,6 +727,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "POTASSIUM"
     },
     "section": "labResults"
@@ -730,6 +749,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "SGOT (AST)"
     },
     "section": "labResults"
@@ -751,6 +771,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "SGPT (ALT)"
     },
     "section": "labResults"
@@ -772,6 +793,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "URIC ACID"
     },
     "section": "labResults"
@@ -793,6 +815,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "LDH, TOTAL"
     },
     "section": "labResults"
@@ -814,6 +837,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "SODIUM"
     },
     "section": "labResults"
@@ -835,6 +859,7 @@
         "id": "1.42.20120416202200.685",
         "name": "Alpine Family Physicians"
       },
+      "status": "completed",
       "test": "POTASSIUM"
     },
     "section": "labResults"
