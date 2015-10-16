@@ -74,22 +74,24 @@ class DataLoadApplication {
     List<Facility> facilities = []
     int portNum = execCon.startingPort
 
-    def facilitiesFile = new File('build/facilities.csv').with {
-      text = ''
-      newWriter()
-    }
-    def patientsFile = new File('build/patients.csv').with {
-      text = ''
-      newWriter()
-    }
+    def facilitiesFile = new File('build/facilities.csv').
+        with {
+          text = ''
+          newWriter()
+        }
+    def patientsFile = new File('build/patients.csv').
+        with {
+          text = ''
+          newWriter()
+        }
 
-    facilitiesFile.println (['name', 'nsid', 'uid', 'uidtype'].collect {$/"${it}"/$}.join(','))
-    patientsFile.println ([
+    facilitiesFile.println(['name', 'nsid', 'uid', 'uidtype'].collect { $/"${it}"/$ }.join(','))
+    patientsFile.println([
         'local.id', 'local.nsid', 'local.uid', 'local.uidtype',
         'aco.id', 'aco.nsid', 'aco.uid', 'aco.uidtype',
         'firstName', 'lastName', 'gender', 'dob',
         'measures'
-    ].collect {$/"${it}"/$}.join(','))
+    ].collect { $/"${it}"/$ }.join(','))
     execCon.facilities.
         times { id ->
           def idx = 1000 + id
@@ -107,7 +109,7 @@ class DataLoadApplication {
           facility.idx = idx.toString()
           facility.identifier = identifier
           facilities << facility
-          facilitiesFile.println ([name, facility.idx, facility.identifier, 'ISO'].collect {$/"${it}"/$}.join(','))
+          facilitiesFile.println([name, facility.idx, facility.identifier, 'ISO'].collect { $/"${it}"/$ }.join(','))
 
         }
 
@@ -148,12 +150,12 @@ class DataLoadApplication {
 
               }
 
-          patientsFile.println ([
+          patientsFile.println([
               localId, facility.idx, facility.identifier, 'ISO',
               acoId, execCon.aco.namespaceId, execCon.aco.universalId, 'ISO',
               person.firstName, person.lastName, person.gender, dob,
               measures.trim()
-          ].collect {$/"${it}"/$}.join(','))
+          ].collect { $/"${it}"/$ }.join(','))
 
           def cda = Cda.createCcd(cdaContext)
           baymax.addDocument(cda, facility)
@@ -171,12 +173,14 @@ class DataLoadApplication {
               MeasureInfo.Ignore
     } else {
       random > measure.compliant ? MeasureInfo.Compliant :
-          random > measure.complement ?MeasureInfo.Complement :
+          random > measure.complement ? MeasureInfo.Complement :
               MeasureInfo.Ignore
     }
   }
 
-  private static CdaContext createCdaContext(Person person, String dob, Facility facility, String identifier, Address address) {
+  private static CdaContext createCdaContext(
+      Person person, String dob, Facility facility, String identifier, Address address
+  ) {
     def cdaContext = new CdaContext()
     cdaContext.with {
       code LOINC('34133-9')

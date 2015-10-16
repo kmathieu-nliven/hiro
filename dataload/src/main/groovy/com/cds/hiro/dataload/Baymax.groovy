@@ -120,7 +120,7 @@ class Baymax {
 
   void createPatient(
       Person person, Address address, String dob, String localIdentifier, Facility facility,
-      ExecutionConfig.Aco aco, String acoIdentifier
+      Aco aco, String acoIdentifier
   ) {
     def nameS = "${person.lastName}^${person.firstName}"
     def localId = "${localIdentifier}^^^${facility.idx}&${facility.identifier}&ISO"
