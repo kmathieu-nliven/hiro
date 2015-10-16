@@ -39,6 +39,7 @@ class DataLoadApplication {
   }
 
   static CE LOINC(String input) { ce(input, '2.16.840.1.113883.6.1', 'LOINC') }
+
   static CE Conf(String input) { ce(input, '2.16.840.1.113883.5.25', 'Confidentiality Codes') }
 
   private static Address getAddress(ExecutionConfig executionConfig) {
@@ -52,13 +53,14 @@ class DataLoadApplication {
     addr
   }
 
-  static String generateMD5_A(String s, int len){
-    MessageDigest.getInstance("MD5").digest(s.bytes).encodeHex().toString()[0..len-1].toUpperCase()
+  static String generateMD5_A(String s, int len) {
+    MessageDigest.getInstance("MD5").digest(s.bytes).encodeHex().toString()[0..len - 1].toUpperCase()
   }
 
   static enum MeasureInfo {
     Complement, Compliant, Ignore
   }
+
   public static void main(String[] args) {
     LogConfig.init()
     log.info "Starting application..."
@@ -96,53 +98,47 @@ class DataLoadApplication {
           def person = names.person
           def address = getAddress(execCon)
           def dob = (new SimpleDateFormat('yyyyMMdd').parse('19700101') + rnd.nextInt(365 * 80) - 365 * 40).format('yyyyMMdd')
-          def idntfr = generateMD5_A("${person.firstName} ${person.lastName} ${dob.format('yyyyMMdd')}", 8)
-          log.info "Creating patient ${person.firstName} ${person.lastName} at ${facility.nickName}"
+          def identifier = generateMD5_A("${person.firstName} ${person.lastName} ${dob.format('yyyyMMdd')}", 8)
+          log.info "Creating patient ${person.firstName} ${person.lastName} at ${facility.nickName} as ${identifier}"
 
-          baymax.createPatient(person, address, dob, idntfr, facility)
-          CdaContext cdaContext = createCdaContext(person, dob, facility, idntfr)
+          baymax.createPatient(person, address, dob, identifier, facility)
+          CdaContext cdaContext = createCdaContext(person, dob, facility, identifier)
 
-          // TODO Create CCD correctly
-          execCon.measures.each { measure ->
-            def random = Math.abs(rnd.nextGaussian())
+          execCon.measures.
+              each { measure ->
+                def random = Math.abs(rnd.nextGaussian())
 
-            def measureClass = Class.forName("com.cds.hiro.dataload.measures.${measure.name}".toString())
-            def measureGenerator = measureClass.newInstance() as MeasureGenerator
-            switch (evalMeasure(random, measure)) {
-              case MeasureInfo.Compliant:
-                log.info "Will apply ${measure} as Compliant for ${idntfr}"
-                measureGenerator.applyCompliant(cdaContext); break
-              case MeasureInfo.Complement:
-                log.info "Will apply ${measure} as Complement for ${idntfr}"
-                measureGenerator.applyComplement(cdaContext); break
-              default:
-                log.debug "Will not apply ${measure} for ${idntfr}"
-            }
-          }
+                def measureClass = Class.forName("com.cds.hiro.dataload.measures.${measure.name}".toString())
+                def measureGenerator = measureClass.newInstance() as MeasureGenerator
+
+                switch (evalMeasure(random, measure)) {
+                  case MeasureInfo.Compliant:
+                    log.info "Will apply ${measure} as Compliant for ${identifier}"
+                    measureGenerator.applyCompliant(cdaContext); break
+                  case MeasureInfo.Complement:
+                    log.info "Will apply ${measure} as Complement for ${identifier}"
+                    measureGenerator.applyComplement(cdaContext); break
+                  default:
+                    log.debug "Will not apply ${measure} for ${identifier}"
+                }
+
+              }
           def cda = Cda.createCcd(cdaContext)
           baymax.addDocument(cda, facility)
-          // println "${'X12'.padLeft(20)} : ${''}"
+          // TODO Generate X12
         }
 
   }
 
   static MeasureInfo evalMeasure(double random, ExecutionConfig.Measure measure) {
-    if (measure.complement > measure.compliant ) {
-      if (random > measure.complement) {
-        MeasureInfo.Complement
-      } else if (random > measure.compliant) {
-        MeasureInfo.Compliant
-      } else {
-        MeasureInfo.Ignore
-      }
+    if (measure.complement > measure.compliant) {
+      random > measure.complement ? MeasureInfo.Complement :
+          random > measure.compliant ? MeasureInfo.Compliant :
+              MeasureInfo.Ignore
     } else {
-      if (random > measure.compliant) {
-        MeasureInfo.Compliant
-      } else if (random > measure.complement) {
-        MeasureInfo.Complement
-      } else {
-        MeasureInfo.Ignore
-      }
+      random > measure.compliant ? MeasureInfo.Compliant :
+          random > measure.complement ?MeasureInfo.Complement :
+              MeasureInfo.Ignore
     }
   }
 
