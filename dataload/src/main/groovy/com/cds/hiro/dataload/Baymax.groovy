@@ -1,6 +1,7 @@
 package com.cds.hiro.dataload
 
 import com.cds.hiro.builders.Cda
+import com.cds.hiro.dataload.ExecutionConfig.Aco
 import com.github.rahulsom.cda.POCDMT000040ClinicalDocument
 import com.github.rahulsom.genealogy.Person
 import com.github.rahulsom.geocoder.domain.Address
@@ -43,7 +44,7 @@ class Baymax {
     Integer.parseInt(userList.first().id.toString())
   }
 
-  String createFacility(Facility facility, int idx) {
+  String createFacility(Facility facility, int idx, Aco aco) {
     def name = facility.nickName
     log.info "Creating facility ${name}"
 
@@ -98,6 +99,17 @@ class Baymax {
             name: 'Default'
         ))
 
+        f.addToIdentityDomains(new iti.pixpdq.IdentityDomain(
+            assigningAuthority: new com.cds.healthdock.shared.AssigningAuthority(
+                namespaceId: '${aco.namespaceId}',
+                universalId: '${aco.universalId}',
+                universalIdType: 'ISO'
+            ),
+            msh3: '${aco.namespaceId}',
+            msh4: '${aco.namespaceId}',
+            name: 'ACO'
+        ))
+
         f.save(flush: true)
         """]) { HttpResponseDecorator resp -> resp.statusLine.toString()
     }
@@ -106,15 +118,19 @@ class Baymax {
     return identifier
   }
 
-  void createPatient(Person person, Address address, String dob, String idntfr, Facility facility) {
+  void createPatient(
+      Person person, Address address, String dob, String localIdentifier, Facility facility,
+      Aco aco, String acoIdentifier
+  ) {
     def nameS = "${person.lastName}^${person.firstName}"
-    def idString = "${idntfr}^^^${facility.idx}&${facility.identifier}&ISO"
+    def localId = "${localIdentifier}^^^${facility.idx}&${facility.identifier}&ISO"
+    def acoId = "${acoIdentifier}^^^${aco.namespaceId}&${aco.universalId}&ISO"
     def addrS = "${address.street}^^${address.city}^${address.state}^${address.zip}"
 
     def hl7 = """\
         |MSH|^~\\&|ABCDEFG&1.23.4&ISO|CDS|LABADT|MCM|20120109|SECURITY|ADT^A04|MSG00001|P|2.4
         |EVN|A01|198808181123
-        |PID|||$idString||${nameS}||${dob}|${person.gender}||2106-3|${addrS}|GL||||S||ADT_PID18^2^M10||9-87654^NC""".
+        |PID|||$localId~$acoId||${nameS}||${dob}|${person.gender}||2106-3|${addrS}|GL||||S||ADT_PID18^2^M10||9-87654^NC""".
         stripMargin()
     def adtStatus = client.post(
         path: 'hl7Sender/send.json',
@@ -129,9 +145,7 @@ class Baymax {
     def docString = Cda.serialize(document)
     def status = client.post(
         path: "${facility.nickName}/ccd.json", body: docString, requestContentType: ContentType.XML
-    ) { HttpResponseDecorator resp ->
-      resp.statusLine
-    }
+    ) { HttpResponseDecorator resp -> resp.statusLine }
     log.info "${'CCD'.padLeft(20)} : ${status}"
   }
 }

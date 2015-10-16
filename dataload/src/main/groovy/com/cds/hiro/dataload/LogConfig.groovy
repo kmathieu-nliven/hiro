@@ -21,7 +21,7 @@ class LogConfig {
     FileAppender fa = new FileAppender().
         with {
           name = "FileLogger"
-          file = "mylog.log"
+          file = "build/dataload.log"
           layout = new PatternLayout("%d %-5p [%c{1}] %m%n")
           threshold = Level.DEBUG
           append = true

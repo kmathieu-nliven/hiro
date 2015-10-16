@@ -32,4 +32,12 @@ class ExecutionConfig {
   Baymax baymax = new Baymax()
   List<Measure> measures
 
+  @ToString(includePackage = false)
+  static class Aco {
+    String namespaceId = 'ACO'
+    String universalId = '1.2.4.1'
+  }
+
+  Aco aco = new Aco()
+
 }
