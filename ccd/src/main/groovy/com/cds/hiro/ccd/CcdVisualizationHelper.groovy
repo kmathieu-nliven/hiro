@@ -290,6 +290,7 @@ class CcdVisualizationHelper {
             name: ccdSource?.@source,
             id  : ccdSource?.getAt(ns.ccd)?.text(),
         ],
+        status: observation?.getAt(ns.statusCode)?.@code?.getAt(0),
         code   : getCodeDetails(code)
     ]).toString()
   }
