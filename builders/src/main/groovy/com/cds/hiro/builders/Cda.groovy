@@ -346,7 +346,8 @@ class Cda {
                               problem.between ? ItiHelper.jaxb('low', IVLTS, new IVLTS().withValue(problem.between)) : null,
                               problem.and ? ItiHelper.jaxb('high', IVLTS, new IVLTS().withValue(problem.and)) : null,
                           ].findAll { it })).
-                          withValue(problem.code)
+                          withValue(problem.code).
+                          withStatusCode(new CS().withCode(problem.withStatus))
                       )
                   ).
                   withStatusCode(new CS().

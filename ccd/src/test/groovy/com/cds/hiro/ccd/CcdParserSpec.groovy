@@ -50,9 +50,8 @@ class CcdParserSpec extends Specification {
 
   }
 
-  def "test effectiveTime low high values"() {
+  def "test effectiveTime low high values for procedures"() {
     given: "A ccd"
-
     def ccdString = this.class.classLoader.getResourceAsStream('sample-ccd.xml').text
 
     when: "Parse it using CcdStreamingUtil"
