@@ -71,29 +71,6 @@ class CcdVisualizationHelper {
     }
   }
 
-  @Deprecated
-  String plotEncounters(section) {
-    StringBuilder sb = new StringBuilder()
-    section?.getAt(ns.entry)?.each { entry ->
-      sb.append "events.push({"
-      def encounter = entry?.getAt(ns.encounter)
-      def props = printEffectiveDateForJson(encounter?.getAt(ns.effectiveTime)?.getAt(0))
-      props << "classification: 'Encounter'"
-      def encounterCode = encounter?.getAt(ns.code)
-      def assignedPerson = encounter?.getAt(ns.performer)?.getAt(ns.assignedEntity)?.getAt(ns.assignedPerson)
-      def originalText = encounterCode?.getAt(ns.originalText)?.text() ?: findTextById(section,
-          encounterCode?.getAt(ns.originalText)?.getAt(ns.reference)?.@value?.getAt(0) as String)
-      def personName = assignedPerson?.getAt(ns.name)
-      def description = personName?.text() ?: (personName?.getAt(ns.given)?.text() + ' ' + personName?.getAt(ns.family)?.text())
-      props << "  text: '${originalText?.replaceAll("'", "\\\\'")}, ${description?.replaceAll("'", "\\\\'")}'"
-      props << "  description: '${description?.replaceAll("'", "\\\\'")}'"
-      sb.append props.join(", ")
-      sb.append "});\n"
-    }
-    getNonNullString(sb)
-  }
-
-
   private static def printEffectiveDate(Node effectiveDate) {
     if (!effectiveDate)
       return null
@@ -203,7 +180,7 @@ class CcdVisualizationHelper {
           node?.getAt(ns.code)?.getAt(ns.originalText)?.getAt(0)?.text(),
           node?.getAt(ns.name)?.getAt(0)?.text(),
       ]
-      def chosenValue = possibleValues.find { !it.is(null) } ?: defaultValue
+      possibleValues.find { !it.is(null) } ?: defaultValue
     }
   }
 
@@ -617,7 +594,7 @@ class CcdVisualizationHelper {
                 name: ccdSource?.@source?.getAt(0),
                 id  : ccdSource?.getAt(ns.ccd)?.text(),
             ],
-            code         : getCodeDetails(element?.getAt(ns.code)?.getAt(0))
+            code         : getCodeDetails(element?.getAt(ns.code)?.getAt(0))emove
         ]
       case 'substanceAdmin':
         return [
