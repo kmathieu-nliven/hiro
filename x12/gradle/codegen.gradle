@@ -61,12 +61,22 @@ class TransactionSetDetail {
   Loop theLoop
 }
 
-abstract class BlockElement {}
+abstract class BlockElement {
+  abstract String getName();
+  String getMethodName() {
+    this.name[0].toUpperCase() + this.name[1..-1].toLowerCase()
+  }
+}
 
 @Canonical(excludes = 'details')
 class Segment extends BlockElement {
   String segmentId, segmentName
   List<SegmentDetail> details = []
+
+  @Override
+  String getName() {
+    segmentName
+  }
 }
 
 @Canonical(excludes = 'children,parent')

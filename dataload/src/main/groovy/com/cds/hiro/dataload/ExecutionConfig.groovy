@@ -10,6 +10,8 @@ import groovy.transform.builder.SimpleStrategy
 @ToString(includePackage = false)
 class ExecutionConfig {
   String geonamesUsername
+  Double lat = 32.902071
+  Double lng = -117.207741
 
   @ToString(includePackage = false)
   static class Baymax {
@@ -21,8 +23,8 @@ class ExecutionConfig {
   @ToString(includePackage = false)
   static class Measure {
     String name
-    Double compliant
-    Double complement
+    Double compliant = 2.5
+    Double complement = 3.0
   }
 
   Integer facilities  = 4

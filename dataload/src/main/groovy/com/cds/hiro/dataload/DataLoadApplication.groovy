@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat
 @CompileStatic
 class DataLoadApplication {
   static Random rnd = new Random(new SecureRandom().nextLong())
+  public static final int YEAR = 365
 
 
   static CE ce(String code, String codeSystem, String codeSystemName) {
@@ -43,7 +44,7 @@ class DataLoadApplication {
   static CE Conf(String input) { ce(input, '2.16.840.1.113883.5.25', 'Confidentiality Codes') }
 
   private static Address getAddress(ExecutionConfig executionConfig) {
-    def ll = new LatLng(32.902071, -117.207741)
+    def ll = new LatLng(executionConfig.lat, executionConfig.lng)
     def geocoderName = executionConfig.geonamesUsername
     def g2 = new GeonamesCoder(geocoderName)
     Address addr = null
@@ -118,7 +119,7 @@ class DataLoadApplication {
           def facility = facilities[rnd.nextInt(facilities.size())]
           def person = names.person
           def address = getAddress(execCon)
-          def dob = (new SimpleDateFormat('yyyyMMdd').parse('19700101') + rnd.nextInt(365 * 80) - 365 * 40).format('yyyyMMdd')
+          def dob = (new SimpleDateFormat('yyyyMMdd').parse('19700101') + rnd.nextInt(YEAR * 80) - YEAR * 40).format('yyyyMMdd')
           def localId = generateMD5_A("${person.firstName} ${person.lastName} ${dob.format('yyyyMMdd')}", 8)
           def acoId = generateMD5_A("${person.firstName} ${person.lastName} ${dob.format('yyyyMMdd')} ${execCon.aco.universalId}", 8)
           log.info "Creating patient ${person.firstName} ${person.lastName} at ${facility.nickName} as ${localId}"

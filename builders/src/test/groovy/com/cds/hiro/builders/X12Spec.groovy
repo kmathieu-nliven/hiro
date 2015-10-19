@@ -62,6 +62,12 @@ class X12Spec extends Specification {
 
       id '1234567890'
 
+      authoredBy 'Johnson', 'Kimberly' phone '4082361234' of 'Alpine Family Physicians' \
+          identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
+
+      // informant 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771'
+      // custodian 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771'
+
       patient {
         name 'Wilson', 'Paul'
         gender 'M'
@@ -79,10 +85,8 @@ class X12Spec extends Specification {
         }
       }
 
-      authoredBy 'Johnson', 'Kimberly' phone '4082361234' of 'Alpine Family Physicians' \
-          identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
-      informant 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771'
-      custodian 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771'
+      // payers
+      payer 'Humana' identifiedAs '2.16.840.1.113883.19' identifierIs 'HPCG02815-00'
 
       serviceEvent {
         initiatedBy 'Chen', 'Peter'
@@ -145,9 +149,6 @@ class X12Spec extends Specification {
 
       // allergies
       allergen RxNorm('70618') causes SnomedCt('247472004')
-
-      // payers
-      payer 'Humana' identifiedAs '2.16.840.1.113883.19' identifierIs 'HPCG02815-00'
 
       // assessments
       assessed LoincCd('73831-0') toBe SnomedCt('428171000124102') on '20110923'
