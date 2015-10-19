@@ -1,8 +1,6 @@
 package com.cds.hiro.dataload
 
 import groovy.transform.ToString
-import groovy.transform.builder.Builder
-import groovy.transform.builder.SimpleStrategy
 
 /**
  * Created by rahul on 10/15/15.
@@ -27,7 +25,7 @@ class ExecutionConfig {
     Double complement = 3.0
   }
 
-  Integer facilities  = 4
+  Integer facilities = 4
   Integer patients = 16
   Integer startingPort = 9000
 
