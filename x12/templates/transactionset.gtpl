@@ -31,6 +31,10 @@ class ${className} extends Message {
   ${detail.name} ${detail.name.toLowerCase()}
   <% } else {%>
   List<${detail.name}> ${detail.name.toLowerCase()} = new ArrayList<${detail.name}>()
+  ${className} with${detail.methodName}(${detail.name} item) {
+    this.${detail.name.toLowerCase()}.add(item)
+    return this
+  }
 <% } %>
   <%   } else {
     tsd = details.find{it.segmentId == detail.segmentId}
@@ -59,13 +63,13 @@ class ${className} extends Message {
          if (detail.class.simpleName == 'Loop') {
            tsd = details.find{it.loopId == detail.loopId}
             if (tsd.loopRepeat == '1') {
-    %>
-if (${detail.name.toLowerCase()}) retval.addAll (${detail.name.toLowerCase()}.toTokens(<%
+%>
+    if (${detail.name.toLowerCase()}) retval.addAll (${detail.name.toLowerCase()}.toTokens(<%
     if (idx == 0) {%>indentOld<%} else {%>indentNew<%}%>))<%
             } else {
 %>
-if (${detail.name.toLowerCase()}) retval.addAll (${detail.name.toLowerCase()}*.toTokens(<%
-    if (idx == 0) {%>indentOld<%} else {%>indentNew<%}%>))<%
+    ${detail.name.toLowerCase()}*.toTokens(<%if (idx == 0) {%>indentOld<%} else {%>indentNew<%}%>).each {retval.addAll(it)}
+    <%
             }
 
           } else {
