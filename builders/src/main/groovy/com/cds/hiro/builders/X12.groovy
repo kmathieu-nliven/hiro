@@ -1,6 +1,7 @@
 package com.cds.hiro.builders
 
 import com.cds.hiro.x12.EdiParser
+import com.cds.hiro.x12_837p.composites.CompositeMedicalProcedureIdentifier
 import com.cds.hiro.x12_837p.composites.HealthCareCodeInformation
 import com.cds.hiro.x12_837p.enums.*
 import com.cds.hiro.x12_837p.loops.*
@@ -35,10 +36,39 @@ class X12 {
     configureInsured(x12, context.patient)
     configurePayer(x12, context.payers?.first())
     configureServiceEventAndEncounter(x12, context)
-
     configureProblems(x12, context.problems)
+    configureProcedures(x12, context.procedures)
 
     x12
+  }
+
+  private static void configureProcedures(x12, ArrayList<CdaContext.Procedure> procedures) {
+    procedures.each {
+      def startProcedure = it.from ?
+          dtp(DateTimeQualifier.Start_196, it.from) :
+          it.on ?
+              dtp(DateTimeQualifier.Start_196, it.on) :
+              null
+      def endProcedure = it.to ? dtp(DateTimeQualifier.End_197, it.to) : null
+
+      x12.withL2000c(new L2000C().
+          withL2300_8(new L2300().
+              withL2400_94(new L2400().
+                  withSv1_2(new SV1().
+                      withCompositeMedicalProcedureIdentifier_01(new CompositeMedicalProcedureIdentifier().
+                          withProductServiceIDQualifier_01(
+                              ProductServiceIDQualifier.CurrentProceduralTerminologyCPTCodes_CJ
+                              /* TODO This assumes CPT all the time */
+                          ).
+                          withProductServiceID_02(it.code.code).
+                          withDescription_07(it.code.displayName)
+                      )
+                  ).
+                  withDtp_23(startProcedure).
+                  withDtp_24(endProcedure)
+              ))
+      )
+    }
   }
 
   private static void configureProblems(x12, ArrayList<CdaContext.Problem> problems) {
@@ -62,10 +92,7 @@ class X12 {
                       ).
                       withIndustryCode_02(it.code.code)
                   )
-              )/*.
-              withL2400_94(new L2400().
-                  withSv1_2(new SV1().with01)
-              )*/
+              )
           )
       )
     }

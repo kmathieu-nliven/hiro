@@ -106,18 +106,18 @@ class X12Spec extends Specification {
       suffers Icd9CM('724.5') since '20110805'
 
       // Family History
-      familyMember SnomedCt('65656005') condition 'Survived into her 90s'
+//      familyMember SnomedCt('65656005') condition 'Survived into her 90s'
 
       // Social History
-      social SnomedCt('229819007') status 'never'
+//      social SnomedCt('229819007') status 'never'
 
       // Medications
-      prescribed RxNorm('123') from '20110101' to '20120101'
-      prescribed RxNorm('456') from '20130101' to '20130204' withStatus 'ACTIVE'
+//      prescribed RxNorm('123') from '20110101' to '20120101'
+//      prescribed RxNorm('456') from '20130101' to '20130204' withStatus 'ACTIVE'
 
       // immunizations
-      immunized CVX('88') by RouteOfAdministration('IM') on '199911'
-      immunized CVX('27') by RouteOfAdministration('IM') on '199911' withStatus 'completed'
+//      immunized CVX('88') by RouteOfAdministration('IM') on '199911'
+//      immunized CVX('27') by RouteOfAdministration('IM') on '199911' withStatus 'completed'
 
       // procedures
       performed CPT('99203') on '20101120100000'
@@ -125,33 +125,33 @@ class X12Spec extends Specification {
       performed SnomedCt('77528005') from '20101120' to '20131220' withStatus 'completed'
 
       // Past Medical History
-      diagnosis {
-        code SnomedCt('77528005')
-        by 'Healthy', 'Bruce'
-        at 'Community General Hospital'
-        identifiedAs '2.16.840.1.113883.4.6', '1111111111'
-        on '20130130000000'
-      }
+//      diagnosis {
+//        code SnomedCt('77528005')
+//        by 'Healthy', 'Bruce'
+//        at 'Community General Hospital'
+//        identifiedAs '2.16.840.1.113883.4.6', '1111111111'
+//        on '20130130000000'
+//      }
 
       // vitals
-      vitals {
-        on '20111209'
-
-        measured ICNP('27113002') at '72 in' of 'PQ'
-        measured ICNP('60621009') at '22.83 kg/m2' of 'RTO_PQ_PQ'
-      }
+//      vitals {
+//        on '20111209'
+//
+//        measured ICNP('27113002') at '72 in' of 'PQ'
+//        measured ICNP('60621009') at '22.83 kg/m2' of 'RTO_PQ_PQ'
+//      }
 
       // results group
-      results {
-        on '20111209'
-        measured LOINC('2339-0') at '143 mg/dL' of 'PQ' withRange '70-125' was 'High'
-      }
+//      results {
+//        on '20111209'
+//        measured LOINC('2339-0') at '143 mg/dL' of 'PQ' withRange '70-125' was 'High'
+//      }
 
       // allergies
-      allergen RxNorm('70618') causes SnomedCt('247472004')
+//      allergen RxNorm('70618') causes SnomedCt('247472004')
 
       // assessments
-      assessed LoincCd('73831-0') toBe SnomedCt('428171000124102') on '20110923'
+//      assessed LoincCd('73831-0') toBe SnomedCt('428171000124102') on '20110923'
     }
 
     def edi = X12.serialize(x12, true)
@@ -179,6 +179,14 @@ class X12Spec extends Specification {
         |      HI*BJ:415.0:::::::***********
         |      DTP*431*D8*20110805
         |      HI*BJ:724.5:::::::***********
+        |        SV1*CJ:99203:::::Code 99203:********************
+        |        DTP*196*D8*20101120100000
+        |        SV1*CJ:99203:::::Code 99203:********************
+        |        DTP*196*D8*20101120
+        |        DTP*197*D8*20131220
+        |        SV1*CJ:77528005:::::Code 77528005:********************
+        |        DTP*196*D8*20101120
+        |        DTP*197*D8*20131220
         '''.stripMargin().replaceAll(/\n *$/, '')
 
     then: "All is well"
