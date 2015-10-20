@@ -1,6 +1,7 @@
 package com.cds.hiro.builders
 
 import com.cds.hiro.x12.EdiParser
+import com.cds.hiro.x12_837p.composites.HealthCareCodeInformation
 import com.cds.hiro.x12_837p.enums.*
 import com.cds.hiro.x12_837p.loops.*
 import com.cds.hiro.x12_837p.segments.*
@@ -33,16 +34,50 @@ class X12 {
     configureAuthor(x12, context.author)
     configureInsured(x12, context.patient)
     configurePayer(x12, context.payers?.first())
+    configureServiceEventAndEncounter(x12, context)
 
+    configureProblems(x12, context.problems)
+
+    x12
+  }
+
+  private static void configureProblems(x12, ArrayList<CdaContext.Problem> problems) {
+    problems.each {
+      def startProblem = it.between ?
+          dtp(DateTimeQualifier.OnsetofCurrentSymptomsorIllness_431, it.between) :
+          it.since ?
+              dtp(DateTimeQualifier.OnsetofCurrentSymptomsorIllness_431, it.since) :
+              null
+      def endProblem = it.and ? dtp(DateTimeQualifier.OccurrenceSpanTo_450, it.and) : null
+
+      x12.withL2000c(new L2000C().
+          withL2300_8(new L2300().
+              withDtp_2(startProblem).
+              withDtp_3(endProblem).
+              withHi_79(new HI().
+                  withHealthCareCodeInformation_01(new HealthCareCodeInformation().
+                      withCodeListQualifierCode_01(
+                          CodeListQualifierCode.InternationalClassificationofDiseasesClinicalModificationICD9CMAdmittingDiagnosis_BJ
+                          /* TODO This assumes ICD9CM. May be wrong */
+                      ).
+                      withIndustryCode_02(it.code.code)
+                  )
+              )/*.
+              withL2400_94(new L2400().
+                  withSv1_2(new SV1().with01)
+              )*/
+          )
+      )
+    }
+  }
+
+  private static void configureServiceEventAndEncounter(M837Q1 x12, CdaContext context) {
     x12.withL2000c(new L2000C().
         withPat_2(createPatient(context)).
-        withL2010ca_5(null).
-        withL2010cb_6(null).
-        withL2010cc_7(null).
         withL2300_8(new L2300().
             withL2310b_86(createServiceEvent(context.serviceEvent)).
-            withDtp_2(beginEncounter(context.encounter)).
-            withDtp_3(endEncounter(context.encounter))
+            withDtp_2(dtp(DateTimeQualifier.InitialTreatment_454, context.encounter.between)).
+            withDtp_3(dtp(DateTimeQualifier.LastVisit_691, context.encounter.and))
         )
     )
   }
@@ -68,18 +103,11 @@ class X12 {
         withYesNoConditionorResponseCode_09(YesNoConditionorResponseCode.No_N)
   }
 
-  private static DTP endEncounter(CdaContext.Encounter encounter) {
+  private static DTP dtp(DateTimeQualifier dateTimeQualifier, String and) {
     new DTP().
-        withDateTimeQualifier_01(DateTimeQualifier.LastVisit_691).
+        withDateTimeQualifier_01(dateTimeQualifier).
         withDateTimePeriodFormatQualifier_02(DateTimePeriodFormatQualifier.DateExpressedinFormatCCYYMMDD_D8).
-        withDateTimePeriod_03(encounter.and)
-  }
-
-  private static DTP beginEncounter(CdaContext.Encounter encounter) {
-    new DTP().
-        withDateTimeQualifier_01(DateTimeQualifier.InitialTreatment_454).
-        withDateTimePeriodFormatQualifier_02(DateTimePeriodFormatQualifier.DateExpressedinFormatCCYYMMDD_D8).
-        withDateTimePeriod_03(encounter.between)
+        withDateTimePeriod_03(and)
   }
 
   private static L2310B createServiceEvent(CdaContext.ServiceEvent serviceEvent) {

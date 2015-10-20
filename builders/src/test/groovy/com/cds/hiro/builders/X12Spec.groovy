@@ -171,6 +171,14 @@ class X12Spec extends Specification {
         |      DTP*454*D8*20110807
         |      DTP*691*D8*20111209
         |      NM1*1P*1*Chen*Peter****EI*1225652938001060***
+        |      DTP*431*D8*20110805
+        |      DTP*450*D8*20111231
+        |      HI*BJ:415.0:::::::***********
+        |      DTP*431*D8*20110805
+        |      DTP*450*D8*20111231
+        |      HI*BJ:415.0:::::::***********
+        |      DTP*431*D8*20110805
+        |      HI*BJ:724.5:::::::***********
         '''.stripMargin().replaceAll(/\n *$/, '')
 
     then: "All is well"
