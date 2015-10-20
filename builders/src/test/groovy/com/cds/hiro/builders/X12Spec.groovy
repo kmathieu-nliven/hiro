@@ -108,6 +108,11 @@ class X12Spec extends Specification {
       performed CPT('99203') on '20101120100000'
       performed CPT('99203') from '20101120' to '20131220'
       performed SnomedCt('77528005') from '20101120' to '20131220' withStatus 'completed'
+
+      diagnosis {
+        code SnomedCt('77528005') on '20130130000000'
+      }
+
     }
 
     def edi = X12.serialize(x12, true)
@@ -135,6 +140,8 @@ class X12Spec extends Specification {
         |      HI*BJ:415.0:::::::***********
         |      DTP*431*D8*20110805
         |      HI*BJ:724.5:::::::***********
+        |      DTP*431*D8*20130130000000
+        |      HI*AAA:77528005:::::::***********
         |        SV1*CJ:99203:::::Code 99203:********************
         |        DTP*196*D8*20101120100000
         |        SV1*CJ:99203:::::Code 99203:********************

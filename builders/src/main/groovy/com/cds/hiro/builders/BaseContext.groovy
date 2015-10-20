@@ -1,6 +1,7 @@
 package com.cds.hiro.builders
 
 import com.cds.hiro.builders.contexts.Author
+import com.cds.hiro.builders.contexts.Diagnosis
 import com.cds.hiro.builders.contexts.Encounter
 import com.cds.hiro.builders.contexts.Patient
 import com.cds.hiro.builders.contexts.Payer
@@ -93,6 +94,15 @@ class BaseContext {
     def problem = new Problem().code(code).active(true)
     problems << problem
     return problem
+  }
+
+
+  List<Diagnosis> diagnoses = []
+  void diagnosis(@DelegatesTo(Diagnosis) Closure closure) {
+    def diagnosis = closure.delegate = new Diagnosis()
+    diagnoses << diagnosis
+    closure.resolveStrategy = Closure.DELEGATE_FIRST
+    closure.call()
   }
 
 }

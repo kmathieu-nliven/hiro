@@ -2,7 +2,8 @@ package com.cds.hiro.builders
 
 import com.cds.hiro.builders.contexts.*
 import com.cds.hiro.x12.EdiParser
-import com.cds.hiro.x12_837p.composites.*
+import com.cds.hiro.x12_837p.composites.CompositeMedicalProcedureIdentifier
+import com.cds.hiro.x12_837p.composites.HealthCareCodeInformation
 import com.cds.hiro.x12_837p.enums.*
 import com.cds.hiro.x12_837p.loops.*
 import com.cds.hiro.x12_837p.segments.*
@@ -37,6 +38,7 @@ class X12 {
     configurePayer(x12, context.payers?.first())
     configureServiceEventAndEncounter(x12, context)
     configureProblems(x12, context.problems)
+    configureDiagnoses(x12, context.diagnoses)
     configureProcedures(x12, context.procedures)
 
     x12
@@ -46,12 +48,13 @@ class X12 {
       '2.16.840.1.113883.5.25': ProductServiceIDQualifier.CurrentProceduralTerminologyCPTCodes_CJ,
       '2.16.840.1.113883.6.96': ProductServiceIDQualifier.SNOMEDSystematizedNomenclatureofMedicine_LD,
   ]
+
   private static void configureProcedures(x12, ArrayList<Procedure> procedures) {
     procedures.each {
 
       def startProcedure = it.from ?
           dtp(DateTimeQualifier.Start_196, it.from) : it.on ?
-              dtp(DateTimeQualifier.Start_196, it.on) : null
+          dtp(DateTimeQualifier.Start_196, it.on) : null
 
       def endProcedure = it.to ? dtp(DateTimeQualifier.End_197, it.to) : null
 
@@ -79,7 +82,9 @@ class X12 {
 
   private static Map<String, CodeListQualifierCode> codeListQualifierCodeMap = [
       '2.16.840.1.113883.6.103': CodeListQualifierCode.InternationalClassificationofDiseasesClinicalModificationICD9CMAdmittingDiagnosis_BJ,
+      '2.16.840.1.113883.6.96' : CodeListQualifierCode.SNOMEDSystematizedNomenclatureofMedicine_AAA,
   ]
+
   private static void configureProblems(x12, ArrayList<Problem> problems) {
     problems.each {
       def startProblem = it.between ?
@@ -98,6 +103,31 @@ class X12 {
           withL2300_8(new L2300().
               withDtp_2(startProblem).
               withDtp_3(endProblem).
+              withHi_79(new HI().
+                  withHealthCareCodeInformation_01(new HealthCareCodeInformation().
+                      withCodeListQualifierCode_01(codeListQualifierCode).
+                      withIndustryCode_02(it.code.code)
+                  )
+              )
+          )
+      )
+    }
+  }
+
+  private static void configureDiagnoses(x12, ArrayList<Diagnosis> diagnoses) {
+    diagnoses.each {
+      def diagnosisDate = it.on ?
+          dtp(DateTimeQualifier.OnsetofCurrentSymptomsorIllness_431, it.on) :
+          null
+
+      def codeListQualifierCode = codeListQualifierCodeMap[it.code.codeSystem]
+      if (!codeListQualifierCode) {
+        throw new Exception("CodeSystem ${it.code.codeSystem} is not mapped in com.cds.hiro.builders.X12.codeListQualifierCodeMap")
+      }
+
+      x12.withL2000c(new L2000C().
+          withL2300_8(new L2300().
+              withDtp_2(diagnosisDate).
               withHi_79(new HI().
                   withHealthCareCodeInformation_01(new HealthCareCodeInformation().
                       withCodeListQualifierCode_01(codeListQualifierCode).

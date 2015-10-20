@@ -116,7 +116,7 @@ class Cda {
   }
 
   private static void addDiagnoses(
-      POCDMT000040StructuredBody structuredBody, List<CdaContext.Diagnosis> diagnoses) {
+      POCDMT000040StructuredBody structuredBody, List<Diagnosis> diagnoses) {
     if (diagnoses)
       addSection(structuredBody, generateSectionCode('11348-0')) {
         diagnoses.each { diagnosis ->

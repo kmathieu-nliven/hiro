@@ -186,37 +186,6 @@ class CdaContext extends BaseContext {
   }
 
   @Builder(builderStrategy = SimpleStrategy, prefix = '')
-  static class Diagnosis {
-    CE code
-    String performerGiven
-    String performerFamily
-
-    Diagnosis by(String family, String given) {
-      performerFamily = family
-      performerGiven = given
-      this
-    }
-    String at
-    String facilityRoot
-    String performerId
-
-    Diagnosis identifiedAs(String root, String extension) {
-      facilityRoot = root
-      performerId = extension
-      this
-    }
-    String on
-  }
-  List<Diagnosis> diagnoses = []
-
-  void diagnosis(@DelegatesTo(Diagnosis) Closure closure) {
-    def diagnosis = closure.delegate = new Diagnosis()
-    diagnoses << diagnosis
-    closure.resolveStrategy = Closure.DELEGATE_FIRST
-    closure.call()
-  }
-
-  @Builder(builderStrategy = SimpleStrategy, prefix = '')
   static class Assessment {
     CD code
     String on
