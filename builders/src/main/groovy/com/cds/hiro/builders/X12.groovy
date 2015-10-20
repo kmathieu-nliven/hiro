@@ -1,8 +1,8 @@
 package com.cds.hiro.builders
 
+import com.cds.hiro.builders.contexts.*
 import com.cds.hiro.x12.EdiParser
-import com.cds.hiro.x12_837p.composites.CompositeMedicalProcedureIdentifier
-import com.cds.hiro.x12_837p.composites.HealthCareCodeInformation
+import com.cds.hiro.x12_837p.composites.*
 import com.cds.hiro.x12_837p.enums.*
 import com.cds.hiro.x12_837p.loops.*
 import com.cds.hiro.x12_837p.segments.*
@@ -18,18 +18,18 @@ import java.time.format.DateTimeFormatter
  * @author Rahul Somasunderam
  */
 class X12 {
-  static M837Q1 create(@DelegatesTo(CdaContext) Closure closure) {
-    create(new CdaContext(), closure)
+  static M837Q1 create(@DelegatesTo(X12Context) Closure closure) {
+    create(new X12Context(), closure)
   }
 
-  static M837Q1 create(CdaContext defaults, @DelegatesTo(CdaContext) Closure closure) {
-    def delegate = defaults.clone() as CdaContext
+  static M837Q1 create(X12Context defaults, @DelegatesTo(X12Context) Closure closure) {
+    def delegate = defaults.clone() as X12Context
     closure.delegate = delegate
     closure.call()
     createX12(delegate)
   }
 
-  static M837Q1 createX12(CdaContext context) {
+  static M837Q1 createX12(X12Context context) {
     def x12 = new M837Q1()
     configureHeaders(x12, context)
     configureAuthor(x12, context.author)
@@ -42,13 +42,13 @@ class X12 {
     x12
   }
 
-  private static void configureProcedures(x12, ArrayList<CdaContext.Procedure> procedures) {
+  private static void configureProcedures(x12, ArrayList<Procedure> procedures) {
     procedures.each {
+
       def startProcedure = it.from ?
-          dtp(DateTimeQualifier.Start_196, it.from) :
-          it.on ?
-              dtp(DateTimeQualifier.Start_196, it.on) :
-              null
+          dtp(DateTimeQualifier.Start_196, it.from) : it.on ?
+              dtp(DateTimeQualifier.Start_196, it.on) : null
+
       def endProcedure = it.to ? dtp(DateTimeQualifier.End_197, it.to) : null
 
       x12.withL2000c(new L2000C().
@@ -71,7 +71,7 @@ class X12 {
     }
   }
 
-  private static void configureProblems(x12, ArrayList<CdaContext.Problem> problems) {
+  private static void configureProblems(x12, ArrayList<Problem> problems) {
     problems.each {
       def startProblem = it.between ?
           dtp(DateTimeQualifier.OnsetofCurrentSymptomsorIllness_431, it.between) :
@@ -98,7 +98,7 @@ class X12 {
     }
   }
 
-  private static void configureServiceEventAndEncounter(M837Q1 x12, CdaContext context) {
+  private static void configureServiceEventAndEncounter(M837Q1 x12, X12Context context) {
     x12.withL2000c(new L2000C().
         withPat_2(createPatient(context)).
         withL2300_8(new L2300().
@@ -109,24 +109,14 @@ class X12 {
     )
   }
 
-  private static CdaContext.VitalsGroup.VitalSign computeWeight(CdaContext context) {
-    context.vitalsGroups.
-        sort { it.on }.
-        collectMany { it.vitalSigns }.
-        find { CdaContext.VitalsGroup.VitalSign sign ->
-          sign.code.displayName.equalsIgnoreCase('Weight')
-        } as CdaContext.VitalsGroup.VitalSign
-  }
-
-  private static PAT createPatient(CdaContext context) {
-    CdaContext.VitalsGroup.VitalSign weight = computeWeight(context)
+  private static PAT createPatient(X12Context context) {
     new PAT().
         withIndividualRelationshipCode_01(IndividualRelationshipCode.Self_18).
         withPatientLocationCode_02(PatientLocationCode.OutpatientFacility_O).
         withEmploymentStatusCode_03(EmploymentStatusCode.EmployedbyOutsideOrganization_EO).
         withDateTimePeriodFormatQualifier_05(DateTimePeriodFormatQualifier.DateandTimeExpressedinFormatCCYYMMDDHHMM_DT).
         withDateTimePeriod_06(LocalDateTime.ofInstant(context.created, ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern('yyyyMMddHHmm'))).
-        withWeight_08(weight ? Double.valueOf(weight.at) : null).
+        withWeight_08(context.patientWeight).
         withYesNoConditionorResponseCode_09(YesNoConditionorResponseCode.No_N)
   }
 
@@ -137,7 +127,7 @@ class X12 {
         withDateTimePeriod_03(and)
   }
 
-  private static L2310B createServiceEvent(CdaContext.ServiceEvent serviceEvent) {
+  private static L2310B createServiceEvent(ServiceEvent serviceEvent) {
     new L2310B().
         withNm1_1(new NM1().
             withEntityIdentifierCode_01(EntityIdentifierCode.Provider_1P).
@@ -149,7 +139,7 @@ class X12 {
         )
   }
 
-  private static void configurePayer(M837Q1 x12, CdaContext.Payer payer) {
+  private static void configurePayer(M837Q1 x12, Payer payer) {
     x12.withL1000b(new L1000B().
         withNm1_1(new NM1().
             withEntityIdentifierCode_01(EntityIdentifierCode.Receiver_40).
@@ -161,7 +151,7 @@ class X12 {
     )
   }
 
-  private static void configureAuthor(M837Q1 x12, CdaContext.Author author) {
+  private static void configureAuthor(M837Q1 x12, Author author) {
     x12.withL1000a(new L1000A().
         withNm1_1(new NM1().
             withEntityIdentifierCode_01(EntityIdentifierCode.Submitter_41).
@@ -179,7 +169,7 @@ class X12 {
     )
   }
 
-  private static void configureInsured(M837Q1 x12, CdaContext.Patient patient) {
+  private static void configureInsured(M837Q1 x12, Patient patient) {
     if (patient) {
       x12.withL2000a(new L2000A().
           withHl_1(new HL()).
@@ -207,13 +197,13 @@ class X12 {
     }
   }
 
-  private static void configureHeaders(M837Q1 x12, CdaContext context) {
+  private static void configureHeaders(M837Q1 x12, X12Context context) {
     def localDateTime = LocalDateTime.ofInstant(context.created, ZoneId.systemDefault())
     x12.
         withSt(new ST().
             withTransactionSetIdentifierCode_01(TransactionSetIdentifierCode.HealthCareClaim_837).
             withTransactionSetControlNumber_02(context.id).
-            withImplementationConventionReference_03('005010X222A1')
+            withImplementationConventionReference_03(context.conventionReference)
         ).
         withBht(new BHT().
             withHierarchicalStructureCode_01(HierarchicalStructureCode.InformationSourceSubscriberDependent_0019).

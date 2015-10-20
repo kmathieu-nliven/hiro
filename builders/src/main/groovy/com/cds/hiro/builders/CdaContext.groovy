@@ -1,5 +1,6 @@
 package com.cds.hiro.builders
 
+import com.cds.hiro.builders.contexts.*
 import com.github.rahulsom.cda.CD
 import com.github.rahulsom.cda.CE
 import com.github.rahulsom.cda.II
@@ -19,9 +20,8 @@ import java.time.LocalDateTime
 @CompileStatic
 @AutoClone
 @Builder(builderStrategy = SimpleStrategy, prefix = '')
-class CdaContext {
+class CdaContext extends BaseContext {
 
-  Instant created = Instant.now()
   String realmCode = 'US'
 
   II CDA_R2 = new II().withRoot('2.16.840.1.113883.3.27.1776').withAssigningAuthorityName('CDA/R2'),
@@ -35,9 +35,6 @@ class CdaContext {
   /** Template Ids */
   void templates(II... templates) { this.templates = templates.toList() }
 
-  /** Document Identifier */
-  String id = UUID.randomUUID().toString()
-
   /** Document Code */
   CE code
 
@@ -49,128 +46,6 @@ class CdaContext {
 
   /** Language to be used for the document */
   Locale language = Locale.US
-
-  /**
-   * The patient to whom this document is tied
-   */
-  @Builder(builderStrategy = SimpleStrategy, prefix = '')
-  static class Patient {
-    /** given name of patient */
-    String given
-    /** family name of patient*/
-    String family
-
-    /** Shortcut to set family and given name */
-    void name(String family, String given) {
-      this.family = family
-      this.given = given
-    }
-
-    /** patient gender */
-    String gender
-    /** patient birth time */
-    String birthTime
-
-    /** patient marital status */
-    String maritalStatus
-
-    /** patient identifer */
-    String root, extension
-
-    /** shortcut to set patient identifier */
-    void id(String root, String extension) {
-      this.root = root
-      this.extension = extension
-    }
-
-    /**
-     * Represents patient address
-     */
-    @Builder(builderStrategy = SimpleStrategy, prefix = '')
-    static class Address {
-      String street, city, state, country, postalCode
-    }
-    Address addr
-
-    void addr(@DelegatesTo(Address) Closure closure) {
-      closure.resolveStrategy = Closure.DELEGATE_FIRST
-      closure.delegate = addr = new Address()
-      closure.call()
-    }
-
-    void addr(Address address) {
-      addr = address
-    }
-  }
-  Patient patient
-
-  void patient(@DelegatesTo(Patient) Closure closure) {
-    closure.resolveStrategy = Closure.DELEGATE_FIRST
-    closure.delegate = patient = new Patient()
-    closure.call()
-  }
-
-  /** Generate a random patient */
-  Patient patient() {
-    this.patient {
-      name 'Doe', 'John'
-      gender 'M'
-      birthTime '19520413'
-      maritalStatus 'M'
-
-      id '1.2.3.4', '42'
-
-      addr {
-        street '123 Main St'
-        city 'San Jose'
-        state 'CA'
-        postalCode '95129'
-        country 'USA'
-      }
-    }
-    this.patient
-  }
-
-  void patient(Patient patient) {
-    this.patient = patient
-  }
-
-  @Builder(builderStrategy = SimpleStrategy, prefix = '')
-  static class Encounter {
-    void met(String family, String given) {
-      this.given = given
-      this.family = family
-    }
-    String given, family, at
-    String between, and
-  }
-  Encounter encounter
-
-  void encounter(@DelegatesTo(Encounter) Closure closure) {
-    closure.resolveStrategy = Closure.DELEGATE_FIRST
-    closure.delegate = encounter = new Encounter()
-    closure.call()
-  }
-
-  @Builder(builderStrategy = SimpleStrategy, prefix = '')
-  static class Problem {
-    CE code
-    String between, and, since, withStatus
-    boolean active = false
-  }
-  List<Problem> problems = []
-
-  Problem suffered(CE code) {
-    def problem = new Problem().code(code).active(false)
-    problems << problem
-    return problem
-  }
-
-  Problem suffers(CE code) {
-    def problem = new Problem().code(code).active(true)
-    problems << problem
-    return problem
-  }
 
   @Builder(builderStrategy = SimpleStrategy, prefix = '')
   static class FamilyHistory {
@@ -291,30 +166,6 @@ class CdaContext {
   }
 
   @Builder(builderStrategy = SimpleStrategy, prefix = '')
-  static class Payer {
-    String name
-    String identifiedAs
-    String identifierIs
-  }
-  List<Payer> payers = []
-
-  Payer payer(String name) {
-    def payer = new Payer().name(name)
-    payers << payer
-    payer
-  }
-
-  @Builder(builderStrategy = SimpleStrategy, prefix = '')
-  static class Author {
-    String of, identifiedAs, at, given, family, phone
-  }
-  Author author
-
-  Author authoredBy(String family, String given) {
-    author = new Author().family(family).given(given)
-  }
-
-  @Builder(builderStrategy = SimpleStrategy, prefix = '')
   static class Informant {
     String orgName, identifiedAs
   }
@@ -332,28 +183,6 @@ class CdaContext {
 
   Custodian custodian(String orgName) {
     custodian = new Custodian().orgName(orgName)
-  }
-
-  @Builder(builderStrategy = SimpleStrategy, prefix = '')
-  static class ServiceEvent {
-    String given, family, root, extension, at, identifiedAs
-
-    void id(String root, String extension) {
-      this.root = root
-      this.extension = extension
-    }
-
-    void initiatedBy(String family, String given) {
-      this.family = family
-      this.given = given
-    }
-  }
-  ServiceEvent serviceEvent
-
-  void serviceEvent(@DelegatesTo(ServiceEvent) Closure closure) {
-    closure.resolveStrategy = Closure.DELEGATE_FIRST
-    serviceEvent = closure.delegate = new ServiceEvent()
-    closure.call()
   }
 
   @Builder(builderStrategy = SimpleStrategy, prefix = '')
@@ -385,18 +214,6 @@ class CdaContext {
     diagnoses << diagnosis
     closure.resolveStrategy = Closure.DELEGATE_FIRST
     closure.call()
-  }
-
-  @Builder(builderStrategy = SimpleStrategy, prefix = '')
-  static class Procedure {
-    CD code
-    String on, from, to, withStatus
-  }
-  List<Procedure> procedures = []
-  Procedure performed(CD code) {
-    def procedure = new Procedure().code(code)
-    procedures << procedure
-    procedure
   }
 
   @Builder(builderStrategy = SimpleStrategy, prefix = '')
