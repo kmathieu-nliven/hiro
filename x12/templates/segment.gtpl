@@ -26,8 +26,8 @@ class ${className} extends Segment {
    * ${detail.element.toRow()}
    * </pre>
    */
-   <% if (detail.requirement == 'C') { %>@Deprecated <% }
-   %>${detail.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
+  <% if (detail.requirement == 'C') { %>@Deprecated <% }
+  %>${detail.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
   <% } %>
 
   void parse(List<List<List<String>>> input) {
@@ -38,15 +38,21 @@ class ${className} extends Segment {
           } else {
           %> listOf(input[${idx + 1}], ${detail.element.toJavaType()})<%
           }%> : null
-    <%
-    }
-    %>
+    <% } %>
   }
 
   List<List<List<String>>> toTokens(int indent) {
     def indentString = indent > -1 ? ('  ' * indent) : ''
-    def retval = new ArrayList().with { add(new ArrayList().with {
-      add new ArrayList().with { add "\${indentString}${className}".toString(); it }; it }); it
+
+    def retval = new ArrayList().with {
+      add new ArrayList().with {
+        add new ArrayList().with {
+          add "\${indentString}${className}".toString()
+          it
+        }
+        it
+      }
+      it
     }
 
     <% details.each { detail ->

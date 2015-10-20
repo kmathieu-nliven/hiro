@@ -68,8 +68,8 @@ class ${className} extends Message {
     if (idx == 0) {%>indentOld<%} else {%>indentNew<%}%>))<%
             } else {
 %>
-    ${detail.name.toLowerCase()}*.toTokens(<%if (idx == 0) {%>indentOld<%} else {%>indentNew<%}%>).each {retval.addAll(it)}
-    <%
+    ${detail.name.toLowerCase()}*.toTokens(<%if (idx == 0) {%>indentOld<%} else {%>indentNew<%}
+      %>).each {retval.addAll(it)}<%
             }
 
           } else {

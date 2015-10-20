@@ -1,35 +1,16 @@
 package com.cds.hiro.builders
 
 import com.cds.hiro.x12.EdiParser
-import com.cds.hiro.x12_837p.enums.CommunicationNumberQualifier
-import com.cds.hiro.x12_837p.enums.ContactFunctionCode
-import com.cds.hiro.x12_837p.enums.EntityIdentifierCode
-import com.cds.hiro.x12_837p.enums.EntityTypeQualifier
-import com.cds.hiro.x12_837p.enums.HierarchicalStructureCode
-import com.cds.hiro.x12_837p.enums.IdentificationCodeQualifier
-import com.cds.hiro.x12_837p.enums.LocationQualifier
-import com.cds.hiro.x12_837p.enums.ReferenceIdentificationQualifier
-import com.cds.hiro.x12_837p.enums.TransactionSetIdentifierCode
-import com.cds.hiro.x12_837p.enums.TransactionSetPurposeCode
-import com.cds.hiro.x12_837p.enums.TransactionTypeCode
-import com.cds.hiro.x12_837p.loops.L1000A
-import com.cds.hiro.x12_837p.loops.L1000B
-import com.cds.hiro.x12_837p.loops.L2000A
-import com.cds.hiro.x12_837p.loops.L2010AA
-import com.cds.hiro.x12_837p.segments.BHT
-import com.cds.hiro.x12_837p.segments.HL
-import com.cds.hiro.x12_837p.segments.N3
-import com.cds.hiro.x12_837p.segments.N4
-import com.cds.hiro.x12_837p.segments.NM1
-import com.cds.hiro.x12_837p.segments.PER
-import com.cds.hiro.x12_837p.segments.REF
-import com.cds.hiro.x12_837p.segments.ST
+import com.cds.hiro.x12_837p.composites.CompositeMedicalProcedureIdentifier
+import com.cds.hiro.x12_837p.composites.HealthCareCodeInformation
+import com.cds.hiro.x12_837p.enums.*
+import com.cds.hiro.x12_837p.loops.*
+import com.cds.hiro.x12_837p.segments.*
 import com.cds.hiro.x12_837p.transactionsets.M837Q1
 
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /**
  * Builder for X12.837 Documents
@@ -52,12 +33,123 @@ class X12 {
     def x12 = new M837Q1()
     configureHeaders(x12, context)
     configureAuthor(x12, context.author)
-    configurePatient(x12, context.patient)
-    conigurePayer(x12, context.payers?.first())
+    configureInsured(x12, context.patient)
+    configurePayer(x12, context.payers?.first())
+    configureServiceEventAndEncounter(x12, context)
+    configureProblems(x12, context.problems)
+    configureProcedures(x12, context.procedures)
+
     x12
   }
 
-  private static void conigurePayer(M837Q1 x12, CdaContext.Payer payer) {
+  private static void configureProcedures(x12, ArrayList<CdaContext.Procedure> procedures) {
+    procedures.each {
+      def startProcedure = it.from ?
+          dtp(DateTimeQualifier.Start_196, it.from) :
+          it.on ?
+              dtp(DateTimeQualifier.Start_196, it.on) :
+              null
+      def endProcedure = it.to ? dtp(DateTimeQualifier.End_197, it.to) : null
+
+      x12.withL2000c(new L2000C().
+          withL2300_8(new L2300().
+              withL2400_94(new L2400().
+                  withSv1_2(new SV1().
+                      withCompositeMedicalProcedureIdentifier_01(new CompositeMedicalProcedureIdentifier().
+                          withProductServiceIDQualifier_01(
+                              ProductServiceIDQualifier.CurrentProceduralTerminologyCPTCodes_CJ
+                              /* TODO This assumes CPT all the time */
+                          ).
+                          withProductServiceID_02(it.code.code).
+                          withDescription_07(it.code.displayName)
+                      )
+                  ).
+                  withDtp_23(startProcedure).
+                  withDtp_24(endProcedure)
+              ))
+      )
+    }
+  }
+
+  private static void configureProblems(x12, ArrayList<CdaContext.Problem> problems) {
+    problems.each {
+      def startProblem = it.between ?
+          dtp(DateTimeQualifier.OnsetofCurrentSymptomsorIllness_431, it.between) :
+          it.since ?
+              dtp(DateTimeQualifier.OnsetofCurrentSymptomsorIllness_431, it.since) :
+              null
+      def endProblem = it.and ? dtp(DateTimeQualifier.OccurrenceSpanTo_450, it.and) : null
+
+      x12.withL2000c(new L2000C().
+          withL2300_8(new L2300().
+              withDtp_2(startProblem).
+              withDtp_3(endProblem).
+              withHi_79(new HI().
+                  withHealthCareCodeInformation_01(new HealthCareCodeInformation().
+                      withCodeListQualifierCode_01(
+                          CodeListQualifierCode.InternationalClassificationofDiseasesClinicalModificationICD9CMAdmittingDiagnosis_BJ
+                          /* TODO This assumes ICD9CM. May be wrong */
+                      ).
+                      withIndustryCode_02(it.code.code)
+                  )
+              )
+          )
+      )
+    }
+  }
+
+  private static void configureServiceEventAndEncounter(M837Q1 x12, CdaContext context) {
+    x12.withL2000c(new L2000C().
+        withPat_2(createPatient(context)).
+        withL2300_8(new L2300().
+            withL2310b_86(createServiceEvent(context.serviceEvent)).
+            withDtp_2(dtp(DateTimeQualifier.InitialTreatment_454, context.encounter.between)).
+            withDtp_3(dtp(DateTimeQualifier.LastVisit_691, context.encounter.and))
+        )
+    )
+  }
+
+  private static CdaContext.VitalsGroup.VitalSign computeWeight(CdaContext context) {
+    context.vitalsGroups.
+        sort { it.on }.
+        collectMany { it.vitalSigns }.
+        find { CdaContext.VitalsGroup.VitalSign sign ->
+          sign.code.displayName.equalsIgnoreCase('Weight')
+        } as CdaContext.VitalsGroup.VitalSign
+  }
+
+  private static PAT createPatient(CdaContext context) {
+    CdaContext.VitalsGroup.VitalSign weight = computeWeight(context)
+    new PAT().
+        withIndividualRelationshipCode_01(IndividualRelationshipCode.Self_18).
+        withPatientLocationCode_02(PatientLocationCode.OutpatientFacility_O).
+        withEmploymentStatusCode_03(EmploymentStatusCode.EmployedbyOutsideOrganization_EO).
+        withDateTimePeriodFormatQualifier_05(DateTimePeriodFormatQualifier.DateandTimeExpressedinFormatCCYYMMDDHHMM_DT).
+        withDateTimePeriod_06(LocalDateTime.ofInstant(context.created, ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern('yyyyMMddHHmm'))).
+        withWeight_08(weight ? Double.valueOf(weight.at) : null).
+        withYesNoConditionorResponseCode_09(YesNoConditionorResponseCode.No_N)
+  }
+
+  private static DTP dtp(DateTimeQualifier dateTimeQualifier, String and) {
+    new DTP().
+        withDateTimeQualifier_01(dateTimeQualifier).
+        withDateTimePeriodFormatQualifier_02(DateTimePeriodFormatQualifier.DateExpressedinFormatCCYYMMDD_D8).
+        withDateTimePeriod_03(and)
+  }
+
+  private static L2310B createServiceEvent(CdaContext.ServiceEvent serviceEvent) {
+    new L2310B().
+        withNm1_1(new NM1().
+            withEntityIdentifierCode_01(EntityIdentifierCode.Provider_1P).
+            withEntityTypeQualifier_02(EntityTypeQualifier.Person_1).
+            withNameLastorOrganizationName_03(serviceEvent.family).
+            withNameFirst_04(serviceEvent.given).
+            withIdentificationCodeQualifier_08(IdentificationCodeQualifier.EmployeeIdentificationNumber_EI).
+            withIdentificationCode_09(serviceEvent.extension)
+        )
+  }
+
+  private static void configurePayer(M837Q1 x12, CdaContext.Payer payer) {
     x12.withL1000b(new L1000B().
         withNm1_1(new NM1().
             withEntityIdentifierCode_01(EntityIdentifierCode.Receiver_40).
@@ -87,7 +179,7 @@ class X12 {
     )
   }
 
-  private static void configurePatient(M837Q1 x12, CdaContext.Patient patient) {
+  private static void configureInsured(M837Q1 x12, CdaContext.Patient patient) {
     if (patient) {
       x12.withL2000a(new L2000A().
           withHl_1(new HL()).
@@ -117,7 +209,8 @@ class X12 {
 
   private static void configureHeaders(M837Q1 x12, CdaContext context) {
     def localDateTime = LocalDateTime.ofInstant(context.created, ZoneId.systemDefault())
-    x12.withSt(new ST().
+    x12.
+        withSt(new ST().
             withTransactionSetIdentifierCode_01(TransactionSetIdentifierCode.HealthCareClaim_837).
             withTransactionSetControlNumber_02(context.id).
             withImplementationConventionReference_03('005010X222A1')
