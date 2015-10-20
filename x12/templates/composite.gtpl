@@ -34,8 +34,8 @@ class ${className} extends Composite {
   List<String> toTokens() {
     def retval = []
     <% details.each { detail -> %>
-    retval.add(${detail.element.toFieldName()}_${detail.sequence}.toString() ?: '')
-    <% } %>
+    retval.add(${detail.element.toFieldName()}_${detail.sequence}?.toString() ?: '')<%
+    } %>
     retval
   }
 
