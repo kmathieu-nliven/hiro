@@ -68,6 +68,9 @@ class X12Spec extends Specification {
       // informant 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771'
       // custodian 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771'
 
+      // payers
+      payer 'Humana' identifiedAs '2.16.840.1.113883.19' identifierIs 'HPCG02815-00'
+
       patient {
         name 'Wilson', 'Paul'
         gender 'M'
@@ -84,9 +87,6 @@ class X12Spec extends Specification {
           country 'USA'
         }
       }
-
-      // payers
-      payer 'Humana' identifiedAs '2.16.840.1.113883.19' identifierIs 'HPCG02815-00'
 
       serviceEvent {
         initiatedBy 'Chen', 'Peter'
@@ -166,7 +166,12 @@ class X12Spec extends Specification {
         |  HL****
         |    NM1*IL*1*Wilson*Paul****MI*42***
         |      N3*500 Washington Blvd*
-        |      N4*San Jose*CA*95129*USA*H**'''.stripMargin()
+        |      N4*San Jose*CA*95129*USA*H**
+        |    PAT*18*O*EO**DT*200712030215***N
+        |      DTP*454*D8*20110807
+        |      DTP*691*D8*20111209
+        |      NM1*1P*1*Chen*Peter****EI*1225652938001060***
+        '''.stripMargin().replaceAll(/\n *$/, '')
 
     then: "All is well"
     edi == controlValue

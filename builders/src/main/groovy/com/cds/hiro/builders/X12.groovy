@@ -1,35 +1,14 @@
 package com.cds.hiro.builders
 
 import com.cds.hiro.x12.EdiParser
-import com.cds.hiro.x12_837p.enums.CommunicationNumberQualifier
-import com.cds.hiro.x12_837p.enums.ContactFunctionCode
-import com.cds.hiro.x12_837p.enums.EntityIdentifierCode
-import com.cds.hiro.x12_837p.enums.EntityTypeQualifier
-import com.cds.hiro.x12_837p.enums.HierarchicalStructureCode
-import com.cds.hiro.x12_837p.enums.IdentificationCodeQualifier
-import com.cds.hiro.x12_837p.enums.LocationQualifier
-import com.cds.hiro.x12_837p.enums.ReferenceIdentificationQualifier
-import com.cds.hiro.x12_837p.enums.TransactionSetIdentifierCode
-import com.cds.hiro.x12_837p.enums.TransactionSetPurposeCode
-import com.cds.hiro.x12_837p.enums.TransactionTypeCode
-import com.cds.hiro.x12_837p.loops.L1000A
-import com.cds.hiro.x12_837p.loops.L1000B
-import com.cds.hiro.x12_837p.loops.L2000A
-import com.cds.hiro.x12_837p.loops.L2010AA
-import com.cds.hiro.x12_837p.segments.BHT
-import com.cds.hiro.x12_837p.segments.HL
-import com.cds.hiro.x12_837p.segments.N3
-import com.cds.hiro.x12_837p.segments.N4
-import com.cds.hiro.x12_837p.segments.NM1
-import com.cds.hiro.x12_837p.segments.PER
-import com.cds.hiro.x12_837p.segments.REF
-import com.cds.hiro.x12_837p.segments.ST
+import com.cds.hiro.x12_837p.enums.*
+import com.cds.hiro.x12_837p.loops.*
+import com.cds.hiro.x12_837p.segments.*
 import com.cds.hiro.x12_837p.transactionsets.M837Q1
 
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /**
  * Builder for X12.837 Documents
@@ -52,12 +31,70 @@ class X12 {
     def x12 = new M837Q1()
     configureHeaders(x12, context)
     configureAuthor(x12, context.author)
-    configurePatient(x12, context.patient)
-    conigurePayer(x12, context.payers?.first())
-    x12
+    configureInsured(x12, context.patient)
+    configurePayer(x12, context.payers?.first())
+
+    x12.withL2000c(new L2000C().
+        withPat_2(createPatient(context)).
+        withL2010ca_5(null).
+        withL2010cb_6(null).
+        withL2010cc_7(null).
+        withL2300_8(new L2300().
+            withL2310b_86(createServiceEvent(context.serviceEvent)).
+            withDtp_2(beginEncounter(context.encounter)).
+            withDtp_3(endEncounter(context.encounter))
+        )
+    )
   }
 
-  private static void conigurePayer(M837Q1 x12, CdaContext.Payer payer) {
+  private static CdaContext.VitalsGroup.VitalSign computeWeight(CdaContext context) {
+    context.vitalsGroups.
+        sort { it.on }.
+        collectMany { it.vitalSigns }.
+        find { CdaContext.VitalsGroup.VitalSign sign ->
+          sign.code.displayName.equalsIgnoreCase('Weight')
+        } as CdaContext.VitalsGroup.VitalSign
+  }
+
+  private static PAT createPatient(CdaContext context) {
+    CdaContext.VitalsGroup.VitalSign weight = computeWeight(context)
+    new PAT().
+        withIndividualRelationshipCode_01(IndividualRelationshipCode.Self_18).
+        withPatientLocationCode_02(PatientLocationCode.OutpatientFacility_O).
+        withEmploymentStatusCode_03(EmploymentStatusCode.EmployedbyOutsideOrganization_EO).
+        withDateTimePeriodFormatQualifier_05(DateTimePeriodFormatQualifier.DateandTimeExpressedinFormatCCYYMMDDHHMM_DT).
+        withDateTimePeriod_06(LocalDateTime.ofInstant(context.created, ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern('yyyyMMddHHmm'))).
+        withWeight_08(weight ? Double.valueOf(weight.at) : null).
+        withYesNoConditionorResponseCode_09(YesNoConditionorResponseCode.No_N)
+  }
+
+  private static DTP endEncounter(CdaContext.Encounter encounter) {
+    new DTP().
+        withDateTimeQualifier_01(DateTimeQualifier.LastVisit_691).
+        withDateTimePeriodFormatQualifier_02(DateTimePeriodFormatQualifier.DateExpressedinFormatCCYYMMDD_D8).
+        withDateTimePeriod_03(encounter.and)
+  }
+
+  private static DTP beginEncounter(CdaContext.Encounter encounter) {
+    new DTP().
+        withDateTimeQualifier_01(DateTimeQualifier.InitialTreatment_454).
+        withDateTimePeriodFormatQualifier_02(DateTimePeriodFormatQualifier.DateExpressedinFormatCCYYMMDD_D8).
+        withDateTimePeriod_03(encounter.between)
+  }
+
+  private static L2310B createServiceEvent(CdaContext.ServiceEvent serviceEvent) {
+    new L2310B().
+        withNm1_1(new NM1().
+            withEntityIdentifierCode_01(EntityIdentifierCode.Provider_1P).
+            withEntityTypeQualifier_02(EntityTypeQualifier.Person_1).
+            withNameLastorOrganizationName_03(serviceEvent.family).
+            withNameFirst_04(serviceEvent.given).
+            withIdentificationCodeQualifier_08(IdentificationCodeQualifier.EmployeeIdentificationNumber_EI).
+            withIdentificationCode_09(serviceEvent.extension)
+        )
+  }
+
+  private static void configurePayer(M837Q1 x12, CdaContext.Payer payer) {
     x12.withL1000b(new L1000B().
         withNm1_1(new NM1().
             withEntityIdentifierCode_01(EntityIdentifierCode.Receiver_40).
@@ -87,7 +124,7 @@ class X12 {
     )
   }
 
-  private static void configurePatient(M837Q1 x12, CdaContext.Patient patient) {
+  private static void configureInsured(M837Q1 x12, CdaContext.Patient patient) {
     if (patient) {
       x12.withL2000a(new L2000A().
           withHl_1(new HL()).
@@ -117,7 +154,8 @@ class X12 {
 
   private static void configureHeaders(M837Q1 x12, CdaContext context) {
     def localDateTime = LocalDateTime.ofInstant(context.created, ZoneId.systemDefault())
-    x12.withSt(new ST().
+    x12.
+        withSt(new ST().
             withTransactionSetIdentifierCode_01(TransactionSetIdentifierCode.HealthCareClaim_837).
             withTransactionSetControlNumber_02(context.id).
             withImplementationConventionReference_03('005010X222A1')
