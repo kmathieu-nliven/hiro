@@ -43,7 +43,8 @@ class X12 {
   }
 
   private static Map<String, ProductServiceIDQualifier> productServiceIDQualifierMap = [
-      '2.16.840.1.113883.5.25': ProductServiceIDQualifier.CurrentProceduralTerminologyCPTCodes_CJ
+      '2.16.840.1.113883.5.25': ProductServiceIDQualifier.CurrentProceduralTerminologyCPTCodes_CJ,
+      '2.16.840.1.113883.6.96': ProductServiceIDQualifier.SNOMEDSystematizedNomenclatureofMedicine_LD,
   ]
   private static void configureProcedures(x12, ArrayList<Procedure> procedures) {
     procedures.each {
@@ -77,7 +78,7 @@ class X12 {
   }
 
   private static Map<String, CodeListQualifierCode> codeListQualifierCodeMap = [
-      '2.16.840.1.113883.6.103': CodeListQualifierCode.InternationalClassificationofDiseasesClinicalModificationICD9CMAdmittingDiagnosis_BJ
+      '2.16.840.1.113883.6.103': CodeListQualifierCode.InternationalClassificationofDiseasesClinicalModificationICD9CMAdmittingDiagnosis_BJ,
   ]
   private static void configureProblems(x12, ArrayList<Problem> problems) {
     problems.each {
