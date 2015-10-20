@@ -42,6 +42,9 @@ class X12 {
     x12
   }
 
+  private static Map<String, ProductServiceIDQualifier> productServiceIDQualifierMap = [
+      '2.16.840.1.113883.5.25': ProductServiceIDQualifier.CurrentProceduralTerminologyCPTCodes_CJ
+  ]
   private static void configureProcedures(x12, ArrayList<Procedure> procedures) {
     procedures.each {
 
@@ -51,15 +54,17 @@ class X12 {
 
       def endProcedure = it.to ? dtp(DateTimeQualifier.End_197, it.to) : null
 
+      def codeSystemQualifier = productServiceIDQualifierMap[it.code.codeSystem]
+      if (!codeSystemQualifier) {
+        throw new Exception("CodeSystem ${it.code.codeSystem} is not mapped in com.cds.hiro.builders.X12.productServiceIDQualifierMap")
+      }
+
       x12.withL2000c(new L2000C().
           withL2300_8(new L2300().
               withL2400_94(new L2400().
                   withSv1_2(new SV1().
                       withCompositeMedicalProcedureIdentifier_01(new CompositeMedicalProcedureIdentifier().
-                          withProductServiceIDQualifier_01(
-                              ProductServiceIDQualifier.CurrentProceduralTerminologyCPTCodes_CJ
-                              /* TODO This assumes CPT all the time */
-                          ).
+                          withProductServiceIDQualifier_01(codeSystemQualifier).
                           withProductServiceID_02(it.code.code).
                           withDescription_07(it.code.displayName)
                       )
@@ -71,6 +76,9 @@ class X12 {
     }
   }
 
+  private static Map<String, CodeListQualifierCode> codeListQualifierCodeMap = [
+      '2.16.840.1.113883.6.103': CodeListQualifierCode.InternationalClassificationofDiseasesClinicalModificationICD9CMAdmittingDiagnosis_BJ
+  ]
   private static void configureProblems(x12, ArrayList<Problem> problems) {
     problems.each {
       def startProblem = it.between ?
@@ -80,16 +88,18 @@ class X12 {
               null
       def endProblem = it.and ? dtp(DateTimeQualifier.OccurrenceSpanTo_450, it.and) : null
 
+      def codeListQualifierCode = codeListQualifierCodeMap[it.code.codeSystem]
+      if (!codeListQualifierCode) {
+        throw new Exception("CodeSystem ${it.code.codeSystem} is not mapped in com.cds.hiro.builders.X12.codeListQualifierCodeMap")
+      }
+
       x12.withL2000c(new L2000C().
           withL2300_8(new L2300().
               withDtp_2(startProblem).
               withDtp_3(endProblem).
               withHi_79(new HI().
                   withHealthCareCodeInformation_01(new HealthCareCodeInformation().
-                      withCodeListQualifierCode_01(
-                          CodeListQualifierCode.InternationalClassificationofDiseasesClinicalModificationICD9CMAdmittingDiagnosis_BJ
-                          /* TODO This assumes ICD9CM. May be wrong */
-                      ).
+                      withCodeListQualifierCode_01(codeListQualifierCode).
                       withIndustryCode_02(it.code.code)
                   )
               )
