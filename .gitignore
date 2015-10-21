@@ -61,3 +61,4 @@ crashlytics-build.properties
 
 dataload/dataload.yml
 *.log
+.gradletasknamecache
