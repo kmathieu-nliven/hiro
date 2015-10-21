@@ -42,15 +42,18 @@ class X12 {
     configureProblems(x12, context.problems)
     configureDiagnoses(x12, context.diagnoses)
     configureProcedures(x12, context.procedures)
+    configureFooter(x12, context)
 
+    x12
+  }
+
+  private static void configureFooter(M837Q1 x12, X12Context context) {
     def segCount = x12.toTokens(-1).size() + 1
 
     x12.withSe(new SE().
         withNumberofIncludedSegments_01(segCount).
         withTransactionSetControlNumber_02(context.id)
     )
-
-    x12
   }
 
   private static Map<String, ProductServiceIDQualifier> productServiceIDQualifierMap = [
