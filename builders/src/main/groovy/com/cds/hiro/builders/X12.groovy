@@ -36,10 +36,19 @@ class X12 {
     configureAuthor(x12, context.author)
     configureInsured(x12, context.patient)
     configurePayer(x12, context.payers?.first())
-    configureServiceEventAndEncounter(x12, context)
+    if (context.serviceEvent) {
+      configureServiceEventAndEncounter(x12, context)
+    }
     configureProblems(x12, context.problems)
     configureDiagnoses(x12, context.diagnoses)
     configureProcedures(x12, context.procedures)
+
+    def segCount = x12.toTokens(-1).size() + 1
+
+    x12.withSe(new SE().
+        withNumberofIncludedSegments_01(segCount).
+        withTransactionSetControlNumber_02(context.id)
+    )
 
     x12
   }

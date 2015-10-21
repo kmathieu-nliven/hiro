@@ -150,6 +150,7 @@ class X12Spec extends Specification {
         |        SV1*LD:77528005:::::Code 77528005:********************
         |        DTP*196*D8*20101120
         |        DTP*197*D8*20131220
+        |  SE*33*1234567890
         '''.stripMargin().replaceAll(/\n *$/, '')
 
     then: "All is well"
