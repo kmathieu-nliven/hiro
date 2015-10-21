@@ -258,7 +258,7 @@ class CdaContext {
     @Builder(builderStrategy = SimpleStrategy, prefix = '')
     static class Result {
       CE code
-      String at, of, withRange, was
+      String at, of, withRange, was, withStatus
     }
     List<Result> results = []
 
