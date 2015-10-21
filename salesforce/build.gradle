@@ -18,9 +18,17 @@ dependencies {
 
 import com.sforce.ws.tools.wsdlc
 task codegen << {
-  wsdlc.main(['-nc', 'src/main/resources/salesforce_wsdl_enterprise.xml', 'build/libs/wsc.jar', 'build/generatedSources/wsc'] as String[])
+  def commandLine = [
+      '-nc',
+      "${projectDir}/src/main/resources/salesforce_wsdl_enterprise.xml",
+      "${projectDir}/build/libs/wsc.jar",
+      "${projectDir}/build/generatedSources/wsc"
+  ]
+  wsdlc.main(commandLine as String[])
 }
 
 sourceSets.main.java.srcDirs = [
     'src/main/java', 'build/generatedSources/wsc',
 ]
+
+compileJava.dependsOn(codegen)

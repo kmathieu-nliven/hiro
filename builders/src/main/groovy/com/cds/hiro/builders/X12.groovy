@@ -225,7 +225,6 @@ class X12 {
   private static void configureInsured(M837Q1 x12, Patient patient) {
     if (patient) {
       x12.withL2000a(new L2000A().
-          withHl_1(new HL()).
           withL2010aa_5(new L2010AA().
               withNm1_1(new NM1().
                   withEntityIdentifierCode_01(EntityIdentifierCode.InsuredorSubscriber_IL).
