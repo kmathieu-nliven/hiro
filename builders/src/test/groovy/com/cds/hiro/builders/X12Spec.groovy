@@ -65,9 +65,6 @@ class X12Spec extends Specification {
       authoredBy 'Johnson', 'Kimberly' phone '4082361234' of 'Alpine Family Physicians' \
           identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
 
-      // informant 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771'
-      // custodian 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771'
-
       // payers
       payer 'Humana' identifiedAs '2.16.840.1.113883.19' identifierIs 'HPCG02815-00'
 
@@ -88,6 +85,8 @@ class X12Spec extends Specification {
         }
       }
 
+      patientWeight 192.3d
+
       serviceEvent {
         initiatedBy 'Chen', 'Peter'
         id '2.16.840.1.113883.3.771', '1225652938001060'
@@ -105,53 +104,15 @@ class X12Spec extends Specification {
       suffered Icd9CM('415.0') between '20110805' and '20111231' withStatus 'ACTIVE'
       suffers Icd9CM('724.5') since '20110805'
 
-      // Family History
-//      familyMember SnomedCt('65656005') condition 'Survived into her 90s'
-
-      // Social History
-//      social SnomedCt('229819007') status 'never'
-
-      // Medications
-//      prescribed RxNorm('123') from '20110101' to '20120101'
-//      prescribed RxNorm('456') from '20130101' to '20130204' withStatus 'ACTIVE'
-
-      // immunizations
-//      immunized CVX('88') by RouteOfAdministration('IM') on '199911'
-//      immunized CVX('27') by RouteOfAdministration('IM') on '199911' withStatus 'completed'
-
       // procedures
       performed CPT('99203') on '20101120100000'
       performed CPT('99203') from '20101120' to '20131220'
       performed SnomedCt('77528005') from '20101120' to '20131220' withStatus 'completed'
 
-      // Past Medical History
-//      diagnosis {
-//        code SnomedCt('77528005')
-//        by 'Healthy', 'Bruce'
-//        at 'Community General Hospital'
-//        identifiedAs '2.16.840.1.113883.4.6', '1111111111'
-//        on '20130130000000'
-//      }
+      diagnosis {
+        code SnomedCt('77528005') on '20130130000000'
+      }
 
-      // vitals
-//      vitals {
-//        on '20111209'
-//
-//        measured ICNP('27113002') at '72 in' of 'PQ'
-//        measured ICNP('60621009') at '22.83 kg/m2' of 'RTO_PQ_PQ'
-//      }
-
-      // results group
-//      results {
-//        on '20111209'
-//        measured LOINC('2339-0') at '143 mg/dL' of 'PQ' withRange '70-125' was 'High'
-//      }
-
-      // allergies
-//      allergen RxNorm('70618') causes SnomedCt('247472004')
-
-      // assessments
-//      assessed LoincCd('73831-0') toBe SnomedCt('428171000124102') on '20110923'
     }
 
     def edi = X12.serialize(x12, true)
@@ -163,11 +124,10 @@ class X12Spec extends Specification {
         |  NM1*41*2*20111118014000*****46*2.16.840.1.113883.3.771***
         |    PER*IC*Kimberly Johnson*TE*4082361234*****
         |  NM1*40*2*Humana*****46*2.16.840.1.113883.19***
-        |  HL****
         |    NM1*IL*1*Wilson*Paul****MI*42***
         |      N3*500 Washington Blvd*
         |      N4*San Jose*CA*95129*USA*H**
-        |    PAT*18*O*EO**DT*200712030215***N
+        |    PAT*18*O*EO**DT*200712030215**192.3*N
         |      DTP*454*D8*20110807
         |      DTP*691*D8*20111209
         |      NM1*1P*1*Chen*Peter****EI*1225652938001060***
@@ -179,14 +139,17 @@ class X12Spec extends Specification {
         |      HI*BJ:415.0:::::::***********
         |      DTP*431*D8*20110805
         |      HI*BJ:724.5:::::::***********
+        |      DTP*431*D8*20130130000000
+        |      HI*AAA:77528005:::::::***********
         |        SV1*CJ:99203:::::Code 99203:********************
         |        DTP*196*D8*20101120100000
         |        SV1*CJ:99203:::::Code 99203:********************
         |        DTP*196*D8*20101120
         |        DTP*197*D8*20131220
-        |        SV1*CJ:77528005:::::Code 77528005:********************
+        |        SV1*LD:77528005:::::Code 77528005:********************
         |        DTP*196*D8*20101120
         |        DTP*197*D8*20131220
+        |  SE*32*1234567890
         '''.stripMargin().replaceAll(/\n *$/, '')
 
     then: "All is well"

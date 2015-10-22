@@ -1,5 +1,6 @@
 package com.cds.hiro.builders
 
+import com.cds.hiro.builders.contexts.*
 import com.github.rahulsom.ItiHelper
 import com.github.rahulsom.cda.*
 
@@ -7,9 +8,6 @@ import javax.xml.bind.JAXBContext
 import javax.xml.bind.JAXBElement
 import javax.xml.bind.Marshaller
 import javax.xml.namespace.QName
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 /**
  * Builder for creating CDA documents.
@@ -92,7 +90,7 @@ class Cda {
     document
   }
 
-  private static void addProcedures(POCDMT000040StructuredBody structuredBody, List<CdaContext.Procedure> procedures) {
+  private static void addProcedures(POCDMT000040StructuredBody structuredBody, List<Procedure> procedures) {
     if (procedures)
       addSection(structuredBody, generateSectionCode('47519-4')) {
         procedures.each { procedure ->
@@ -118,7 +116,7 @@ class Cda {
   }
 
   private static void addDiagnoses(
-      POCDMT000040StructuredBody structuredBody, List<CdaContext.Diagnosis> diagnoses) {
+      POCDMT000040StructuredBody structuredBody, List<Diagnosis> diagnoses) {
     if (diagnoses)
       addSection(structuredBody, generateSectionCode('11348-0')) {
         diagnoses.each { diagnosis ->
@@ -328,7 +326,7 @@ class Cda {
       }
   }
 
-  private static void addProblems(POCDMT000040StructuredBody structuredBody, List<CdaContext.Problem> problems) {
+  private static void addProblems(POCDMT000040StructuredBody structuredBody, List<Problem> problems) {
     if (problems)
       addSection(structuredBody, generateSectionCode('11450-4')) {
         problems.each { problem ->
@@ -360,7 +358,7 @@ class Cda {
       }
   }
 
-  private static void addEncounter(POCDMT000040StructuredBody structuredBody, CdaContext.Encounter encounter) {
+  private static void addEncounter(POCDMT000040StructuredBody structuredBody, Encounter encounter) {
     if (encounter)
       addSection(structuredBody, generateSectionCode('46240-8')) {
         withEntry(new POCDMT000040Entry().
@@ -407,7 +405,7 @@ class Cda {
   }
 
   private static void configureServiceEvent(
-      POCDMT000040ClinicalDocument document, CdaContext.ServiceEvent serviceEvent) {
+      POCDMT000040ClinicalDocument document, ServiceEvent serviceEvent) {
     if (serviceEvent)
       document.withDocumentationOf(new POCDMT000040DocumentationOf().
           withServiceEvent(new POCDMT000040ServiceEvent().
@@ -475,7 +473,7 @@ class Cda {
       )
   }
 
-  private static void configurePatient(CdaContext.Patient patient, POCDMT000040ClinicalDocument document) {
+  private static void configurePatient(Patient patient, POCDMT000040ClinicalDocument document) {
     if (patient)
       document.withRecordTarget(new POCDMT000040RecordTarget().
           withPatientRole(new POCDMT000040PatientRole().

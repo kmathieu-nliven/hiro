@@ -1,0 +1,34 @@
+targetCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_7
+
+buildscript {
+  repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven { url 'http://cbees-ltdev1-oradb1.transcendinsights.com:8081/nexus/content/groups/public' }
+  }
+  dependencies {
+    classpath 'com.force.api:force-wsc:35.0.0'
+  }
+}
+dependencies {
+  compile 'com.force.api:force-wsc:35.0.0'
+}
+
+import com.sforce.ws.tools.wsdlc
+task codegen << {
+  def commandLine = [
+      '-nc',
+      "${projectDir}/src/main/resources/salesforce_wsdl_enterprise.xml",
+      "${projectDir}/build/libs/wsc.jar",
+      "${projectDir}/build/generatedSources/wsc"
+  ]
+  wsdlc.main(commandLine as String[])
+}
+
+sourceSets.main.java.srcDirs = [
+    'src/main/java', 'build/generatedSources/wsc',
+]
+
+compileJava.dependsOn(codegen)
