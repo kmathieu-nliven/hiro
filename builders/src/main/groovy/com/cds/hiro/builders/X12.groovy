@@ -1,5 +1,6 @@
 package com.cds.hiro.builders
 
+import com.cds.hiro.builders.contexts.*
 import com.cds.hiro.x12.EdiParser
 import com.cds.hiro.x12_837p.composites.CompositeMedicalProcedureIdentifier
 import com.cds.hiro.x12_837p.composites.HealthCareCodeInformation
@@ -18,48 +19,68 @@ import java.time.format.DateTimeFormatter
  * @author Rahul Somasunderam
  */
 class X12 {
-  static M837Q1 create(@DelegatesTo(CdaContext) Closure closure) {
-    create(new CdaContext(), closure)
+  static M837Q1 create(@DelegatesTo(X12Context) Closure closure) {
+    create(new X12Context(), closure)
   }
 
-  static M837Q1 create(CdaContext defaults, @DelegatesTo(CdaContext) Closure closure) {
-    def delegate = defaults.clone() as CdaContext
+  static M837Q1 create(X12Context defaults, @DelegatesTo(X12Context) Closure closure) {
+    def delegate = defaults.clone() as X12Context
     closure.delegate = delegate
     closure.call()
     createX12(delegate)
   }
 
-  static M837Q1 createX12(CdaContext context) {
+  static M837Q1 createX12(X12Context context) {
     def x12 = new M837Q1()
     configureHeaders(x12, context)
     configureAuthor(x12, context.author)
     configureInsured(x12, context.patient)
     configurePayer(x12, context.payers?.first())
-    configureServiceEventAndEncounter(x12, context)
+    if (context.serviceEvent) {
+      configureServiceEventAndEncounter(x12, context)
+    }
     configureProblems(x12, context.problems)
+    configureDiagnoses(x12, context.diagnoses)
     configureProcedures(x12, context.procedures)
+    configureFooter(x12, context)
 
     x12
   }
 
-  private static void configureProcedures(x12, ArrayList<CdaContext.Procedure> procedures) {
+  private static void configureFooter(M837Q1 x12, X12Context context) {
+    def segCount = x12.toTokens(-1).size() + 1
+
+    x12.withSe(new SE().
+        withNumberofIncludedSegments_01(segCount).
+        withTransactionSetControlNumber_02(context.id)
+    )
+  }
+
+  private static Map<String, ProductServiceIDQualifier> productServiceIDQualifierMap = [
+      '2.16.840.1.113883.5.25': ProductServiceIDQualifier.CurrentProceduralTerminologyCPTCodes_CJ,
+      '2.16.840.1.113883.6.96': ProductServiceIDQualifier.SNOMEDSystematizedNomenclatureofMedicine_LD,
+  ]
+
+  private static void configureProcedures(x12, ArrayList<Procedure> procedures) {
     procedures.each {
+
       def startProcedure = it.from ?
-          dtp(DateTimeQualifier.Start_196, it.from) :
-          it.on ?
-              dtp(DateTimeQualifier.Start_196, it.on) :
-              null
+          dtp(DateTimeQualifier.Start_196, it.from) : it.on ?
+          dtp(DateTimeQualifier.Start_196, it.on) : null
+
       def endProcedure = it.to ? dtp(DateTimeQualifier.End_197, it.to) : null
+
+      def codeSystemQualifier = productServiceIDQualifierMap[it.code.codeSystem]
+      if (!codeSystemQualifier) {
+        throw new Exception("CodeSystem ${it.code.codeSystem} is not mapped in com.cds.hiro.builders.X12.productServiceIDQualifierMap")
+      }
 
       x12.withL2000c(new L2000C().
           withL2300_8(new L2300().
               withL2400_94(new L2400().
                   withSv1_2(new SV1().
                       withCompositeMedicalProcedureIdentifier_01(new CompositeMedicalProcedureIdentifier().
-                          withProductServiceIDQualifier_01(
-                              ProductServiceIDQualifier.CurrentProceduralTerminologyCPTCodes_CJ
-                              /* TODO This assumes CPT all the time */
-                          ).
+                          withProductServiceIDQualifier_01(codeSystemQualifier).
                           withProductServiceID_02(it.code.code).
                           withDescription_07(it.code.displayName)
                       )
@@ -71,7 +92,12 @@ class X12 {
     }
   }
 
-  private static void configureProblems(x12, ArrayList<CdaContext.Problem> problems) {
+  private static Map<String, CodeListQualifierCode> codeListQualifierCodeMap = [
+      '2.16.840.1.113883.6.103': CodeListQualifierCode.InternationalClassificationofDiseasesClinicalModificationICD9CMAdmittingDiagnosis_BJ,
+      '2.16.840.1.113883.6.96' : CodeListQualifierCode.SNOMEDSystematizedNomenclatureofMedicine_AAA,
+  ]
+
+  private static void configureProblems(x12, ArrayList<Problem> problems) {
     problems.each {
       def startProblem = it.between ?
           dtp(DateTimeQualifier.OnsetofCurrentSymptomsorIllness_431, it.between) :
@@ -80,16 +106,18 @@ class X12 {
               null
       def endProblem = it.and ? dtp(DateTimeQualifier.OccurrenceSpanTo_450, it.and) : null
 
+      def codeListQualifierCode = codeListQualifierCodeMap[it.code.codeSystem]
+      if (!codeListQualifierCode) {
+        throw new Exception("CodeSystem ${it.code.codeSystem} is not mapped in com.cds.hiro.builders.X12.codeListQualifierCodeMap")
+      }
+
       x12.withL2000c(new L2000C().
           withL2300_8(new L2300().
               withDtp_2(startProblem).
               withDtp_3(endProblem).
               withHi_79(new HI().
                   withHealthCareCodeInformation_01(new HealthCareCodeInformation().
-                      withCodeListQualifierCode_01(
-                          CodeListQualifierCode.InternationalClassificationofDiseasesClinicalModificationICD9CMAdmittingDiagnosis_BJ
-                          /* TODO This assumes ICD9CM. May be wrong */
-                      ).
+                      withCodeListQualifierCode_01(codeListQualifierCode).
                       withIndustryCode_02(it.code.code)
                   )
               )
@@ -98,7 +126,32 @@ class X12 {
     }
   }
 
-  private static void configureServiceEventAndEncounter(M837Q1 x12, CdaContext context) {
+  private static void configureDiagnoses(x12, ArrayList<Diagnosis> diagnoses) {
+    diagnoses.each {
+      def diagnosisDate = it.on ?
+          dtp(DateTimeQualifier.OnsetofCurrentSymptomsorIllness_431, it.on) :
+          null
+
+      def codeListQualifierCode = codeListQualifierCodeMap[it.code.codeSystem]
+      if (!codeListQualifierCode) {
+        throw new Exception("CodeSystem ${it.code.codeSystem} is not mapped in com.cds.hiro.builders.X12.codeListQualifierCodeMap")
+      }
+
+      x12.withL2000c(new L2000C().
+          withL2300_8(new L2300().
+              withDtp_2(diagnosisDate).
+              withHi_79(new HI().
+                  withHealthCareCodeInformation_01(new HealthCareCodeInformation().
+                      withCodeListQualifierCode_01(codeListQualifierCode).
+                      withIndustryCode_02(it.code.code)
+                  )
+              )
+          )
+      )
+    }
+  }
+
+  private static void configureServiceEventAndEncounter(M837Q1 x12, X12Context context) {
     x12.withL2000c(new L2000C().
         withPat_2(createPatient(context)).
         withL2300_8(new L2300().
@@ -109,24 +162,14 @@ class X12 {
     )
   }
 
-  private static CdaContext.VitalsGroup.VitalSign computeWeight(CdaContext context) {
-    context.vitalsGroups.
-        sort { it.on }.
-        collectMany { it.vitalSigns }.
-        find { CdaContext.VitalsGroup.VitalSign sign ->
-          sign.code.displayName.equalsIgnoreCase('Weight')
-        } as CdaContext.VitalsGroup.VitalSign
-  }
-
-  private static PAT createPatient(CdaContext context) {
-    CdaContext.VitalsGroup.VitalSign weight = computeWeight(context)
+  private static PAT createPatient(X12Context context) {
     new PAT().
         withIndividualRelationshipCode_01(IndividualRelationshipCode.Self_18).
         withPatientLocationCode_02(PatientLocationCode.OutpatientFacility_O).
         withEmploymentStatusCode_03(EmploymentStatusCode.EmployedbyOutsideOrganization_EO).
         withDateTimePeriodFormatQualifier_05(DateTimePeriodFormatQualifier.DateandTimeExpressedinFormatCCYYMMDDHHMM_DT).
         withDateTimePeriod_06(LocalDateTime.ofInstant(context.created, ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern('yyyyMMddHHmm'))).
-        withWeight_08(weight ? Double.valueOf(weight.at) : null).
+        withWeight_08(context.patientWeight).
         withYesNoConditionorResponseCode_09(YesNoConditionorResponseCode.No_N)
   }
 
@@ -137,7 +180,7 @@ class X12 {
         withDateTimePeriod_03(and)
   }
 
-  private static L2310B createServiceEvent(CdaContext.ServiceEvent serviceEvent) {
+  private static L2310B createServiceEvent(ServiceEvent serviceEvent) {
     new L2310B().
         withNm1_1(new NM1().
             withEntityIdentifierCode_01(EntityIdentifierCode.Provider_1P).
@@ -149,7 +192,7 @@ class X12 {
         )
   }
 
-  private static void configurePayer(M837Q1 x12, CdaContext.Payer payer) {
+  private static void configurePayer(M837Q1 x12, Payer payer) {
     x12.withL1000b(new L1000B().
         withNm1_1(new NM1().
             withEntityIdentifierCode_01(EntityIdentifierCode.Receiver_40).
@@ -161,7 +204,7 @@ class X12 {
     )
   }
 
-  private static void configureAuthor(M837Q1 x12, CdaContext.Author author) {
+  private static void configureAuthor(M837Q1 x12, Author author) {
     x12.withL1000a(new L1000A().
         withNm1_1(new NM1().
             withEntityIdentifierCode_01(EntityIdentifierCode.Submitter_41).
@@ -179,10 +222,9 @@ class X12 {
     )
   }
 
-  private static void configureInsured(M837Q1 x12, CdaContext.Patient patient) {
+  private static void configureInsured(M837Q1 x12, Patient patient) {
     if (patient) {
       x12.withL2000a(new L2000A().
-          withHl_1(new HL()).
           withL2010aa_5(new L2010AA().
               withNm1_1(new NM1().
                   withEntityIdentifierCode_01(EntityIdentifierCode.InsuredorSubscriber_IL).
@@ -207,13 +249,13 @@ class X12 {
     }
   }
 
-  private static void configureHeaders(M837Q1 x12, CdaContext context) {
+  private static void configureHeaders(M837Q1 x12, X12Context context) {
     def localDateTime = LocalDateTime.ofInstant(context.created, ZoneId.systemDefault())
     x12.
         withSt(new ST().
             withTransactionSetIdentifierCode_01(TransactionSetIdentifierCode.HealthCareClaim_837).
             withTransactionSetControlNumber_02(context.id).
-            withImplementationConventionReference_03('005010X222A1')
+            withImplementationConventionReference_03(context.conventionReference)
         ).
         withBht(new BHT().
             withHierarchicalStructureCode_01(HierarchicalStructureCode.InformationSourceSubscriberDependent_0019).

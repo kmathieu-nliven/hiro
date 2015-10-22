@@ -1,5 +1,6 @@
 package com.cds.hiro.builders
 
+import com.cds.hiro.builders.contexts.*
 import com.github.rahulsom.ItiHelper
 import com.github.rahulsom.cda.*
 
@@ -7,9 +8,6 @@ import javax.xml.bind.JAXBContext
 import javax.xml.bind.JAXBElement
 import javax.xml.bind.Marshaller
 import javax.xml.namespace.QName
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 /**
  * Builder for creating CDA documents.
@@ -76,7 +74,9 @@ class Cda {
     configureServiceEvent(document, context.serviceEvent)
 
     def structuredBody = new POCDMT000040StructuredBody()
-    document.withComponent(new POCDMT000040Component2().withStructuredBody(structuredBody))
+    document.component = new POCDMT000040Component2().withStructuredBody(structuredBody)
+
+    addSummaryPurpose(structuredBody)
     addEncounter(structuredBody, context.encounter)
     addProblems(structuredBody, context.problems)
     addFamilyHistory(structuredBody, context.familyHistoryList)
@@ -92,7 +92,33 @@ class Cda {
     document
   }
 
-  private static void addProcedures(POCDMT000040StructuredBody structuredBody, List<CdaContext.Procedure> procedures) {
+  private static addSummaryPurpose(POCDMT000040StructuredBody structuredBody) {
+    addSection(structuredBody, generateSectionCode('48764-5')) {
+      withEntry(new POCDMT000040Entry().
+          withAct(new POCDMT000040Act().
+              withClassCode(XActClassDocumentEntryAct.ACT).withMoodCode(XDocumentActMood.EVN).
+              withCode(new CD().
+                  withCode('23745001').
+                  withCodeSystem('2.16.840.1.113883.6.96').
+                  withDisplayName('Documentation procedure')).
+              withStatusCode(new CS().withCode('completed')).
+              withEntryRelationship(new POCDMT000040EntryRelationship().
+                  withTypeCode(XActRelationshipEntryRelationship.RSON).
+                  withAct(new POCDMT000040Act().
+                      withClassCode(XActClassDocumentEntryAct.ACT).withMoodCode(XDocumentActMood.EVN).
+                      withCode(new CD().
+                          withCode('48767-8').
+                          withCodeSystem('2.16.840.1.113883.6.1').
+                          withDisplayName('Annotation Comment')).
+                      withStatusCode(new CS().withCode('completed'))
+                  )
+              )
+          )
+      )
+    }
+  }
+
+  private static void addProcedures(POCDMT000040StructuredBody structuredBody, List<Procedure> procedures) {
     if (procedures)
       addSection(structuredBody, generateSectionCode('47519-4')) {
         procedures.each { procedure ->
@@ -118,7 +144,7 @@ class Cda {
   }
 
   private static void addDiagnoses(
-      POCDMT000040StructuredBody structuredBody, List<CdaContext.Diagnosis> diagnoses) {
+      POCDMT000040StructuredBody structuredBody, List<Diagnosis> diagnoses) {
     if (diagnoses)
       addSection(structuredBody, generateSectionCode('11348-0')) {
         diagnoses.each { diagnosis ->
@@ -327,7 +353,7 @@ class Cda {
       }
   }
 
-  private static void addProblems(POCDMT000040StructuredBody structuredBody, List<CdaContext.Problem> problems) {
+  private static void addProblems(POCDMT000040StructuredBody structuredBody, List<Problem> problems) {
     if (problems)
       addSection(structuredBody, generateSectionCode('11450-4')) {
         problems.each { problem ->
@@ -359,7 +385,7 @@ class Cda {
       }
   }
 
-  private static void addEncounter(POCDMT000040StructuredBody structuredBody, CdaContext.Encounter encounter) {
+  private static void addEncounter(POCDMT000040StructuredBody structuredBody, Encounter encounter) {
     if (encounter)
       addSection(structuredBody, generateSectionCode('46240-8')) {
         withEntry(new POCDMT000040Entry().
@@ -406,7 +432,7 @@ class Cda {
   }
 
   private static void configureServiceEvent(
-      POCDMT000040ClinicalDocument document, CdaContext.ServiceEvent serviceEvent) {
+      POCDMT000040ClinicalDocument document, ServiceEvent serviceEvent) {
     if (serviceEvent)
       document.withDocumentationOf(new POCDMT000040DocumentationOf().
           withServiceEvent(new POCDMT000040ServiceEvent().
@@ -474,7 +500,7 @@ class Cda {
       )
   }
 
-  private static void configurePatient(CdaContext.Patient patient, POCDMT000040ClinicalDocument document) {
+  private static void configurePatient(Patient patient, POCDMT000040ClinicalDocument document) {
     if (patient)
       document.withRecordTarget(new POCDMT000040RecordTarget().
           withPatientRole(new POCDMT000040PatientRole().

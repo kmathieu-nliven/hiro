@@ -1,3 +1,3 @@
-include 'ccd', 'builders', 'x12', 'dataload'
+include 'ccd', 'builders', 'x12', 'dataload', 'salesforce'
 
 rootProject.name = 'com.cds.hiro'

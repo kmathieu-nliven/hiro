@@ -6,6 +6,7 @@ import com.cds.hiro.builders.CdaContext
  * Created by rahul on 10/15/15.
  */
 class ACO0016 extends MeasureGenerator {
+
   @Override
   void applyComplement(CdaContext cdaContext) {
   }
@@ -19,8 +20,7 @@ class ACO0016 extends MeasureGenerator {
         on '20150320'
         measured LOINC('39156-5') at '25 kg/m2' of 'RTO_PQ_PQ'
       }
-
     }
-
   }
+
 }
