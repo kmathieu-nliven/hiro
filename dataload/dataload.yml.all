@@ -1,0 +1,14 @@
+geonamesUsername: random_dev
+facilities: 1
+patients: 10
+startingPort: 9030
+baymax:
+  baseUrl: http://certify-oracle-dev.corp.certifydatasystems.com/hl/
+#  username: admin
+#  password: admin
+measures:
+  - name: ACO0041
+    compliant: 0.5
+    complement: 1.0
+
+
