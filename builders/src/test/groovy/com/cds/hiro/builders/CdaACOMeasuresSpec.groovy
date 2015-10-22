@@ -982,7 +982,7 @@ class CdaACOMeasuresSpec extends Specification {
 
       performed SnomedCt('10197000') from '20150511' to '20150520' withStatus 'PERFORMED'
 
-      assessed LOINC('73831-0') toBe SnomedCt('428171000124102') on '2015052'
+      assessed LOINC('73831-0') toBe SnomedCt('428171000124102') on '20150512'
     }
     new File('build/ACO-18-Numer.xml').text = Cda.serialize(ccd, true)
 
