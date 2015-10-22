@@ -20,6 +20,7 @@ class EdiParser {
   String compositeSeparator = ':'
   String repetitionSeparator = '^'
 
+  static final DateTimeFormatter DateTimeFormat = DateTimeFormatter.ofPattern('yyyyMMddHHmm')
   static final DateTimeFormatter DateFormat = DateTimeFormatter.BASIC_ISO_DATE
   static final DateTimeFormatter TimeFormat = DateTimeFormatter.ofPattern('HHmm')
 
