@@ -74,7 +74,9 @@ class Cda {
     configureServiceEvent(document, context.serviceEvent)
 
     def structuredBody = new POCDMT000040StructuredBody()
-    document.withComponent(new POCDMT000040Component2().withStructuredBody(structuredBody))
+    document.component = new POCDMT000040Component2().withStructuredBody(structuredBody)
+
+    addSummaryPurpose(structuredBody)
     addEncounter(structuredBody, context.encounter)
     addProblems(structuredBody, context.problems)
     addFamilyHistory(structuredBody, context.familyHistoryList)
@@ -88,6 +90,32 @@ class Cda {
     addAssessments(structuredBody, context.assessments)
 
     document
+  }
+
+  private static addSummaryPurpose(POCDMT000040StructuredBody structuredBody) {
+    addSection(structuredBody, generateSectionCode('48764-5')) {
+      withEntry(new POCDMT000040Entry().
+          withAct(new POCDMT000040Act().
+              withClassCode(XActClassDocumentEntryAct.ACT).withMoodCode(XDocumentActMood.EVN).
+              withCode(new CD().
+                  withCode('23745001').
+                  withCodeSystem('2.16.840.1.113883.6.96').
+                  withDisplayName('Documentation procedure')).
+              withStatusCode(new CS().withCode('completed')).
+              withEntryRelationship(new POCDMT000040EntryRelationship().
+                  withTypeCode(XActRelationshipEntryRelationship.RSON).
+                  withAct(new POCDMT000040Act().
+                      withClassCode(XActClassDocumentEntryAct.ACT).withMoodCode(XDocumentActMood.EVN).
+                      withCode(new CD().
+                          withCode('48767-8').
+                          withCodeSystem('2.16.840.1.113883.6.1').
+                          withDisplayName('Annotation Comment')).
+                      withStatusCode(new CS().withCode('completed'))
+                  )
+              )
+          )
+      )
+    }
   }
 
   private static void addProcedures(POCDMT000040StructuredBody structuredBody, List<Procedure> procedures) {
