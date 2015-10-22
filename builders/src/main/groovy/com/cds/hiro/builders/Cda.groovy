@@ -227,7 +227,7 @@ class Cda {
                             withInterpretationCode(new CE().
                                 withCode(result.was)
                             ).
-                            withStatusCode(new CS().withCode(result.withStatus))  // hack
+                            withStatusCode(new CS().withCode(result.withStatus))
                         )
                   })
               )
