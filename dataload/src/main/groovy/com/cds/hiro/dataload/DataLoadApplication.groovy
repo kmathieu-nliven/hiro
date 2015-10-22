@@ -2,7 +2,10 @@ package com.cds.hiro.dataload
 
 import com.cds.hiro.builders.Cda
 import com.cds.hiro.builders.CdaContext
+import com.cds.hiro.builders.X12
+import com.cds.hiro.builders.X12Context
 import com.cds.hiro.dataload.measures.MeasureGenerator
+import com.cds.hiro.x12.EdiParser
 import com.github.rahulsom.cda.CD
 import com.github.rahulsom.cda.CE
 import com.github.rahulsom.genealogy.NameDbUsa
@@ -126,6 +129,7 @@ class DataLoadApplication {
 
           baymax.createPatient(person, address, dob, localId, facility, execCon.aco, acoId)
           CdaContext cdaContext = createCdaContext(person, dob, facility, localId, address)
+          X12Context x12Context = createX12Context(person, dob, facility, localId, address)
 
           def measures = ''
 
@@ -138,13 +142,21 @@ class DataLoadApplication {
 
                 switch (evalMeasure(random, measure)) {
                   case MeasureInfo.Compliant:
-                    log.info "${measure.name.padLeft(20)} : + Compliant"
-                    measures += "+${measure.name} "
-                    measureGenerator.applyCompliant(cdaContext); break
+                    if (measureGenerator.applyCompliant(cdaContext, x12Context)) {
+                      log.info "${measure.name.padLeft(20)} : + Compliant"
+                      measures += "+${measure.name} "
+                    } else {
+                      log.info "${measure.name.padLeft(20)} : + Compliant *** Not Applied ***"
+                    }
+                    break
                   case MeasureInfo.Complement:
-                    log.info "${measure.name.padLeft(20)} : - Complement"
-                    measures += "-${measure.name} "
-                    measureGenerator.applyComplement(cdaContext); break
+                    if (measureGenerator.applyComplement(cdaContext, x12Context)) {
+                      log.info "${measure.name.padLeft(20)} : - Complement"
+                      measures += "-${measure.name} "
+                    } else {
+                      log.info "${measure.name.padLeft(20)} : - Complement *** Not Applied ***"
+                    }
+                    break
                   default:
                     log.debug "Will not apply ${measure} for ${localId}"
                 }
@@ -160,7 +172,8 @@ class DataLoadApplication {
 
           def cda = Cda.createCcd(cdaContext)
           baymax.addDocument(cda, facility)
-          // TODO Generate X12
+          def x12 = X12.createX12(x12Context)
+          new File("build/${acoId}.edi").text = new EdiParser().toEdi(x12.toTokens(0))
         }
 
     patientsFile.close()
@@ -186,6 +199,32 @@ class DataLoadApplication {
     cdaContext.with {
       code LOINC('34133-9')
       confidentiality Conf('N')
+      patient {
+        name person.lastName, person.firstName
+        gender person.gender
+        birthTime dob
+        maritalStatus rnd.nextBoolean() ? 'M' : 'S'
+
+        id facility.identifier, identifier
+
+        addr {
+          street address.street
+          city address.city
+          state address.state
+          postalCode address.zip
+          country address.country
+        }
+      }
+      authoredBy 'Johnson', 'Kimberly' of facility.name identifiedAs facility.identifier at new Date().format('yyyyMMdd')
+    }
+    cdaContext
+  }
+
+  private static X12Context createX12Context(
+      Person person, String dob, Facility facility, String identifier, Address address
+  ) {
+    def cdaContext = new X12Context()
+    cdaContext.with {
       patient {
         name person.lastName, person.firstName
         gender person.gender
