@@ -9,17 +9,20 @@ class ACO0014 extends MeasureGenerator {
   @Override
   void applyComplement(CdaContext cdaContext) {
     cdaContext.with {
-      performed CPT('99202') from '20150304' to '20150304'
-      performed SnomedCt('252779009') from '20151010' to '20151011'
-      suffered Icd9CM('250.03') between '20150304' and '20150304'
+      performed CPT('99341') from '20151003' to '20151003'
+      performed CPT('99341') from '20150615' to '20150615'
     }
   }
 
   @Override
   void applyCompliant(CdaContext cdaContext) {
     cdaContext.with {
+      performed SnomedCt('12843005') from '20141120' to '20141120'
+
       performed CPT('99341') from '20151003' to '20151003'
       performed CPT('99341') from '20150615' to '20150615'
+
+      performed SnomedCt('442333005') from '20141120' to '20141120'
     }
   }
 }
