@@ -51,7 +51,12 @@ abstract class MeasureGenerator {
   private static Random random = new Random()
 
   static boolean randBoolean() {
-    random.nextBoolean()
+    // random.nextBoolean()
+    // TODO Dory places claims based codes and CCD based codes in different locations in it's output
+    // this is something Gill depends on.
+    // Once both the teams fix that, we can go back to randomizing
+
+    true
   }
 
   abstract boolean applyComplement(CdaContext cdaContext, X12Context x12Context)
