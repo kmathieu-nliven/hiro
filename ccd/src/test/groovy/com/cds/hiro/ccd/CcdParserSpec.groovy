@@ -1,5 +1,6 @@
 package com.cds.hiro.ccd
 
+import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
 /**
@@ -11,10 +12,11 @@ import spock.lang.Specification
 
 class CcdParserSpec extends Specification {
 
-  public static final String EMPTY_DOCUMENT = """<?xml version="1.0" encoding="UTF-8"?>
-              <ClinicalDocument xmlns="urn:hl7-org:v3"
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-              </ClinicalDocument>"""
+  public static final String EMPTY_DOCUMENT = '''\
+      <?xml version="1.0" encoding="UTF-8"?>
+      <ClinicalDocument xmlns="urn:hl7-org:v3"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      </ClinicalDocument>'''.stripIndent()
 
   def "the code runs"() {
     given: "A ccd"
@@ -43,15 +45,15 @@ class CcdParserSpec extends Specification {
     JsonSlurper slurper = new JsonSlurper()
     def expectedJson = slurper.parseText(this.class.classLoader.getResourceAsStream('sample-output.json').text)
     def resultJson = slurper.parseText(results)
+    new File('build/actual-output.json').text = new JsonBuilder(resultJson).toPrettyString()
 
     then: "result json should match expected json"
     expectedJson == resultJson
 
   }
 
-  def "test effectiveTime low high values"() {
+  def "test effectiveTime low high values for procedures"() {
     given: "A ccd"
-
     def ccdString = this.class.classLoader.getResourceAsStream('sample-ccd.xml').text
 
     when: "Parse it using CcdStreamingUtil"

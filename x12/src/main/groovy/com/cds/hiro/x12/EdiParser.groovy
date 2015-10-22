@@ -6,6 +6,7 @@ import groovy.transform.builder.Builder
 import groovy.transform.builder.SimpleStrategy
 
 import java.time.format.DateTimeFormatter
+import java.util.regex.Pattern
 
 /**
  * Parses a X12 Document encoded as EDI
@@ -14,10 +15,10 @@ import java.time.format.DateTimeFormatter
  */
 @Builder(builderStrategy = SimpleStrategy, prefix = '')
 class EdiParser {
-  String segmentSeperator = '\n'
-  String fieldSeperator = /\*/
-  String compositeSeperator = /:/
-  String repetitionSeperator = /\^/
+  String segmentSeparator = '\n'
+  String fieldSeparator = '*'
+  String compositeSeparator = ':'
+  String repetitionSeparator = '^'
 
   static final DateTimeFormatter DateFormat = DateTimeFormatter.BASIC_ISO_DATE
   static final DateTimeFormatter TimeFormat = DateTimeFormatter.ofPattern('HHmm')
@@ -30,14 +31,28 @@ class EdiParser {
     retval
   }
 
+  private String p(String separator) {
+    Pattern.quote(separator)
+  }
+
   @PackageScope
   List<List<List<List<String>>>> extractTree(String input) {
-    input.split(segmentSeperator).collect {
-      it.split(fieldSeperator).collect {
-        it.split(repetitionSeperator).collect {
-          it.split(compositeSeperator).toList()*.trim()
+    input.split(p(segmentSeparator)).collect {
+      it.split(p (fieldSeparator)).collect {
+        it.split(p (repetitionSeparator)).collect {
+          it.split(p (compositeSeparator)).toList()*.trim()
         }
       }
     }
+  }
+
+  String toEdi(List<List<List<List<String>>>> tokens) {
+    tokens.collect { seg ->
+      seg.collect { rep ->
+        rep.collect { composite ->
+          composite.join(compositeSeparator)
+        }.join(repetitionSeparator)
+      }.join(fieldSeparator)
+    }.join(segmentSeparator)
   }
 }

@@ -21,25 +21,30 @@ abstract class Element {
 @CompileStatic
 abstract class Composite extends Element {
   abstract void parse(List<String> input)
+  abstract List<String> toTokens()
 
 }
 
 @CompileStatic
-abstract class BlockElement extends Element {}
+abstract class BlockElement extends Element {
+}
 
 @CompileStatic
 abstract class Message extends BlockElement {
+  abstract List<List<List<List<String>>>> toTokens(int indent)
   abstract void parse(List<List<List<List<String>>>> input)
 }
 
 @CompileStatic
 abstract class Loop extends BlockElement {
+  abstract List<List<List<List<String>>>> toTokens(int indent)
   abstract void parse(List<List<List<List<String>>>> input)
 }
 
 @CompileStatic
 abstract class Segment extends BlockElement {
   abstract void parse(List<List<List<String>>> input)
+  abstract List<List<List<String>>> toTokens(int indent)
 
   protected static <T> T valueOf(List<List<String>> strings, Class<T> clazz) {
     def list = listOf(strings, clazz)

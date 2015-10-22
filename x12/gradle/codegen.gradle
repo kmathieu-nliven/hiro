@@ -34,11 +34,7 @@ class X12Util {
     def output = input.replaceAll(/[^A-Za-z0-9_]/, '')
     def retval = output ==~ /^[0-9].*/ ? "M${output}" : output
 
-    if (downCase) {
-      retval[0].toLowerCase() + retval[1..-1]
-    } else {
-      retval
-    }
+    downCase ? (retval[0].toLowerCase() + retval[1..-1]) : retval
   }
 }
 
@@ -58,19 +54,29 @@ class TransactionSet {
 
 @TupleConstructor
 @EqualsAndHashCode
-@ToString(includeNames = true)
+@ToString(includeNames = true, excludes = 'theSegment,theLoop')
 class TransactionSetDetail {
   String transactionSetId, area, sequence, segmentId, requirement, maxUse, loopLevel, loopRepeat, loopId
   Segment theSegment
   Loop theLoop
 }
 
-abstract class BlockElement {}
+abstract class BlockElement {
+  abstract String getName();
+  String getMethodName() {
+    this.name[0].toUpperCase() + this.name[1..-1].toLowerCase()
+  }
+}
 
 @Canonical(excludes = 'details')
 class Segment extends BlockElement {
   String segmentId, segmentName
   List<SegmentDetail> details = []
+
+  @Override
+  String getName() {
+    segmentName
+  }
 }
 
 @Canonical(excludes = 'children,parent')
@@ -100,6 +106,8 @@ interface Element {
   String toJavaType()
   String toFieldName()
   String toRow()
+  boolean isEnum()
+  boolean isComposite()
 }
 
 @Canonical
@@ -133,6 +141,16 @@ class SimpleElement implements Element {
       |"${dataElementNumber}","${dataElementName}"
       |   * "${dataElementNumber}","${dataElementType}","${minimumLength}","${maximumLength}" """.stripMargin()
   }
+
+  @Override
+  boolean isEnum() {
+    return enumerations.size() > 0
+  }
+
+  @Override
+  boolean isComposite() {
+    return false
+  }
 }
 
 @Canonical
@@ -153,6 +171,16 @@ class CompositeElement implements Element {
   @Override
   String toRow() {
     /"${dataElementNumber}","${dataElementName}"/
+  }
+
+  @Override
+  boolean isEnum() {
+    return false
+  }
+
+  @Override
+  boolean isComposite() {
+    return true
   }
 }
 
@@ -183,214 +211,12 @@ File dir(File parent, String name) {
 
 task codegen << {
 
-  def tsTemplate = '''
-package ${packageName}
-
-import com.cds.hiro.x12.structures.*
-import com.cds.hiro.x12_837p.segments.*
-import com.cds.hiro.x12_837p.loops.*
-
-/**
- * From sethead.txt
- * <pre>
- * "${transactionSetId}","${transactionSetName}","${functionalGroupId}"
- * </pre>
- */
-@groovy.transform.CompileStatic
-@groovy.transform.ToString
-class ${className} extends Message {
-
-  <% children.each { detail -> %>
-   <% if (detail.class.simpleName == 'Loop') { %>
-  /**
-   * From sethead.txt
-   * <pre>
-   * "${detail}"
-   * </pre>
-   */
-   ${detail.name} ${detail.name.toLowerCase()}
-   <% } else { %>
-  /**
-   * From sethead.txt
-   * <pre>
-   *
-   * </pre>
-   */
-   ${detail.segmentId} ${detail.segmentId.toLowerCase()}
-   <% } %>
-  <% } %>
-
-  void parse(List<List<List<List<String>>>> input) {
-    // TODO
-  }
-}
-'''
-  def loopTemplate = '''
-package ${packageName}
-
-import com.cds.hiro.x12.structures.*
-import com.cds.hiro.x12_837p.segments.*
-
-/**
- * From nowhere
- * <pre>
- * "${name}","${loopId}""
- * </pre>
- */
-@groovy.transform.CompileStatic
-@groovy.transform.ToString
-class ${className} extends Loop {
-
-  // ${children.size()}
-  <% children.eachWithIndex { detail, idx -> %>
-  /**
-   * From sethead.txt
-   * <pre>
-   * "${detail}"
-   * </pre>
-   */
-   <% if (detail.class.simpleName == 'Loop') { %>
-   ${detail.name} ${detail.name.toLowerCase()}_${idx+1}
-   <% } else { %>
-   ${detail.segmentId} ${detail.segmentId.toLowerCase()}_${idx+1}
-   <% } %>
-  <% } %>
-
-  void parse(List<List<List<List<String>>>> input) {
-    // TODO
-  }
-}
-'''
-
-  def segTemplate = '''
-package ${packageName}
-
-import com.cds.hiro.x12.structures.*
-import com.cds.hiro.x12_837p.composites.*
-import com.cds.hiro.x12_837p.enums.*
-
-/**
- * From seghead.txt
- * <pre>
- * "${segmentId}","${segmentName}"
- * </pre>
- */
-@groovy.transform.CompileStatic
-@groovy.transform.ToString
-class ${className} extends Segment {
-
-  <% details.each { detail -> %>
-  /**
-   * From segdetl.txt:
-   * <pre>
-   * "${detail.segmentID}","${detail.sequence}","${detail.dataElementNumber}","${detail.requirement}","${detail.repeat}"
-   * </pre>
-   * From elehead.txt + eledetl.txt or comhead.txt:
-   * <pre>
-   * ${detail.element.toRow()}
-   * </pre>
-   */
-   ${detail.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
-  <% } %>
-
-  void parse(List<List<List<String>>> input) {
-    <% details.eachWithIndex { detail, idx ->
-    %>this.${detail.element.toFieldName()}_${detail.sequence} = input.size() > ${idx + 1
-          } ? <%if (detail.repeat == '1') {
-          %> valueOf(input[${idx + 1}], ${detail.element.toJavaType()})<%
-          } else {
-          %> listOf(input[${idx + 1}], ${detail.element.toJavaType()})<%
-          }%> : null
-    <%
-    }
-    %>
-  }
-}
-'''
-
-  def compositeTemplate = '''
-package ${packageName}
-
-import com.cds.hiro.x12.structures.*
-import com.cds.hiro.x12_837p.enums.*
-
-/**
- * From seghead.txt
- * <pre>
- * "${dataElementNumber}","${dataElementName}"
- * </pre>
- */
-@groovy.transform.CompileStatic
-@groovy.transform.ToString
-class ${className} extends Composite {
-
-  <% details.each { detail -> %>
-  /**
-   * From comdetl.txt:
-   * <pre>
-   * "${dataElementNumber}","${detail.sequence}","${detail.dataElementNumber}","${detail.requirement}"
-   * </pre>
-   */
-   ${detail.element.toJavaType()} ${detail.element.toFieldName()}_${detail.sequence}
-  <% } %>
-
-  void parse(List<String> input) {
-    <% details.eachWithIndex { detail, idx ->
-    %>this.${detail.element.toFieldName()}_${detail.sequence} = input.size() > ${idx} ? valueOf(input[${idx}],${detail.element.toJavaType()}) : null;
-    <% } %>
-  }
-}
-'''
-
-  def enumTemplate = '''
-package ${packageName};
-
-import java.util.Map;
-import java.util.HashMap;
-
-/**
- * From seghead.txt
- * <pre>
- * "${dataElementNumber}","${dataElementName}"
- * </pre>
- */
-public enum ${className} {
-
-  <%
-  def size = enumerations.size()
-  enumerations.eachWithIndex { enumeration, idx ->
-  %>/** ${enumeration.name} */
-  ${enumeration.representation}_${enumeration.code}("${enumeration.code}")<% if (size - 1 > idx) {%>,
-  <% } else {%>;
-  <%}
-  }
-  %>
-
-  static Map<String, ${className}> reverseLookupMap = new HashMap<String, ${className}>();
-
-  static {
-    ${className}[] values = ${className}.values();
-    for (${className} value: values) {
-      reverseLookupMap.put(value.code, value);
-    }
-  }
-
-  static ${className} byCode(String code) {
-    return reverseLookupMap.get(code);
-  }
-
-  String code;
-  ${className}(String code) {this.code = code;}
-}
-'''
-
 
   List<TransactionSet> transactionSets = []
   List<TransactionSetDetail> transactionSetDetails = []
   List<Segment> segments = []
   List<SegmentDetail> segmentDetails = []
   List<? extends Element> elements = []
-
 
   X12Util.from('elehead').
       each { line -> elements << new SimpleElement(*line) }
@@ -430,12 +256,11 @@ public enum ${className} {
         }
       }
 
-  X12Util.from('sethead').
-      each { transactionSets << new TransactionSet(*it) }
 
   List<Loop> loops = []
-  Loop root
-  Loop current
+  Loop root, current
+  X12Util.from('sethead').
+      each { transactionSets << new TransactionSet(*it) }
   X12Util.from('setdetl').
       each { line ->
         def detail = new TransactionSetDetail(*line)
@@ -514,7 +339,7 @@ public enum ${className} {
 
         map.className = X12Util.toSymbol(it.dataElementName)
         new GStringTemplateEngine().
-            createTemplate(enumTemplate).
+            createTemplate(file('templates/enum.gtpl')).
             make(map).
             writeTo(
                 new File(eDir, "${map.className}.java").newWriter()
@@ -530,7 +355,7 @@ public enum ${className} {
 
         map.className = X12Util.toSymbol(it.dataElementName)
         new GStringTemplateEngine().
-            createTemplate(compositeTemplate).
+            createTemplate(file('templates/composite.gtpl')).
             make(map).
             writeTo(
                 new File(comDir, "${map.className}.groovy").newWriter()
@@ -545,7 +370,7 @@ public enum ${className} {
 
         map.className = X12Util.toSymbol(it.segmentId)
         new GStringTemplateEngine().
-            createTemplate(segTemplate).
+            createTemplate(file('templates/segment.gtpl')).
             make(map).
             writeTo(
                 new File(segsDir, "${map.className}.groovy").newWriter()
@@ -560,7 +385,7 @@ public enum ${className} {
 
         map.className = X12Util.toSymbol(it.name)
         new GStringTemplateEngine().
-            createTemplate(loopTemplate).
+            createTemplate(file('templates/loop.gtpl')).
             make(map).
             writeTo(
                 new File(loopsDir, "${map.className}.groovy").newWriter()
@@ -575,7 +400,7 @@ public enum ${className} {
 
         map.className = X12Util.toSymbol(it.transactionSetId)
         new GStringTemplateEngine().
-            createTemplate(tsTemplate).
+            createTemplate(file('templates/transactionset.gtpl')).
             make(map).
             writeTo(
                 new File(transactionSetDir, "${map.className}.groovy").newWriter()

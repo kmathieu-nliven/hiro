@@ -7,6 +7,9 @@ import javax.xml.bind.JAXBContext
 import javax.xml.bind.JAXBElement
 import javax.xml.bind.Marshaller
 import javax.xml.namespace.QName
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /**
  * Builder for creating CDA documents.
@@ -58,13 +61,16 @@ class Cda {
     if (context.id) {
       document.id = new II().withRoot(context.id)
     }
+    if (context.created) {
+      document.effectiveTime = new TS().withValue(context.created.toString())
+    }
     document.code = context.code
     document.title = new ST().withContent(context.title)
     document.confidentialityCode = context.confidentiality
     document.languageCode = new CS().withCode(context.language.toLanguageTag())
 
+    configureAuthor(document, context)
     configurePatient(context.patient, document)
-    configureAuthor(document, context.author)
     configureInformant(document, context.informant)
     configureCustodian(document, context.custodian)
     configureServiceEvent(document, context.serviceEvent)
@@ -239,7 +245,10 @@ class Cda {
           withEntry(new POCDMT000040Entry().
               withSubstanceAdministration(new POCDMT000040SubstanceAdministration().
                   withClassCode('SBADM').withMoodCode(XDocumentSubstanceMood.EVN).
-                  withEffectiveTime(/* TODO */).
+                  withEffectiveTime(new IVLTS().withRest([
+                      medication.from ? ItiHelper.jaxb('low', IVLTS, new IVLTS().withValue(medication.from)) : null,
+                      medication.to ? ItiHelper.jaxb('high', IVLTS, new IVLTS().withValue(medication.to)) : null,
+                  ].findAll { it })).
                   withConsumable(new POCDMT000040Consumable().
                       withManufacturedProduct(new POCDMT000040ManufacturedProduct().
                           withClassCode(RoleClassManufacturedProduct.MANU).
@@ -333,8 +342,12 @@ class Cda {
                           withCode(new CD().
                               withCode('64572001').withCodeSystem('2.16.840.1.113883.6.96')
                           ).
-                          withEffectiveTime(new IVLTS().withRest(/*TODO*/)).
-                          withValue(problem.code)
+                          withEffectiveTime(new IVLTS().withRest([
+                              problem.between ? ItiHelper.jaxb('low', IVLTS, new IVLTS().withValue(problem.between)) : null,
+                              problem.and ? ItiHelper.jaxb('high', IVLTS, new IVLTS().withValue(problem.and)) : null,
+                          ].findAll { it })).
+                          withValue(problem.code).
+                          withStatusCode(new CS().withCode(problem.withStatus))
                       )
                   ).
                   withStatusCode(new CS().
@@ -353,7 +366,10 @@ class Cda {
             withTypeCode(XActRelationshipEntry.DRIV).
             withEncounter(new POCDMT000040Encounter().
                 withCode(null /*TODO*/).
-                withEffectiveTime(new IVLTS().withRest(/*TODO*/)).
+                withEffectiveTime(new IVLTS().withRest([
+                    encounter.between ? ItiHelper.jaxb('low', IVLTS, new IVLTS().withValue(encounter.between)) : null,
+                    encounter.and ? ItiHelper.jaxb('high', IVLTS, new IVLTS().withValue(encounter.and)) : null,
+                ].findAll { it })).
                 withText(new ED().withContent('TODO')).
                 withPerformer(new POCDMT000040Performer2().
                     withAssignedEntity(new POCDMT000040AssignedEntity().
@@ -437,12 +453,13 @@ class Cda {
       )
   }
 
-  private static void configureAuthor(POCDMT000040ClinicalDocument document, CdaContext.Author author) {
+  private static void configureAuthor(POCDMT000040ClinicalDocument document, CdaContext context) {
+    def author = context.author
     if (author)
       document.withAuthor(new POCDMT000040Author().
           withTypeCode('AUT').
           withContextControlCode('OP').
-          withTime(new TS().withValue(new Date().format('yyyyMMddHHmmssZ'))).
+          withTime(new TS().withValue(context.created.toString())).
           withAssignedAuthor(new POCDMT000040AssignedAuthor().
               withRepresentedOrganization(new POCDMT000040Organization().
                   withId(new II().withRoot(author.identifiedAs)).

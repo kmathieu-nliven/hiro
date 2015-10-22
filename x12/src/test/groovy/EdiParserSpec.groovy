@@ -2,17 +2,30 @@ import com.cds.hiro.x12.EdiParser
 import com.cds.hiro.x12_837p.enums.CodeListQualifierCode
 import com.cds.hiro.x12_837p.enums.DateTimePeriodFormatQualifier
 import com.cds.hiro.x12_837p.enums.GenderCode
+import com.cds.hiro.x12_837p.enums.HierarchicalStructureCode
 import com.cds.hiro.x12_837p.enums.MaritalStatusCode
 import com.cds.hiro.x12_837p.enums.RaceorEthnicityCode
 import com.cds.hiro.x12_837p.enums.TransactionSetIdentifierCode
+import com.cds.hiro.x12_837p.enums.TransactionSetPurposeCode
+import com.cds.hiro.x12_837p.enums.TransactionTypeCode
+import com.cds.hiro.x12_837p.loops.L1000A
+import com.cds.hiro.x12_837p.loops.L1000B
+import com.cds.hiro.x12_837p.segments.BHT
 import com.cds.hiro.x12_837p.segments.CLM
 import com.cds.hiro.x12_837p.segments.DMG
+import com.cds.hiro.x12_837p.segments.REF
 import com.cds.hiro.x12_837p.segments.SE
 import com.cds.hiro.x12_837p.segments.ST
+import com.cds.hiro.x12_837p.transactionsets.M837Q1
 import spock.lang.Specification
 
+import java.time.LocalDate
+import java.time.LocalTime
+
 /**
- * Created by rahul on 10/8/15.
+ * Tests parsing and creation of X12 documents based on the EDI format
+ *
+ * @author Rahul Somasunderam
  */
 class EdiParserSpec extends Specification {
   def "Tokenizing works with defaults for a simple message"() {
@@ -20,10 +33,9 @@ class EdiParserSpec extends Specification {
     def parser = new EdiParser()
 
     when: "I give it inputs without composites or reps"
-    def tree = parser.extractTree("""\
-ISA*12*23
-ST*Foo Bar*Fubar
-""")
+    def tree = parser.extractTree('''\
+          |ISA*12*23
+          |ST*Foo Bar*Fubar'''.stripMargin())
 
     then: "It works"
     tree == [
@@ -42,7 +54,7 @@ ST*Foo Bar*Fubar
 
   def "Tokenizing can be customized"() {
     given: "A builder"
-    def parser = new EdiParser().segmentSeperator('~').fieldSeperator(/\|/)
+    def parser = new EdiParser().segmentSeparator('~').fieldSeparator('|')
 
     when: "I give it inputs without composites or reps"
     def tree = parser.extractTree("""ISA|12|23~ST|Foo Bar|Fubar""")
@@ -171,5 +183,77 @@ ST*Foo Bar*Fubar
     then: "Segment is valid"
     segment.claimSubmittersIdentifier_01 == 'ABC7001'
     segment.monetaryAmount_02 == 65.0
+  }
+
+  def "A message can be turned into a tree"() {
+    given: "An x12 message"
+    def x12 = new M837Q1().
+        withSt(new ST().
+            withTransactionSetIdentifierCode_01(TransactionSetIdentifierCode.HealthCareClaim_837).
+            withTransactionSetControlNumber_02('123').
+            withImplementationConventionReference_03('ABC')
+        ).
+        withBht(new BHT().
+            withHierarchicalStructureCode_01(HierarchicalStructureCode.ReportingAgencyClaimAdministratorInsurerInsuredEmployerClaimantPayment_0211).
+            withTransactionSetPurposeCode_02(TransactionSetPurposeCode.Initial_57).
+            withReferenceIdentification_03('12345').
+            withDate_04(LocalDate.parse('20140903', EdiParser.DateFormat)).
+            withTime_05(LocalTime.parse('2145', EdiParser.TimeFormat)).
+            withTransactionTypeCode_06(TransactionTypeCode.ClaimSubmission_CK)
+        ).
+        withRef(new REF()).
+        withL1000a(new L1000A()).
+        withL1000b(new L1000B())
+
+    when: "I convert it to tokens"
+    def tokens = x12.toTokens()
+
+    then: "Tokens match expectations"
+    tokens == [
+        [
+            [['ST']],
+            [['837']],
+            [['123']],
+            [['ABC']],
+        ],
+        [
+            [['BHT']],
+            [['0211']],
+            [['57']],
+            [['12345']],
+            [['20140903']],
+            [['2145']],
+            [['CK']],
+        ],
+        [
+            [['REF']],
+            [[]],
+            [[]],
+            [[]],
+            [[]],
+        ]
+    ]
+
+    when: "I convert it to edi"
+    def edi = new EdiParser().toEdi(tokens)
+
+    def expected ='''\
+        |ST*837*123*ABC
+        |BHT*0211*57*12345*20140903*2145*CK
+        |REF****'''.stripMargin()
+
+    then: "Edi matches expectation"
+    edi == expected
+
+    when: "I convert it to a pretty edi"
+    edi = new EdiParser().toEdi(x12.toTokens(0))
+
+    expected ='''\
+        |ST*837*123*ABC
+        |  BHT*0211*57*12345*20140903*2145*CK
+        |  REF****'''.stripMargin()
+
+    then: "Edi matches expectation"
+    edi == expected
   }
 }
