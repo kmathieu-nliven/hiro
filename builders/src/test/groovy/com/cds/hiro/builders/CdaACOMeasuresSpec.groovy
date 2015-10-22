@@ -20,7 +20,6 @@ class CdaACOMeasuresSpec extends Specification {
   /*
    * Begin cheats
    */
-
   static ce(String code, String codeSystem, String codeSystemName) {
     new CE().withCode(code).withCodeSystem(codeSystem).
         withDisplayName("Code $code").withCodeSystemName(codeSystemName)
@@ -400,7 +399,7 @@ class CdaACOMeasuresSpec extends Specification {
 
       authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
 
-      // Dates are not being generated
+
       suffered Icd9CM('153.5') between '20080505' and '20080505' withStatus 'ACTIVE'
       performed SnomedCt('446745002') from '20050505' to '20050505' withStatus 'PERFORMED'
       performed CPT('99203') from '20150505' to '20150505'
@@ -483,7 +482,7 @@ class CdaACOMeasuresSpec extends Specification {
 
       results {
         on '20150615'
-        measured LOINC('8462-4') at '60 mmHg' of 'PQ' withRange '70-125' was 'High'
+        measured LOINC('8462-4') at '60 mmHg' of 'PQ' withRange '70-125' was 'High' withStatus 'PERFORMED'
       }
     }
     new File('build/ACO-21-Numer.xml').text = Cda.serialize(ccd, true)
@@ -630,7 +629,6 @@ class CdaACOMeasuresSpec extends Specification {
       performed SnomedCt('52035003') from '20140511' to '20140511' withStatus 'ACTIVE'
       performed SnomedCt('11101003') from '20150511' to '20150511' withStatus 'PERFORMED'
 
-      // date not being generated
       prescribed RxNorm('432389') from '20141228' to '20150211' withStatus 'ACTIVE'
       performed SnomedCt('1055001') from '20141230' to '20150111' withStatus 'ACTIVE'
       performed CPT('99213') from '20150511' to '20150511' withStatus 'PERFORMED'
@@ -809,7 +807,6 @@ class CdaACOMeasuresSpec extends Specification {
       authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
 
       performed CPT('99202') from '20150304' to '20150304'
-      // Dates are not generated
       suffered Icd9CM('250.03') between '20150304' and '20150304'
 
     }
