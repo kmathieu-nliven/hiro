@@ -6,6 +6,7 @@ import com.cds.hiro.builders.CdaContext
  * Created by rahul on 10/15/15.
  */
 class ACO0014 extends MeasureGenerator {
+
   @Override
   void applyComplement(CdaContext cdaContext) {
     cdaContext.with {
@@ -22,4 +23,5 @@ class ACO0014 extends MeasureGenerator {
       performed CPT('99341') from '20150615' to '20150615'
     }
   }
+
 }
