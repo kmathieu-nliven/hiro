@@ -34,7 +34,9 @@ class X12 {
     configureHeaders(x12, context)
     configureAuthor(x12, context.author)
     configureInsured(x12, context.patient)
-    configurePayer(x12, context.payers?.first())
+    if (context.payers) {
+      configurePayer(x12, context.payers?.first())
+    }
     if (context.serviceEvent) {
       configureServiceEventAndEncounter(x12, context)
     }
@@ -58,6 +60,7 @@ class X12 {
   private static Map<String, ProductServiceIDQualifier> productServiceIDQualifierMap = [
       '2.16.840.1.113883.5.25': ProductServiceIDQualifier.CurrentProceduralTerminologyCPTCodes_CJ,
       '2.16.840.1.113883.6.96': ProductServiceIDQualifier.SNOMEDSystematizedNomenclatureofMedicine_LD,
+      '2.16.840.1.113883.6.1': ProductServiceIDQualifier.LogicalObservationIdentifierNamesandCodesLOINCCodes_LB,
   ]
 
   private static void configureProcedures(x12, ArrayList<Procedure> procedures) {

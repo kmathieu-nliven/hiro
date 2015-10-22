@@ -21,8 +21,8 @@ class ExecutionConfig {
   @ToString(includePackage = false)
   static class Measure {
     String name
-    Double compliant = 2.5
-    Double complement = 3.0
+    Double compliant = 1.25
+    Double complement = 1.6
   }
 
   Integer facilities = 4
