@@ -481,7 +481,7 @@ class CdaACOMeasuresSpec extends Specification {
 
       results {
         on '20150615'
-        measured LOINC('"8462-4') at '60 mmHg' of 'PQ' withRange '70-125' was 'High'
+        measured LOINC('8462-4') at '60 mmHg' of 'PQ' withRange '70-125' was 'High' withStatus 'PERFORMED'
       }
     }
     new File('build/ACO-21-Numer.xml').text = Cda.serialize(ccd, true)
