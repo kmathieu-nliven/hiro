@@ -2,6 +2,8 @@ package com.cds.hiro.builders
 
 import com.cds.hiro.builders.contexts.*
 import com.cds.hiro.x12.EdiParser
+import com.cds.hiro.x12.batch.Interchange
+import com.cds.hiro.x12.structures.Message
 import com.cds.hiro.x12_837p.composites.*
 import com.cds.hiro.x12_837p.enums.*
 import com.cds.hiro.x12_837p.loops.*
@@ -144,7 +146,9 @@ class X12 {
       }
 
       x12.withL2000c(new L2000C().
+          withHl_1(hl('1', HierarchicalLevelCode.Dependent_23)).
           withL2300_8(new L2300().
+              withClm_1(new CLM()).
               withDtp_2(diagnosisDate).
               withHi_79(new HI().
                   withHealthCareCodeInformation_01(new HealthCareCodeInformation().
@@ -159,8 +163,10 @@ class X12 {
 
   private static void configureServiceEventAndEncounter(M837Q1 x12, X12Context context) {
     x12.withL2000c(new L2000C().
+        withHl_1(hl('1', HierarchicalLevelCode.Dependent_23)).
         withPat_2(createPatient(context)).
         withL2300_8(new L2300().
+            withClm_1(new CLM()).
             withL2310b_86(createServiceEvent(context.serviceEvent)).
             withDtp_2(dtp(DateTimeQualifier.InitialTreatment_454, context.encounter.between)).
             withDtp_3(dtp(DateTimeQualifier.LastVisit_691, context.encounter.and))
@@ -297,7 +303,11 @@ class X12 {
         )
   }
 
-  static String serialize(M837Q1 document, boolean prettyPrint = false) {
+  static String serialize(Message document, boolean prettyPrint = false) {
+    def tokens = document.toTokens(prettyPrint ? 0 : -1)
+    new EdiParser().toEdi(tokens)
+  }
+  static String serialize(Interchange document, boolean prettyPrint = false) {
     def tokens = document.toTokens(prettyPrint ? 0 : -1)
     new EdiParser().toEdi(tokens)
   }
