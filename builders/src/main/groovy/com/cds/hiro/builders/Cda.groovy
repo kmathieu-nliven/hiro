@@ -8,6 +8,9 @@ import javax.xml.bind.JAXBContext
 import javax.xml.bind.JAXBElement
 import javax.xml.bind.Marshaller
 import javax.xml.namespace.QName
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /**
  * Builder for creating CDA documents.
@@ -60,7 +63,7 @@ class Cda {
       document.id = new II().withRoot(context.id)
     }
     if (context.created) {
-      document.effectiveTime = new TS().withValue(context.created.toString())
+      document.effectiveTime = new TS().withValue(LocalDateTime.ofInstant(context.created, ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern('yyyyMMddHHmmss')))
     }
     document.code = context.code
     document.title = new ST().withContent(context.title)
