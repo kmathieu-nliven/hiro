@@ -1,11 +1,13 @@
 package com.cds.hiro.builders
 
+import com.cds.hiro.x12.batch.Interchange
 import com.github.rahulsom.cda.CD
 import com.github.rahulsom.cda.CE
 import groovy.transform.CompileStatic
 import spock.lang.Specification
 
 import java.time.Instant
+import java.time.LocalDateTime
 
 /**
  * Tests for the {@link X12} class.
@@ -115,56 +117,66 @@ class X12Spec extends Specification {
 
     }
 
-    def edi = X12.serialize(x12, true)
+    def interchange = Interchange.createInterchange([x12], LocalDateTime.parse('2007-12-03T10:15:30'))
+    def edi = X12.serialize(interchange, true)
+
     new File('build/test.edi').text = edi
     def controlValue = '''\
-        |ST*837*1234567890*005010X222A1
-        |  BHT*0019*00*1234567890*20071203*0215*CH
-        |  REF*D9*1234567890*Claim*
-        |  NM1*41*2*Alpine Family Physicians*****46*2.16.840.1.113883.3.771***
-        |    PER*IC*Kimberly Johnson*TE*4082361234*****
-        |  NM1*40*2*Humana*****46*2.16.840.1.113883.19***
-        |  HL*1**20*
-        |    NM1*IL*1*Wilson*Paul****MI*pat_E7064980-7624-4700-9663-A555769DF64F***
-        |      N3*500 Washington Blvd*
-        |      N4*San Jose*CA*95129*USA*H**
-        |  HL*2**22*
-        |    NM1*IL*1*Wilson*Paul****MI*pat_E7064980-7624-4700-9663-A555769DF64F***
-        |    PAT*18*O*EO**DT*200712030215**192.3*N
-        |      DTP*454*DT*201108070000
-        |      DTP*691*DT*201112090000
-        |      NM1*1P*1*Chen*Peter****EI*1225652938001060***
-        |    CLM********************
-        |      DTP*431*DT*201108050000
-        |      DTP*450*DT*201112310000
-        |      HI*BJ:415.0:::::::***********
-        |    CLM********************
-        |      DTP*431*DT*201108050000
-        |      DTP*450*DT*201112310000
-        |      HI*BJ:415.0:::::::***********
-        |    CLM********************
-        |      DTP*431*DT*201108050000
-        |      HI*BJ:724.5:::::::***********
-        |      DTP*431*DT*201301300000
-        |      HI*AAA:77528005:::::::***********
-        |  HL*1**23*
-        |    CLM********************
-        |      LX*1
-        |        SV1*CJ:99203:::::Code 99203:********************
-        |        DTP*196*DT*201011201000
-        |  HL*1**23*
-        |    CLM********************
-        |      LX*1
-        |        SV1*CJ:99203:::::Code 99203:********************
-        |        DTP*196*DT*201011200000
-        |        DTP*197*DT*201312200000
-        |  HL*1**23*
-        |    CLM********************
-        |      LX*1
-        |        SV1*LD:77528005:::::Code 77528005:********************
-        |        DTP*196*DT*201011200000
-        |        DTP*197*DT*201312200000
-        |  SE*47*1234567890
+        |ISA*00*          *00*          *ZZ*99999999999    *ZZ*88888888888    *071203*1015*^*00501*000000023*0*T*:
+        |  GS*HC*99999999999*88888888888*071203*1015*1234567890*X*005010X222A1
+        |  ST*837*1234567890*005010X222A1
+        |    BHT*0019*00*1234567890*20071203*0215*CH
+        |    REF*D9*1234567890*Claim*
+        |    NM1*41*2*Alpine Family Physicians*****46*2.16.840.1.113883.3.771***
+        |      PER*IC*Kimberly Johnson*TE*4082361234*****
+        |    NM1*40*2*Humana*****46*2.16.840.1.113883.19***
+        |    HL*1**20*
+        |      NM1*IL*1*Wilson*Paul****MI*pat_E7064980-7624-4700-9663-A555769DF64F***
+        |        N3*500 Washington Blvd*
+        |        N4*San Jose*CA*95129*USA*H**
+        |    HL*2**22*
+        |      NM1*IL*1*Wilson*Paul****MI*pat_E7064980-7624-4700-9663-A555769DF64F***
+        |    HL*1**23*
+        |      PAT*18*O*EO**DT*200712030215**192.3*N
+        |      CLM********************
+        |        DTP*454*DT*201108070000
+        |        DTP*691*DT*201112090000
+        |        NM1*1P*1*Chen*Peter****EI*1225652938001060***
+        |      CLM********************
+        |        DTP*431*DT*201108050000
+        |        DTP*450*DT*201112310000
+        |        HI*BJ:415.0:::::::***********
+        |      CLM********************
+        |        DTP*431*DT*201108050000
+        |        DTP*450*DT*201112310000
+        |        HI*BJ:415.0:::::::***********
+        |      CLM********************
+        |        DTP*431*DT*201108050000
+        |        HI*BJ:724.5:::::::***********
+        |    HL*1**23*
+        |      CLM********************
+        |        DTP*431*DT*201301300000
+        |        HI*AAA:77528005:::::::***********
+        |    HL*1**23*
+        |      CLM********************
+        |        LX*1
+        |          SV1*CJ:99203:::::Code 99203:********************
+        |          DTP*196*DT*201011201000
+        |    HL*1**23*
+        |      CLM********************
+        |        LX*1
+        |          SV1*CJ:99203:::::Code 99203:********************
+        |          DTP*196*DT*201011200000
+        |          DTP*197*DT*201312200000
+        |    HL*1**23*
+        |      CLM********************
+        |        LX*1
+        |          SV1*LD:77528005:::::Code 77528005:********************
+        |          DTP*196*DT*201011200000
+        |          DTP*197*DT*201312200000
+        |    SE*51*1234567890
+        |  GE*1*1234567890
+        |  IEA*1*23
         '''.stripMargin().replaceAll(/\n *$/, '')
 
     then: "All is well"
