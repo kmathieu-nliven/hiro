@@ -1020,12 +1020,12 @@ class CdaACOMeasuresSpec extends Specification {
 
       results {
         on '20150507'
-        measured LOINC('8480-6') at '130 mmHg' of 'PQ' withRange '70-125' was 'High'
+        measured LOINC('8480-6') at '130 mmHg' of 'PQ' withRange '70-125' was 'High' withStatus 'PERFORMED'
       }
 
       results {
         on '20150507'
-        measured LOINC('8462-4') at '80 mmHg' of 'PQ' withRange '70-125' was 'High'
+        measured LOINC('8462-4') at '80 mmHg' of 'PQ' withRange '70-125' was 'High' withStatus 'PERFORMED'
       }
     }
     new File('build/ACO-28-IPP-and-Denom.xml').text = Cda.serialize(ccd, true)
