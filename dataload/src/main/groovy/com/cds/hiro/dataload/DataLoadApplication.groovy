@@ -117,7 +117,7 @@ class DataLoadApplication {
 
         }
 
-    int sequence = execCon.sequenceStart
+    def sequence = execCon.sequenceStart
     execCon.patients.
         times { idx ->
           def facility = facilities[rnd.nextInt(facilities.size())]
