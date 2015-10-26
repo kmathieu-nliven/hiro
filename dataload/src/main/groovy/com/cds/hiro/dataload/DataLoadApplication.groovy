@@ -28,7 +28,7 @@ import java.text.SimpleDateFormat
 @Log4j
 @CompileStatic
 class DataLoadApplication {
-  static Random rnd = new Random(new SecureRandom().nextLong())
+  static Random rnd = new SecureRandom()
   public static final int YEAR = 365
 
 
@@ -120,11 +120,11 @@ class DataLoadApplication {
     execCon.patients.
         times { idx ->
           def facility = facilities[rnd.nextInt(facilities.size())]
-          def person = names.person
+          def person = names.getPerson(rnd.nextLong())
           def address = getAddress(execCon)
           def dob = (new SimpleDateFormat('yyyyMMdd').parse('19700101') + rnd.nextInt(YEAR * 80) - YEAR * 40).format('yyyyMMdd')
-          def localId = generateMD5_A("${person.firstName} ${person.lastName} ${dob.format('yyyyMMdd')}", 8)
-          def acoId = generateMD5_A("${person.firstName} ${person.lastName} ${dob.format('yyyyMMdd')} ${execCon.aco.universalId}", 8)
+          def localId = generateMD5_A("${person.firstName} ${person.lastName} ${dob.format('yyyyMMdd')}", 10)
+          def acoId = generateMD5_A("${person.firstName} ${person.lastName} ${dob.format('yyyyMMdd')} ${execCon.aco.universalId}", 10)
           log.info "Creating patient ${person.firstName} ${person.lastName} at ${facility.nickName} as ${localId}"
 
           baymax.createPatient(person, address, dob, localId, facility, execCon.aco, acoId)
