@@ -1014,7 +1014,7 @@ class CdaACOMeasuresSpec extends Specification {
 
       authoredBy 'Johnson', 'Kimberly' of 'Alpine Family Physicians' identifiedAs '2.16.840.1.113883.3.771' at '20111118014000'
 
-      performed SnomedCt('12843005') from '20150511' to '20150512' withStatus 'PERFORMED'
+      performed SnomedCt('12843005') from '20150511' to '20150511' withStatus 'PERFORMED'
       performed SnomedCt('12843005') from '20150509' to '20150514' withStatus 'PERFORMED'
       performed SnomedCt('10725009') from '20150511' to '20150515' withStatus 'ACTIVE'
 
