@@ -2,12 +2,13 @@ package com.cds.hiro.builders
 
 import com.cds.hiro.builders.contexts.*
 import com.cds.hiro.x12.EdiParser
-import com.cds.hiro.x12_837p.composites.CompositeMedicalProcedureIdentifier
-import com.cds.hiro.x12_837p.composites.HealthCareCodeInformation
+import com.cds.hiro.x12.batch.Interchange
+import com.cds.hiro.x12.structures.Message
+import com.cds.hiro.x12_837p.composites.*
 import com.cds.hiro.x12_837p.enums.*
 import com.cds.hiro.x12_837p.loops.*
 import com.cds.hiro.x12_837p.segments.*
-import com.cds.hiro.x12_837p.transactionsets.M837Q1
+import com.cds.hiro.x12_837p.transactionsets.*
 
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -35,7 +36,9 @@ class X12 {
     configureHeaders(x12, context)
     configureAuthor(x12, context.author)
     configureInsured(x12, context.patient)
-    configurePayer(x12, context.payers?.first())
+    if (context.payers) {
+      configurePayer(x12, context.payers?.first())
+    }
     if (context.serviceEvent) {
       configureServiceEventAndEncounter(x12, context)
     }
@@ -59,16 +62,18 @@ class X12 {
   private static Map<String, ProductServiceIDQualifier> productServiceIDQualifierMap = [
       '2.16.840.1.113883.5.25': ProductServiceIDQualifier.CurrentProceduralTerminologyCPTCodes_CJ,
       '2.16.840.1.113883.6.96': ProductServiceIDQualifier.SNOMEDSystematizedNomenclatureofMedicine_LD,
+      '2.16.840.1.113883.6.1' : ProductServiceIDQualifier.LogicalObservationIdentifierNamesandCodesLOINCCodes_LB,
   ]
 
   private static void configureProcedures(x12, ArrayList<Procedure> procedures) {
+    int idx = 1
     procedures.each {
 
       def startProcedure = it.from ?
-          dtp(DateTimeQualifier.Start_196, it.from) : it.on ?
-          dtp(DateTimeQualifier.Start_196, it.on) : null
+          dtp(DateTimeQualifier.ServicePeriodStart_150, it.from) : it.on ?
+          dtp(DateTimeQualifier.ServicePeriodStart_150, it.on) : null
 
-      def endProcedure = it.to ? dtp(DateTimeQualifier.End_197, it.to) : null
+      def endProcedure = it.to ? dtp(DateTimeQualifier.ServicePeriodEnd_151, it.to) : null
 
       def codeSystemQualifier = productServiceIDQualifierMap[it.code.codeSystem]
       if (!codeSystemQualifier) {
@@ -76,10 +81,13 @@ class X12 {
       }
 
       x12.withL2000c(new L2000C().
+          withHl_1(hl('1', HierarchicalLevelCode.Dependent_23)).
           withL2300_8(new L2300().
+              withClm_1(clm()).
               withL2400_94(new L2400().
-                  withSv1_2(new SV1().
-                      withCompositeMedicalProcedureIdentifier_01(new CompositeMedicalProcedureIdentifier().
+                  withLx_1(new LX().withAssignedNumber_01(idx++)).
+                  withSv2_3(new SV2().
+                      withCompositeMedicalProcedureIdentifier_02(new CompositeMedicalProcedureIdentifier().
                           withProductServiceIDQualifier_01(codeSystemQualifier).
                           withProductServiceID_02(it.code.code).
                           withDescription_07(it.code.displayName)
@@ -100,11 +108,11 @@ class X12 {
   private static void configureProblems(x12, ArrayList<Problem> problems) {
     problems.each {
       def startProblem = it.between ?
-          dtp(DateTimeQualifier.OnsetofCurrentSymptomsorIllness_431, it.between) :
+          dtp(DateTimeQualifier.ServicePeriodStart_150, it.between) :
           it.since ?
-              dtp(DateTimeQualifier.OnsetofCurrentSymptomsorIllness_431, it.since) :
+              dtp(DateTimeQualifier.ServicePeriodStart_150, it.since) :
               null
-      def endProblem = it.and ? dtp(DateTimeQualifier.OccurrenceSpanTo_450, it.and) : null
+      def endProblem = it.and ? dtp(DateTimeQualifier.ServicePeriodEnd_151, it.and) : null
 
       def codeListQualifierCode = codeListQualifierCodeMap[it.code.codeSystem]
       if (!codeListQualifierCode) {
@@ -113,6 +121,7 @@ class X12 {
 
       x12.withL2000c(new L2000C().
           withL2300_8(new L2300().
+              withClm_1(clm()).
               withDtp_2(startProblem).
               withDtp_3(endProblem).
               withHi_79(new HI().
@@ -129,7 +138,7 @@ class X12 {
   private static void configureDiagnoses(x12, ArrayList<Diagnosis> diagnoses) {
     diagnoses.each {
       def diagnosisDate = it.on ?
-          dtp(DateTimeQualifier.OnsetofCurrentSymptomsorIllness_431, it.on) :
+          dtp(DateTimeQualifier.ServicePeriodStart_150, it.on) :
           null
 
       def codeListQualifierCode = codeListQualifierCodeMap[it.code.codeSystem]
@@ -138,7 +147,9 @@ class X12 {
       }
 
       x12.withL2000c(new L2000C().
+          withHl_1(hl('1', HierarchicalLevelCode.Dependent_23)).
           withL2300_8(new L2300().
+              withClm_1(clm()).
               withDtp_2(diagnosisDate).
               withHi_79(new HI().
                   withHealthCareCodeInformation_01(new HealthCareCodeInformation().
@@ -153,13 +164,29 @@ class X12 {
 
   private static void configureServiceEventAndEncounter(M837Q1 x12, X12Context context) {
     x12.withL2000c(new L2000C().
+        withHl_1(hl('1', HierarchicalLevelCode.Dependent_23)).
         withPat_2(createPatient(context)).
         withL2300_8(new L2300().
+            withClm_1(clm()).
             withL2310b_86(createServiceEvent(context.serviceEvent)).
-            withDtp_2(dtp(DateTimeQualifier.InitialTreatment_454, context.encounter.between)).
-            withDtp_3(dtp(DateTimeQualifier.LastVisit_691, context.encounter.and))
+            withDtp_2(dtp(DateTimeQualifier.Admission_435, context.encounter.between)).
+            withDtp_3(dtp(DateTimeQualifier.Discharge_096, context.encounter.and))
         )
     )
+  }
+
+  private static CLM clm() {
+    new CLM().
+        withClaimSubmittersIdentifier_01('99999999').
+        withMonetaryAmount_02(20.00).
+        withHealthCareServiceLocationInformation_05(new HealthCareServiceLocationInformation().
+            withFacilityCodeValue_01('12').
+            withFacilityCodeQualifier_02(FacilityCodeQualifier.UniformBillingClaimFormBillType_A).
+            withClaimFrequencyTypeCode_03('1')
+        ).
+        withProviderAcceptAssignmentCode_07(ProviderAcceptAssignmentCode.Assigned_A).
+        withYesNoConditionorResponseCode_08(YesNoConditionorResponseCode.Yes_Y).
+        withReleaseofInformationCode_09(ReleaseofInformationCode.YesProviderhasaSignedStatementPermittingReleaseofMedicalBillingDataRelatedtoaClaim_Y)
   }
 
   private static PAT createPatient(X12Context context) {
@@ -173,11 +200,16 @@ class X12 {
         withYesNoConditionorResponseCode_09(YesNoConditionorResponseCode.No_N)
   }
 
-  private static DTP dtp(DateTimeQualifier dateTimeQualifier, String and) {
+  private static LocalDateTime parseDateTime(String input) {
+    def l = 14 - input.length()
+    LocalDateTime.from(DateTimeFormatter.ofPattern('yyyyMMddHHmmss').parse(input + ('0' * l)))
+  }
+
+  private static DTP dtp(DateTimeQualifier dateTimeQualifier, String date) {
     new DTP().
         withDateTimeQualifier_01(dateTimeQualifier).
-        withDateTimePeriodFormatQualifier_02(DateTimePeriodFormatQualifier.DateExpressedinFormatCCYYMMDD_D8).
-        withDateTimePeriod_03(and)
+        withDateTimePeriodFormatQualifier_02(DateTimePeriodFormatQualifier.DateandTimeExpressedinFormatCCYYMMDDHHMM_DT).
+        withDateTimePeriod_03(parseDateTime(date).format(EdiParser.DateTimeFormat))
   }
 
   private static L2310B createServiceEvent(ServiceEvent serviceEvent) {
@@ -209,7 +241,7 @@ class X12 {
         withNm1_1(new NM1().
             withEntityIdentifierCode_01(EntityIdentifierCode.Submitter_41).
             withEntityTypeQualifier_02(EntityTypeQualifier.NonPersonEntity_2).
-            withNameLastorOrganizationName_03(author.at).
+            withNameLastorOrganizationName_03(author.of).
             withIdentificationCodeQualifier_08(IdentificationCodeQualifier.ElectronicTransmitterIdentificationNumberETIN_46).
             withIdentificationCode_09(author.identifiedAs)
         ).
@@ -224,16 +256,18 @@ class X12 {
 
   private static void configureInsured(M837Q1 x12, Patient patient) {
     if (patient) {
+      def nm1Segment = new NM1().
+          withEntityIdentifierCode_01(EntityIdentifierCode.InsuredorSubscriber_IL).
+          withEntityTypeQualifier_02(EntityTypeQualifier.Person_1).
+          withNameLastorOrganizationName_03(patient.family).
+          withNameFirst_04(patient.given).
+          withIdentificationCodeQualifier_08(IdentificationCodeQualifier.MemberIdentificationNumber_MI).
+          withIdentificationCode_09(patient.extension)
+
       x12.withL2000a(new L2000A().
+          withHl_1(hl('1', HierarchicalLevelCode.InformationSource_20)).
           withL2010aa_5(new L2010AA().
-              withNm1_1(new NM1().
-                  withEntityIdentifierCode_01(EntityIdentifierCode.InsuredorSubscriber_IL).
-                  withEntityTypeQualifier_02(EntityTypeQualifier.Person_1).
-                  withNameLastorOrganizationName_03(patient.family).
-                  withNameFirst_04(patient.given).
-                  withIdentificationCodeQualifier_08(IdentificationCodeQualifier.MemberIdentificationNumber_MI).
-                  withIdentificationCode_09(patient.extension)
-              ).
+              withNm1_1(nm1Segment).
               withN3_3(new N3().
                   withAddressInformation_01(patient.addr.street)
               ).
@@ -246,7 +280,19 @@ class X12 {
               )
           )
       )
+      x12.withL2000b(new L2000B().
+          withHl_1(hl('2', HierarchicalLevelCode.Subscriber_22)).
+          withL2010ba_6(new L2010BA().
+              withNm1_1(nm1Segment)
+          )
+      )
     }
+  }
+
+  private static HL hl(String id, HierarchicalLevelCode hierarchicalLevelCode) {
+    new HL().
+        withHierarchicalIDNumber_01(id).
+        withHierarchicalLevelCode_03(hierarchicalLevelCode)
   }
 
   private static void configureHeaders(M837Q1 x12, X12Context context) {
@@ -272,7 +318,12 @@ class X12 {
         )
   }
 
-  static String serialize(M837Q1 document, boolean prettyPrint = false) {
+  static String serialize(Message document, boolean prettyPrint = false) {
+    def tokens = document.toTokens(prettyPrint ? 0 : -1)
+    new EdiParser().toEdi(tokens)
+  }
+
+  static String serialize(Interchange document, boolean prettyPrint = false) {
     def tokens = document.toTokens(prettyPrint ? 0 : -1)
     new EdiParser().toEdi(tokens)
   }
