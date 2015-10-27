@@ -15,7 +15,7 @@ class ACO0015 extends MeasureGenerator {
         performed CPT('99203') from '20150505' to '20150505'
       }
     } else {
-      x12Context.with {
+      x12ContextFactory.context.with {
         performed CPT('99203') from '20150505' to '20150505'
       }
     }
