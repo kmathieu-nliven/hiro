@@ -1208,7 +1208,7 @@ class CdaACOMeasuresSpec extends Specification {
       performed SnomedCt('10725009') from '20150511' to '20150515' withStatus 'ACTIVE'
 
       results {
-        on '20150507'
+        on '20150510'
         measured LOINC('8480-6') at '130 mmHg' of 'PQ' withRange '70-125' was 'High'
       }
 
