@@ -982,7 +982,7 @@ class CdaACOMeasuresSpec extends Specification {
 
       performed SnomedCt('10197000') from '20150511' to '20150520' withStatus 'PERFORMED'
 
-      assessed LOINC('73831-0') toBe SnomedCt('428171000124102') on '20150512'
+      assessed LOINC('73831-0') toBe SnomedCt('428171000124102') on '20150512' withStatus 'PERFORMED'
     }
     new File('build/ACO-18-Numer.xml').text = Cda.serialize(ccd, true)
 
@@ -1064,12 +1064,12 @@ class CdaACOMeasuresSpec extends Specification {
 
       results {
         on '20150507'
-        measured LOINC('8480-6') at '130 mmHg' of 'PQ' withRange '70-125' was 'High'
+        measured LOINC('8480-6') at '130 mmHg' of 'PQ' withRange '70-125' was 'High' withStatus 'PERFORMED'
       }
 
       results {
         on '20150510'
-        measured LOINC('8462-4') at '80 mmHg' of 'PQ' withRange '70-125' was 'High'
+        measured LOINC('8462-4') at '80 mmHg' of 'PQ' withRange '70-125' was 'High' withStatus 'PERFORMED'
       }
     }
     new File('build/ACO-28-Numer.xml').text = Cda.serialize(ccd, true)
