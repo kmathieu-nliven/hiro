@@ -39,5 +39,7 @@ class ExecutionConfig {
   }
 
   Aco aco = new Aco()
+  Boolean useSequentialIds = Boolean.FALSE
+  long sequenceStart = 1000000001
 
 }
