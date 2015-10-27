@@ -134,7 +134,7 @@ class DataLoadApplication {
 
           baymax.createPatient(person, address, dob, localId, facility, execCon.aco, acoId)
           CdaContext cdaContext = createCdaContext(person, dob, facility, localId, address)
-          X12Context x12Context = createX12Context(person, dob, facility, localId, address)
+          X12ContextFactory x12ContextFactory = new X12ContextFactory(person, dob, facility, localId, address)
 
           def measures = ''
 
@@ -147,7 +147,7 @@ class DataLoadApplication {
 
                 switch (evalMeasure(random, measure)) {
                   case MeasureInfo.Compliant:
-                    if (measureGenerator.applyCompliant(cdaContext, x12Context)) {
+                    if (measureGenerator.applyCompliant(cdaContext, x12ContextFactory)) {
                       log.info "${measure.name.padLeft(20)} : + Compliant"
                       measures += "+${measure.name} "
                     } else {
@@ -155,7 +155,7 @@ class DataLoadApplication {
                     }
                     break
                   case MeasureInfo.Complement:
-                    if (measureGenerator.applyComplement(cdaContext, x12Context)) {
+                    if (measureGenerator.applyComplement(cdaContext, x12ContextFactory)) {
                       log.info "${measure.name.padLeft(20)} : - Complement"
                       measures += "-${measure.name} "
                     } else {
@@ -177,8 +177,10 @@ class DataLoadApplication {
 
           def cda = Cda.createCcd(cdaContext)
           baymax.addDocument(cda, facility)
-          def x12 = X12.createX12(x12Context)
-          new File("build/${acoId}.edi").text = new EdiParser().toEdi(x12.toTokens(0))
+          x12ContextFactory.contextList.eachWithIndex  {x12Context, idx2 ->
+            def x12 = X12.createX12(x12Context)
+            new File("build/${acoId}.${idx2}.edi").text = new EdiParser().toEdi(x12.toTokens(0))
+          }
         }
 
     patientsFile.close()
