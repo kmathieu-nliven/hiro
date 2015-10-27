@@ -2,6 +2,7 @@ package com.cds.hiro.dataload.measures
 
 import com.cds.hiro.builders.CdaContext
 import com.cds.hiro.builders.X12Context
+import com.cds.hiro.dataload.X12ContextFactory
 import com.github.rahulsom.cda.CD
 import com.github.rahulsom.cda.CE
 import groovy.transform.CompileStatic
@@ -59,7 +60,7 @@ abstract class MeasureGenerator {
     true
   }
 
-  abstract boolean applyComplement(CdaContext cdaContext, X12Context x12Context)
+  abstract boolean applyComplement(CdaContext cdaContext, X12ContextFactory x12ContextFactory)
 
-  abstract boolean applyCompliant(CdaContext cdaContext, X12Context x12Context)
+  abstract boolean applyCompliant(CdaContext cdaContext, X12ContextFactory x12ContextFactory)
 }
