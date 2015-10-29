@@ -188,7 +188,7 @@ class CdaContext extends BaseContext {
   @Builder(builderStrategy = SimpleStrategy, prefix = '')
   static class Assessment {
     CD code
-    String on
+    String on, withStatus
     CE toBe
   }
   List<Assessment> assessments = []

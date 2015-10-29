@@ -226,7 +226,8 @@ class Cda {
                   withClassCode('OBS').withMoodCode(XActMoodDocumentObservation.EVN).
                   withCode(assessment.code).
                   withValue(assessment.toBe).
-                  withEffectiveTime(new IVLTS().withValue(assessment.on))
+                  withEffectiveTime(new IVLTS().withValue(assessment.on)).
+                  withStatusCode(new CS().withCode(assessment.withStatus))
               )
           )
         }
