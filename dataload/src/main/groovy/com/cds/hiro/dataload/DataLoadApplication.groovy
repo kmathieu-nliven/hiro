@@ -4,6 +4,8 @@ import com.cds.hiro.builders.Cda
 import com.cds.hiro.builders.CdaContext
 import com.cds.hiro.builders.X12
 import com.cds.hiro.builders.X12Context
+import com.cds.hiro.builders.Facility
+import com.cds.hiro.x12.batch.*
 import com.cds.hiro.dataload.measures.MeasureGenerator
 import com.cds.hiro.x12.EdiParser
 import com.github.rahulsom.cda.CD
@@ -21,6 +23,7 @@ import org.yaml.snakeyaml.Yaml
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
 
 /**
  * Loads Data into HealthLogix based on probabilities
@@ -134,7 +137,7 @@ class DataLoadApplication {
 
           baymax.createPatient(person, address, dob, localId, facility, execCon.aco, acoId)
           CdaContext cdaContext = createCdaContext(person, dob, facility, localId, address)
-          X12ContextFactory x12ContextFactory = new X12ContextFactory(person, dob, facility, localId, address)
+          X12ContextFactory x12ContextFactory = new X12ContextFactory(person, dob, facilities, localId, address)
 
           def measures = ''
 
@@ -177,10 +180,16 @@ class DataLoadApplication {
 
           def cda = Cda.createCcd(cdaContext)
           baymax.addDocument(cda, facility)
+
+          def x12List = []
           x12ContextFactory.contextList.eachWithIndex  {x12Context, idx2 ->
             def x12 = X12.createX12(x12Context)
-            new File("build/${acoId}.${idx2}.edi").text = new EdiParser().toEdi(x12.toTokens(0))
+            x12List << x12
           }
+          def interchange = Interchange.createInterchange(x12List)
+          def edi = X12.serialize(interchange, true)
+
+          new File("build/${acoId}.edi").text = edi
         }
 
     patientsFile.close()

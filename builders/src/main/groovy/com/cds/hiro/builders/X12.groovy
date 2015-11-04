@@ -40,11 +40,11 @@ class X12 {
       configurePayer(x12, context.payers?.first())
     }
     if (context.serviceEvent) {
-      configureServiceEventAndEncounter(x12, context)
+      configureServiceEventAndEncounter(x12, context, context.facility)
     }
-    configureProblems(x12, context.problems)
-    configureDiagnoses(x12, context.diagnoses)
-    configureProcedures(x12, context.procedures)
+    configureProblems(x12, context.problems, context.facility)
+    configureDiagnoses(x12, context.diagnoses, context.facility)
+    configureProcedures(x12, context.procedures, context.facility)
     configureFooter(x12, context)
 
     x12
@@ -65,7 +65,7 @@ class X12 {
       '2.16.840.1.113883.6.1' : ProductServiceIDQualifier.LogicalObservationIdentifierNamesandCodesLOINCCodes_LB,
   ]
 
-  private static void configureProcedures(x12, ArrayList<Procedure> procedures) {
+  private static void configureProcedures(x12, ArrayList<Procedure> procedures, Facility facility) {
     int idx = 1
     procedures.each {
 
@@ -83,7 +83,7 @@ class X12 {
       x12.withL2000c(new L2000C().
           withHl_1(hl('1', HierarchicalLevelCode.Dependent_23)).
           withL2300_8(new L2300().
-              withClm_1(clm()).
+              withClm_1(clm(facility)).
               withL2400_94(new L2400().
                   withLx_1(new LX().withAssignedNumber_01(idx++)).
                   withSv2_3(new SV2().
@@ -105,7 +105,7 @@ class X12 {
       '2.16.840.1.113883.6.96' : CodeListQualifierCode.SNOMEDSystematizedNomenclatureofMedicine_AAA,
   ]
 
-  private static void configureProblems(x12, ArrayList<Problem> problems) {
+  private static void configureProblems(x12, ArrayList<Problem> problems, Facility facility) {
     problems.each {
       def startProblem = it.between ?
           dtp(DateTimeQualifier.ServicePeriodStart_150, it.between) :
@@ -121,7 +121,7 @@ class X12 {
 
       x12.withL2000c(new L2000C().
           withL2300_8(new L2300().
-              withClm_1(clm()).
+              withClm_1(clm(facility)).
               withDtp_2(startProblem).
               withDtp_3(endProblem).
               withHi_79(new HI().
@@ -135,7 +135,7 @@ class X12 {
     }
   }
 
-  private static void configureDiagnoses(x12, ArrayList<Diagnosis> diagnoses) {
+  private static void configureDiagnoses(x12, ArrayList<Diagnosis> diagnoses, Facility facility) {
     diagnoses.each {
       def diagnosisDate = it.on ?
           dtp(DateTimeQualifier.ServicePeriodStart_150, it.on) :
@@ -149,7 +149,7 @@ class X12 {
       x12.withL2000c(new L2000C().
           withHl_1(hl('1', HierarchicalLevelCode.Dependent_23)).
           withL2300_8(new L2300().
-              withClm_1(clm()).
+              withClm_1(clm(facility)).
               withDtp_2(diagnosisDate).
               withHi_79(new HI().
                   withHealthCareCodeInformation_01(new HealthCareCodeInformation().
@@ -162,12 +162,12 @@ class X12 {
     }
   }
 
-  private static void configureServiceEventAndEncounter(M837Q1 x12, X12Context context) {
+  private static void configureServiceEventAndEncounter(M837Q1 x12, X12Context context, Facility facility) {
     x12.withL2000c(new L2000C().
         withHl_1(hl('1', HierarchicalLevelCode.Dependent_23)).
         withPat_2(createPatient(context)).
         withL2300_8(new L2300().
-            withClm_1(clm()).
+            withClm_1(clm(facility)).
             withL2310b_86(createServiceEvent(context.serviceEvent)).
             withDtp_2(dtp(DateTimeQualifier.Admission_435, context.encounter.between)).
             withDtp_3(dtp(DateTimeQualifier.Discharge_096, context.encounter.and))
@@ -175,12 +175,12 @@ class X12 {
     )
   }
 
-  private static CLM clm() {
+  private static CLM clm(Facility facility) {
     new CLM().
-        withClaimSubmittersIdentifier_01('99999999').
+        withClaimSubmittersIdentifier_01(facility.idx).
         withMonetaryAmount_02(20.00).
         withHealthCareServiceLocationInformation_05(new HealthCareServiceLocationInformation().
-            withFacilityCodeValue_01('12').
+            withFacilityCodeValue_01(facility.identifier).
             withFacilityCodeQualifier_02(FacilityCodeQualifier.UniformBillingClaimFormBillType_A).
             withClaimFrequencyTypeCode_03('1')
         ).
@@ -310,12 +310,14 @@ class X12 {
             withDate_04(localDateTime.toLocalDate()).
             withTime_05(localDateTime.toLocalTime()).
             withTransactionTypeCode_06(TransactionTypeCode.Chargeable_CH)
-        ).
-        withRef(new REF().
-            withReferenceIdentificationQualifier_01(ReferenceIdentificationQualifier.ClaimNumber_D9).
-            withReferenceIdentification_02(context.id).
-            withDescription_03('Claim')
         )
+        //TODO - Temporarily taken out since Dory is not expecting this.
+//        .
+//        withRef(new REF().
+//            withReferenceIdentificationQualifier_01(ReferenceIdentificationQualifier.ClaimNumber_D9).
+//            withReferenceIdentification_02(context.id).
+//            withDescription_03('Claim')
+//        )
   }
 
   static String serialize(Message document, boolean prettyPrint = false) {

@@ -28,7 +28,7 @@ class BaseContext {
   Instant created = Instant.now()
 
   /** Document Identifier */
-  String id = UUID.randomUUID().toString()
+  String id = (new Random().nextInt(Integer.MAX_VALUE)).toString()
 
 
   Patient patient
@@ -105,4 +105,12 @@ class BaseContext {
     closure.call()
   }
 
+  Facility facility
+  void setFacility(Facility fac) {
+    this.facility = fac
+  }
+
+  Facility getFacility() {
+    return this.facility
+  }
 }
