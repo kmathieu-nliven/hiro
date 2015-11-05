@@ -177,10 +177,10 @@ class X12 {
 
   private static CLM clm(Facility facility) {
     new CLM().
-        withClaimSubmittersIdentifier_01(facility.idx).
+        withClaimSubmittersIdentifier_01(facility ? facility.idx : '99999999').
         withMonetaryAmount_02(20.00).
         withHealthCareServiceLocationInformation_05(new HealthCareServiceLocationInformation().
-            withFacilityCodeValue_01(facility.identifier).
+            withFacilityCodeValue_01(facility ? facility.identifier : '12').
             withFacilityCodeQualifier_02(FacilityCodeQualifier.UniformBillingClaimFormBillType_A).
             withClaimFrequencyTypeCode_03('1')
         ).
