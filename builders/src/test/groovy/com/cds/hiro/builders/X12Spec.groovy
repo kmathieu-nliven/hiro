@@ -126,7 +126,6 @@ class X12Spec extends Specification {
         |  GS*HC*99999999999*88888888888*071203*1015*1234567890*X*005010X222A1
         |  ST*837*1234567890*005010X222A1
         |    BHT*0019*00*1234567890*20071203*0215*CH
-        |    REF*D9*1234567890*Claim*
         |    NM1*41*2*Alpine Family Physicians*****46*2.16.840.1.113883.3.771***
         |      PER*IC*Kimberly Johnson*TE*4082361234*****
         |    NM1*40*2*Humana*****46*2.16.840.1.113883.19***
@@ -174,7 +173,7 @@ class X12Spec extends Specification {
         |          SV2**LD:77528005:::::Code 77528005:********
         |          DTP*150*DT*201011200000
         |          DTP*151*DT*201312200000
-        |    SE*51*1234567890
+        |    SE*50*1234567890
         |  GE*1*1234567890
         |  IEA*1*23
         '''.stripMargin().replaceAll(/\n *$/, '')
