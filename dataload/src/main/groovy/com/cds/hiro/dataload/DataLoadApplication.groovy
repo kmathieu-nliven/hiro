@@ -128,9 +128,9 @@ class DataLoadApplication {
           def address = getAddress(execCon)
           def dob = (new SimpleDateFormat('yyyyMMdd').parse('19700101') + rnd.nextInt(YEAR * 80) - YEAR * 40).format('yyyyMMdd')
 
-          def localId = execCon.useSequentialIds ? (sequence++).toString() :
+          def localId = execCon.useSequentialIds ? (sequence).toString() :
               generateMD5_A("${person.firstName} ${person.lastName} ${dob.format('yyyyMMdd')}".toString(), 10)
-          def acoId = execCon.useSequentialIds ? (sequence++).toString() :
+          def acoId = execCon.useSequentialIds ? execCon.aco.universalId + '.' + (sequence++).toString() :
               generateMD5_A("${person.firstName} ${person.lastName} ${dob.format('yyyyMMdd')} ${execCon.aco.universalId}".toString(), 10)
           
           log.info "Creating patient ${person.firstName} ${person.lastName} at ${facility.nickName} as ${localId}"
