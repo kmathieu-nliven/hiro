@@ -81,9 +81,8 @@ class X12 {
       }
 
       x12.withL2000c(new L2000C().
-          withHl_1(hl('1', HierarchicalLevelCode.Dependent_23)).
+          //withHl_1(hl('1', HierarchicalLevelCode.Dependent_23)).
           withL2300_8(new L2300().
-              withClm_1(clm(facility)).
               withL2400_94(new L2400().
                   withLx_1(new LX().withAssignedNumber_01(idx++)).
                   withSv2_3(new SV2().
@@ -121,9 +120,6 @@ class X12 {
 
       x12.withL2000c(new L2000C().
           withL2300_8(new L2300().
-              withClm_1(clm(facility)).
-              withDtp_2(startProblem).
-              withDtp_3(endProblem).
               withHi_79(new HI().
                   withHealthCareCodeInformation_01(new HealthCareCodeInformation().
                       withCodeListQualifierCode_01(codeListQualifierCode).
@@ -147,10 +143,7 @@ class X12 {
       }
 
       x12.withL2000c(new L2000C().
-          withHl_1(hl('1', HierarchicalLevelCode.Dependent_23)).
           withL2300_8(new L2300().
-              withClm_1(clm(facility)).
-              withDtp_2(diagnosisDate).
               withHi_79(new HI().
                   withHealthCareCodeInformation_01(new HealthCareCodeInformation().
                       withCodeListQualifierCode_01(codeListQualifierCode).
