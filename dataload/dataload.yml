@@ -1,0 +1,18 @@
+geonamesUsername: jasonle
+lat: 37.2805374
+lng: -121.990486
+facilities: 10
+patients: 5
+startingPort: 9000
+baymax:
+  baseUrl: http://localhost:8080/healthdock/
+  username: admin
+  password: admin
+measures:
+  - name: ACO0008
+    compliant: 0.8
+    complement: 0.2
+aco:
+  namespaceId: ACO
+  universalId: 1.2.4.1
+useSequentialIds: true
