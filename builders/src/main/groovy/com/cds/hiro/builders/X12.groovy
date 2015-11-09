@@ -169,8 +169,9 @@ class X12 {
         withL2300_8(new L2300().
             withClm_1(clm(facility)).
             withL2310b_86(createServiceEvent(context.serviceEvent)).
-            withDtp_2(dtp(DateTimeQualifier.Admission_435, context.encounter.between)).
-            withDtp_3(dtp(DateTimeQualifier.Discharge_096, context.encounter.and))
+            withDtp_2(dtp(DateTimeQualifier.Discharge_096, context.encounter.and)).
+            withDtp_3(dtp(DateTimeQualifier.Statement_434, context.encounter.between, context.encounter.and)).
+            withDtp_4(dtp(DateTimeQualifier.Admission_435, context.encounter.between))
         )
     )
   }
@@ -210,6 +211,14 @@ class X12 {
         withDateTimeQualifier_01(dateTimeQualifier).
         withDateTimePeriodFormatQualifier_02(DateTimePeriodFormatQualifier.DateandTimeExpressedinFormatCCYYMMDDHHMM_DT).
         withDateTimePeriod_03(parseDateTime(date).format(EdiParser.DateTimeFormat))
+  }
+
+  private static DTP dtp(DateTimeQualifier dateTimeQualifier, String startDate, String endDate) {
+    new DTP().
+        withDateTimeQualifier_01(dateTimeQualifier).
+        withDateTimePeriodFormatQualifier_02(DateTimePeriodFormatQualifier.RangeofDatesExpressedinFormatCCYYMMDDCCYYMMDD_RD8).
+        withDateTimePeriod_03(parseDateTime(startDate).format(EdiParser.DateFormat) + '-' +
+            parseDateTime(endDate).format(EdiParser.DateFormat))
   }
 
   private static L2310B createServiceEvent(ServiceEvent serviceEvent) {
