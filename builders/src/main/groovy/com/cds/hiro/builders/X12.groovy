@@ -60,7 +60,7 @@ class X12 {
   }
 
   private static Map<String, ProductServiceIDQualifier> productServiceIDQualifierMap = [
-      '2.16.840.1.113883.5.25': ProductServiceIDQualifier.CurrentProceduralTerminologyCPTCodes_CJ,
+      '2.16.840.1.113883.5.25': ProductServiceIDQualifier.HealthCareFinancingAdministrationCommonProceduralCodingSystemHCPCSCodes_HC,
       '2.16.840.1.113883.6.96': ProductServiceIDQualifier.SNOMEDSystematizedNomenclatureofMedicine_LD,
       '2.16.840.1.113883.6.1' : ProductServiceIDQualifier.LogicalObservationIdentifierNamesandCodesLOINCCodes_LB,
   ]
