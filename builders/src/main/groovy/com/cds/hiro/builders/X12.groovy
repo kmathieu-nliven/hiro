@@ -171,7 +171,7 @@ class X12 {
 
   private static CLM clm(Facility facility) {
     new CLM().
-        withClaimSubmittersIdentifier_01(facility ? facility.idx : '99999999').
+        withClaimSubmittersIdentifier_01(new Random().nextInt(99999999).toString()).
         withMonetaryAmount_02(20.00).
         withHealthCareServiceLocationInformation_05(new HealthCareServiceLocationInformation().
             withFacilityCodeValue_01(facility ? facility.identifier : '12').
